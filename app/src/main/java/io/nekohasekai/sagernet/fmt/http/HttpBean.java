@@ -33,8 +33,15 @@ public class HttpBean extends AbstractBean {
 
     public String username;
     public String password;
+
     public boolean tls;
+
+    // The same as StandardV2RayBean
     public String sni;
+    public String alpn;
+    public String certificates;
+    public String pinnedPeerCertificateChainSha256;
+    public Boolean allowInsecure;
 
     @Override
     public void initializeDefaultValues() {
@@ -42,6 +49,10 @@ public class HttpBean extends AbstractBean {
         if (username == null) username = "";
         if (password == null) password = "";
         if (sni == null) sni = "";
+        if (alpn == null) alpn = "";
+        if (certificates == null) certificates = "";
+        if (pinnedPeerCertificateChainSha256 == null) pinnedPeerCertificateChainSha256 = "";
+        if (allowInsecure == null) allowInsecure = false;
     }
 
     @Override
@@ -51,7 +62,13 @@ public class HttpBean extends AbstractBean {
         output.writeString(username);
         output.writeString(password);
         output.writeBoolean(tls);
-        output.writeString(sni);
+        if (tls) {
+            output.writeString(sni);
+            output.writeString(alpn);
+            output.writeString(certificates);
+            output.writeString(pinnedPeerCertificateChainSha256);
+            output.writeBoolean(allowInsecure);
+        }
     }
 
     @Override
@@ -61,7 +78,13 @@ public class HttpBean extends AbstractBean {
         username = input.readString();
         password = input.readString();
         tls = input.readBoolean();
-        sni = input.readString();
+        if (tls) {
+            sni = input.readString();
+            alpn = input.readString();
+            certificates = input.readString();
+            pinnedPeerCertificateChainSha256 = input.readString();
+            allowInsecure = input.readBoolean();
+        }
     }
 
     @NotNull

@@ -20,15 +20,22 @@
 package io.nekohasekai.sagernet.ui.profile
 
 import android.os.Bundle
+import androidx.preference.CheckBoxPreference
 import androidx.preference.EditTextPreference
+import androidx.preference.PreferenceCategory
+import androidx.preference.SwitchPreference
 import com.takisoft.preferencex.PreferenceFragmentCompat
+import com.takisoft.preferencex.SimpleMenuPreference
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.fmt.http.HttpBean
+import javax.sql.DataSource
 
 class HttpSettingsActivity : ProfileSettingsActivity<HttpBean>() {
+
+    lateinit var securityCategory: PreferenceCategory
 
     override fun createEntity() = HttpBean()
 
@@ -40,6 +47,10 @@ class HttpSettingsActivity : ProfileSettingsActivity<HttpBean>() {
         DataStore.serverPassword = password
         DataStore.serverTLS = tls
         DataStore.serverSNI = sni
+        DataStore.serverALPN = alpn
+        DataStore.serverCertificates = certificates
+        DataStore.serverPinnedCertificateChain = pinnedPeerCertificateChainSha256
+        DataStore.serverAllowInsecure = allowInsecure
     }
 
     override fun HttpBean.serialize() {
@@ -50,6 +61,10 @@ class HttpSettingsActivity : ProfileSettingsActivity<HttpBean>() {
         password = DataStore.serverPassword
         tls = DataStore.serverTLS
         sni = DataStore.serverSNI
+        alpn = DataStore.serverALPN
+        certificates = DataStore.serverCertificates
+        pinnedPeerCertificateChainSha256 = DataStore.serverPinnedCertificateChain
+        allowInsecure = DataStore.serverAllowInsecure
     }
 
     override fun PreferenceFragmentCompat.createPreferences(
@@ -63,6 +78,16 @@ class HttpSettingsActivity : ProfileSettingsActivity<HttpBean>() {
         findPreference<EditTextPreference>(Key.SERVER_PASSWORD)!!.apply {
             summaryProvider = PasswordSummaryProvider
         }
+
+        securityCategory = findPreference(Key.SERVER_SECURITY_CATEGORY)!!
+        findPreference<SwitchPreference>(Key.SERVER_TLS)!!.setOnPreferenceChangeListener { _, newValue ->
+            updateSecuritySettingsVisible(newValue as Boolean)
+            true
+        }
+        updateSecuritySettingsVisible(DataStore.serverTLS)
     }
 
+    fun updateSecuritySettingsVisible(newValue: Boolean) {
+        securityCategory.isVisible = newValue;
+    }
 }
