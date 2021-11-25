@@ -36,9 +36,8 @@ fun parseNaive(link: String): NaiveBean {
         serverPort = url.port
         username = url.username
         password = url.password
-        extraHeaders = url.queryParameter("extra-headers")?.let {
-            it.unUrlSafe().replace("\r\n", "\n")
-        }
+        extraHeaders = url.queryParameter("extra-headers")?.unUrlSafe()?.replace("\r\n", "\n")
+        insecureConcurrency = url.queryParameter("insecure-concurrency")?.toIntOrNull()
         name = url.fragment
         initializeDefaultValues()
     }
@@ -59,25 +58,44 @@ fun NaiveBean.toUri(proxyOnly: Boolean = false): String {
         if (name.isNotBlank()) {
             builder.encodedFragment(name.urlSafe())
         }
+        if (insecureConcurrency > 0) {
+            builder.addQueryParameter("insecure-concurrency", "$insecureConcurrency")
+        }
     }
     return builder.toLink(if (proxyOnly) proto else "naive+$proto", false)
 }
 
 fun NaiveBean.buildNaiveConfig(port: Int, mux: Boolean): String {
     return JSONObject().also {
+
+        // process httpHostName
+        if (httpHostName.isNotBlank()){
+            it["host-resolver-rules"] = "MAP $httpHostName $finalAddress"
+            finalAddress = httpHostName
+        } else if (isChain || isChainIn) {
+            if (serverAddress.isIpAddress()) {
+                // for naive, using IP as SNI name hardly happens
+                // and host-resolver-rules cannot resolve the SNI problem
+                // so do nothing
+            } else {
+                it["host-resolver-rules"] = "MAP $serverAddress $LOCALHOST"
+                finalAddress = serverAddress
+            }
+        }
+
         it["listen"] = "socks://$LOCALHOST:$port"
         it["proxy"] = toUri(true)
         if (extraHeaders.isNotBlank()) {
             it["extra-headers"] = extraHeaders.split("\n").joinToString("\r\n")
-        }
-        if (!serverAddress.isIpAddress() && finalAddress == LOCALHOST) {
-            it["host-resolver-rules"] = "MAP $serverAddress $LOCALHOST"
         }
         if (DataStore.enableLog) {
             it["log"] = ""
         }
         if (mux) {
             it["concurrency"] = DataStore.muxConcurrency
+        }
+        if (insecureConcurrency > 0) {
+            it["insecure-concurrency"] = insecureConcurrency
         }
     }.toStringPretty()
 }

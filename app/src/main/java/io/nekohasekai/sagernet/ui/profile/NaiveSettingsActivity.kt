@@ -40,6 +40,9 @@ class NaiveSettingsActivity : ProfileSettingsActivity<NaiveBean>() {
         DataStore.serverPassword = password
         DataStore.serverProtocol = proto
         DataStore.serverHeaders = extraHeaders
+        DataStore.serverHost = httpHostName
+        DataStore.serverCertificates = certificates
+        DataStore.serverInsecureConcurrency = insecureConcurrency
     }
 
     override fun NaiveBean.serialize() {
@@ -50,6 +53,9 @@ class NaiveSettingsActivity : ProfileSettingsActivity<NaiveBean>() {
         password = DataStore.serverPassword
         proto = DataStore.serverProtocol
         extraHeaders = DataStore.serverHeaders.replace("\r\n", "\n")
+        httpHostName = DataStore.serverHost
+        certificates = DataStore.serverCertificates
+        insecureConcurrency = DataStore.serverInsecureConcurrency
     }
 
     override fun PreferenceFragmentCompat.createPreferences(

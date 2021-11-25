@@ -251,6 +251,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var serverProtocolVersion by profileCacheStore.stringToInt(Key.SERVER_PROTOCOL)
     var serverPrivateKey by profileCacheStore.string(Key.SERVER_PRIVATE_KEY)
     var serverLocalAddress by profileCacheStore.string(Key.SERVER_LOCAL_ADDRESS)
+    var serverInsecureConcurrency by profileCacheStore.stringToInt(Key.SERVER_INSECURE_CONCURRENCY)
 
     var balancerType by profileCacheStore.stringToInt(Key.BALANCER_TYPE)
     var balancerGroup by profileCacheStore.stringToLong(Key.BALANCER_GROUP)

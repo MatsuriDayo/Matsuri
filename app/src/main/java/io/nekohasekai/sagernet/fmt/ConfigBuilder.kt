@@ -786,10 +786,11 @@ fun buildV2RayConfig(
 
                         pastInboundTag = tag
                     })
-                } else if (bean.canMapping() && proxyEntity.needExternal() && needIncludeSelf) { // TODO Remove
+                } else if (bean.canMapping() && proxyEntity.needExternal() && needIncludeSelf) {
                     val mappingPort = mkPort()
                     bean.finalAddress = LOCALHOST
                     bean.finalPort = mappingPort
+                    if (index == profileList.lastIndex) bean.isChainIn = true;
 
                     inbounds.add(InboundObject().apply {
                         listen = LOCALHOST

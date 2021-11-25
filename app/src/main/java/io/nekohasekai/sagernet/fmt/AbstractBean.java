@@ -45,6 +45,7 @@ public abstract class AbstractBean extends Serializable implements Cloneable<Abs
     public String name;
 
     public transient boolean isChain;
+    public transient boolean isChainIn;
     public transient String finalAddress;
     public transient int finalPort;
 
