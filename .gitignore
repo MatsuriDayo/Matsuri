@@ -17,3 +17,4 @@ local.properties
 /service_account_credentials.json
 jniLibs/
 /library/libcore_build/
+.idea/deploymentTargetDropDown.xml
