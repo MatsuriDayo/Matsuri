@@ -87,7 +87,6 @@ object Key {
 
     const val PROVIDER_TROJAN = "providerTrojan"
     const val PROVIDER_SS_AEAD = "providerShadowsocksAEAD"
-    const val PROVIDER_SS_STREAM = "providerShadowsocksStream"
 
     const val TUN_IMPLEMENTATION = "tunImplementation"
     const val ENABLE_PCAP = "enablePcap"
@@ -207,15 +206,7 @@ object TrojanProvider {
 
 object ShadowsocksProvider {
     const val V2RAY = 0
-    const val SHADOWSOCKS_RUST = 1
-    const val CLASH = 2
-    const val SHADOWSOCKS_LIBEV = 3
-}
-
-object ShadowsocksStreamProvider {
-    const val SHADOWSOCKS_RUST = 0
     const val CLASH = 1
-    const val SHADOWSOCKS_LIBEV = 2
 }
 
 object IPv6Mode {

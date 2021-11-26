@@ -167,13 +167,6 @@
             app:useSimpleSummaryProvider="true" />
         <com.takisoft.preferencex.SimpleMenuPreference
             app:defaultValue="0"
-            app:entries="@array/ss_stream_provider"
-            app:entryValues="@array/ss_stream_provider_values"
-            app:key="providerShadowsocksStream"
-            app:title="@string/ss_stream_provider"
-            app:useSimpleSummaryProvider="true" />
-        <com.takisoft.preferencex.SimpleMenuPreference
-            app:defaultValue="0"
             app:entries="@array/trojan_provider_experimental"
             app:entryValues="@array/int_array_3"
             app:key="providerTrojan"

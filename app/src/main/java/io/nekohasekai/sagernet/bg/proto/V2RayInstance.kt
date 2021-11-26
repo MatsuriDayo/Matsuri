@@ -188,35 +188,6 @@ abstract class V2RayInstance(
                     externalInstances.containsKey(port) -> {
                         externalInstances[port]!!.launch()
                     }
-                    bean is ShadowsocksBean -> {
-                        val configFile = File(
-                            context.noBackupFilesDir,
-                            "shadowsocks_" + SystemClock.elapsedRealtime() + ".json"
-                        )
-                        configFile.parentFile?.mkdirs()
-                        configFile.writeText(config)
-                        cacheFiles.add(configFile)
-
-                        val commands = mutableListOf(
-                            File(
-                                SagerNet.application.applicationInfo.nativeLibraryDir,
-                                when (profileType) {
-                                    ShadowsocksProvider.SHADOWSOCKS_RUST -> Executable.SS_LOCAL
-                                    else -> Executable.SS_LIBEV_LOCAL
-                                }
-                            ).absolutePath, "-c", configFile.absolutePath
-                        )
-
-                        if (profileType == ShadowsocksProvider.SHADOWSOCKS_RUST) {
-                            commands.add("--log-without-time")
-                        } else {
-                            commands.addAll(arrayOf("-u", "-t", "600"))
-                        }
-
-                        if (DataStore.enableLog) commands.add("-v")
-
-                        processes.start(commands)
-                    }
                     bean is TrojanBean -> {
                         val configFile = File(
                             context.noBackupFilesDir,

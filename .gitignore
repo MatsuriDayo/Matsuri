@@ -21,9 +21,3 @@ jniLibs/
 
 # submodules
 /external
-/library/shadowsocks/src/main/rust/*
-/library/shadowsocks-libev/src/main/jni/shadowsocks-libev
-/library/shadowsocks-libev/src/main/jni/mbedtls
-/library/shadowsocks-libev/src/main/jni/libsodium
-/library/shadowsocks-libev/src/main/jni/libevent
-/library/shadowsocks-libev/src/main/jni/libancillary

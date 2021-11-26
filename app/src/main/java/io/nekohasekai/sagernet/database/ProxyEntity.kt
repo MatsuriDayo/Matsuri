@@ -29,7 +29,6 @@ import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginManager
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.ShadowsocksProvider
-import io.nekohasekai.sagernet.ShadowsocksStreamProvider
 import io.nekohasekai.sagernet.TrojanProvider
 import io.nekohasekai.sagernet.aidl.TrafficStats
 import io.nekohasekai.sagernet.fmt.AbstractBean
@@ -352,6 +351,7 @@ data class ProxyEntity(
     fun pickShadowsocksProvider(): Int {
         val bean = ssBean ?: return -1
         if (bean.method.contains(ssSecureList)) {
+            //AEAD
             val prefer = DataStore.providerShadowsocksAEAD
             when {
                 prefer == ShadowsocksProvider.V2RAY && bean.method in methodsV2fly && bean.plugin.isBlank() -> {
@@ -362,52 +362,15 @@ data class ProxyEntity(
                 ) -> {
                     return ShadowsocksProvider.CLASH
                 }
-                prefer == ShadowsocksProvider.SHADOWSOCKS_RUST && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && bean.method in methodsSsRust && !ssPluginSupportedByClash(
-                    false
-                ) -> {
-                    return ShadowsocksProvider.SHADOWSOCKS_RUST
-                }
-                prefer == ShadowsocksProvider.SHADOWSOCKS_LIBEV && bean.method in methodsSsLibev && !ssPluginSupportedByClash(
-                    false
-                ) -> {
-                    return ShadowsocksProvider.SHADOWSOCKS_LIBEV
-                }
             }
             return if (ssPreferClash()) {
                 ShadowsocksProvider.CLASH
-            } else if (bean.method in methodsV2fly && bean.plugin.isBlank()) {
-                ShadowsocksProvider.V2RAY
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                ShadowsocksProvider.SHADOWSOCKS_RUST
             } else {
-                ShadowsocksProvider.SHADOWSOCKS_LIBEV
+                ShadowsocksProvider.V2RAY
             }
         } else {
-            val prefer = DataStore.providerShadowsocksStream
-            when {
-                prefer == ShadowsocksStreamProvider.CLASH && bean.method in methodsClash && ssPluginSupportedByClash(
-                    true
-                ) -> {
-                    return ShadowsocksProvider.CLASH
-                }
-                prefer == ShadowsocksStreamProvider.SHADOWSOCKS_RUST && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && bean.method in methodsSsRust && !ssPluginSupportedByClash(
-                    false
-                ) -> {
-                    return ShadowsocksProvider.SHADOWSOCKS_RUST
-                }
-                prefer == ShadowsocksStreamProvider.SHADOWSOCKS_LIBEV && bean.method in methodsSsLibev && !ssPluginSupportedByClash(
-                    false
-                ) -> {
-                    return ShadowsocksProvider.SHADOWSOCKS_LIBEV
-                }
-            }
-            return if (ssPreferClash()) {
-                ShadowsocksProvider.CLASH
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                ShadowsocksProvider.SHADOWSOCKS_RUST
-            } else {
-                ShadowsocksProvider.SHADOWSOCKS_LIBEV
-            }
+            // Stream
+            return ShadowsocksProvider.CLASH
         }
     }
 
