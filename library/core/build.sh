@@ -2,10 +2,8 @@
 
 source .github/env.sh
 
-rm -rf build/android \
-  build/java \
-  build/javac-output \
-  build/srcd
+chmod -R 777 build 2>/dev/null
+rm -rf build 2>/dev/null
 
 gomobile bind -v -cache $(realpath build) -trimpath -ldflags='-s -w' . || exit 1
 rm -r libcore-sources.jar
