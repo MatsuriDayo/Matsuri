@@ -487,7 +487,7 @@ fun Project.setupApp() {
         applicationVariants.all {
             outputs.all {
                 this as BaseVariantOutputImpl
-                outputFileName = outputFileName.replace(project.name, "SN-$versionName")
+                outputFileName = outputFileName.replace(project.name, "Matsuri-$versionName")
                     .replace("-release", "")
                     .replace("-oss", "")
 

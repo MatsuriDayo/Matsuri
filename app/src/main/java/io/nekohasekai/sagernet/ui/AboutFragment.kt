@@ -98,7 +98,7 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
                         .subText(versionName)
                         .setOnClickAction {
                             requireContext().launchCustomTab(
-                                "https://github.com/SagerNet/SagerNet/releases"
+                                "https://github.com/MatsuriDayo/SagerNet/releases"
                             )
                         }
                         .build())
@@ -156,7 +156,7 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
                             .subText(R.string.donate_info)
                             .setOnClickAction {
                                 requireContext().launchCustomTab(
-                                    "https://liberapay.com/nekohasekai"
+                                    "https://nekoquq.github.io/about/"
                                 )
                             }
                             .build())
@@ -170,17 +170,7 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
                         .text(R.string.github)
                         .setOnClickAction {
                             requireContext().launchCustomTab(
-                                "https://github.com/SagerNet/SagerNet"
-
-                            )
-                        }
-                        .build())
-                    .addItem(MaterialAboutActionItem.Builder()
-                        .icon(R.drawable.baseline_translate_24)
-                        .text(R.string.translate_platform)
-                        .setOnClickAction {
-                            requireContext().launchCustomTab(
-                                "https://hosted.weblate.org/engage/sagernet/"
+                                "https://github.com/MatsuriDayo/SagerNet"
 
                             )
                         }
@@ -190,7 +180,7 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
                         .text(R.string.telegram)
                         .setOnClickAction {
                             requireContext().launchCustomTab(
-                                "https://t.me/SagerNet"
+                                "https://t.me/MatsuriDayo"
                             )
                         }
                         .build())
