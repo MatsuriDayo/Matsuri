@@ -4,6 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"strings"
+	"sync"
+	"time"
+
 	core "github.com/v2fly/v2ray-core/v4"
 	"github.com/v2fly/v2ray-core/v4/app/observatory"
 	"github.com/v2fly/v2ray-core/v4/common"
@@ -18,14 +23,10 @@ import (
 	"github.com/v2fly/v2ray-core/v4/infra/conf/serial"
 	_ "github.com/v2fly/v2ray-core/v4/main/distro/all"
 	"github.com/v2fly/v2ray-core/v4/transport"
-	"io"
-	"strings"
-	"sync"
-	"time"
 )
 
 func GetV2RayVersion() string {
-	return core.Version() + "-sn-4"
+	return core.Version() + "-matsuri-1"
 }
 
 type V2RayInstance struct {
@@ -179,6 +180,7 @@ func (c *dispatcherConn) handleInput() {
 			buf.ReleaseMulti(mb)
 			return
 		}
+		c.timer.Update()
 		for _, buffer := range mb {
 			packet := udpProtocol.Packet{
 				Payload: buffer,
@@ -234,6 +236,9 @@ func (c *dispatcherConn) WriteTo(p []byte, addr net.Addr) (n int, err error) {
 	buffer.Endpoint = &endpoint
 
 	err = c.link.Writer.WriteMultiBuffer(buf.MultiBuffer{buffer})
+	if err == nil {
+		c.timer.Update()
+	}
 	return
 }
 
