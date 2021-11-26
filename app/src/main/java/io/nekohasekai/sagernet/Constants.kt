@@ -19,7 +19,7 @@
 
 package io.nekohasekai.sagernet
 
-const val CONNECTION_TEST_URL = "https://api.v2fly.org/checkConnection.svgz"
+const val CONNECTION_TEST_URL = "http://cp.cloudflare.com/"
 
 object Key {
 
