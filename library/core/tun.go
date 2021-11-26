@@ -2,6 +2,17 @@ package libcore
 
 import (
 	"context"
+	"io"
+	"libcore/gvisor"
+	"libcore/tun"
+	"math"
+	"net"
+	"os"
+	"path/filepath"
+	"sync"
+	"sync/atomic"
+	"time"
+
 	"github.com/miekg/dns"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -14,17 +25,6 @@ import (
 	"github.com/v2fly/v2ray-core/v4/transport"
 	"github.com/v2fly/v2ray-core/v4/transport/internet"
 	"github.com/v2fly/v2ray-core/v4/transport/pipe"
-	"io"
-	"libcore/gvisor"
-	"libcore/lwip"
-	"libcore/tun"
-	"math"
-	"net"
-	"os"
-	"path/filepath"
-	"sync"
-	"sync/atomic"
-	"time"
 )
 
 var _ tun.Handler = (*Tun2ray)(nil)
@@ -104,11 +104,7 @@ func NewTun2ray(fd int32, mtu int32, v2ray *V2RayInstance,
 
 		t.dev, err = gvisor.New(fd, mtu, t, gvisor.DefaultNIC, pcap, pcapFile, math.MaxUint32, ipv6Mode)
 	} else {
-		dev := os.NewFile(uintptr(fd), "")
-		if dev == nil {
-			return nil, errors.New("failed to open TUN file descriptor")
-		}
-		t.dev, err = lwip.New(dev, mtu, t)
+		err = errors.New("Not supported")
 	}
 	if err != nil {
 		return nil, err

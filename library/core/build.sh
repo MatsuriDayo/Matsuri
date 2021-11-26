@@ -2,8 +2,12 @@
 
 source .github/env.sh
 
-chmod -R 777 build 2>/dev/null
-rm -rf build 2>/dev/null
+BUILD="build"
+
+rm -rf $BUILD/android \
+  $BUILD/java \
+  $BUILD/javac-output \
+  $BUILD/src
 
 gomobile bind -v -cache $(realpath build) -trimpath -ldflags='-s -w' . || exit 1
 rm -r libcore-sources.jar
