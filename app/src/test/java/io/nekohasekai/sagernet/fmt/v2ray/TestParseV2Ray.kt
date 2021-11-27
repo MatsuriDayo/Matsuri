@@ -80,20 +80,4 @@ class TestParseV2Ray : TestCase() {
         assertEquals(parseV2RayN(vmess.toV2rayN()).applyDefaultValues(), vmess)
 
     }
-
-    fun testParseVLESSgrpc() {
-        val vless =
-            parseV2Ray("vless://6d76fa31-8de2-40d4-8fee-6e61339c416f@qv2ray.net:123?type=grpc&security=tls&serviceName=FuckGFW")
-
-        assertEquals(vless.serverAddress, "qv2ray.net")
-        assertEquals(vless.serverPort, 123)
-        assertEquals(vless.uuid, "6d76fa31-8de2-40d4-8fee-6e61339c416f")
-        assertEquals(vless.security, "tls")
-        assertEquals(vless.type, "grpc")
-        assertEquals(vless.grpcServiceName, "FuckGFW")
-
-        vless.initializeDefaultValues()
-        assertEquals(parseV2Ray(vless.toUri()).applyDefaultValues(), vless)
-    }
-
 }

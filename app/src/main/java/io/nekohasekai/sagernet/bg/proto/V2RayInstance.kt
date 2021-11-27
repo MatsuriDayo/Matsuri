@@ -37,21 +37,14 @@ import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.fmt.LOCALHOST
 import io.nekohasekai.sagernet.fmt.V2rayBuildResult
-import io.nekohasekai.sagernet.fmt.brook.BrookBean
-import io.nekohasekai.sagernet.fmt.brook.internalUri
 import io.nekohasekai.sagernet.fmt.buildV2RayConfig
-import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
-import io.nekohasekai.sagernet.fmt.hysteria.buildHysteriaConfig
 import io.nekohasekai.sagernet.fmt.internal.ConfigBean
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean
 import io.nekohasekai.sagernet.fmt.naive.buildNaiveConfig
 import io.nekohasekai.sagernet.fmt.pingtunnel.PingTunnelBean
-import io.nekohasekai.sagernet.fmt.relaybaton.RelayBatonBean
-import io.nekohasekai.sagernet.fmt.relaybaton.buildRelayBatonConfig
 import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.buildShadowsocksConfig
 import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
-import io.nekohasekai.sagernet.fmt.snell.SnellBean
 import io.nekohasekai.sagernet.fmt.ssh.SSHBean
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.fmt.trojan.buildTrojanConfig
@@ -151,25 +144,6 @@ abstract class V2RayInstance(
                         if (needChain) error("PingTunnel is incompatible with chain")
                         initPlugin("pingtunnel-plugin")
                     }
-                    is RelayBatonBean -> {
-                        initPlugin("relaybaton-plugin")
-                        pluginConfigs[port] = profile.type to bean.buildRelayBatonConfig(port)
-                    }
-                    is BrookBean -> {
-                        initPlugin("brook-plugin")
-                    }
-                    is HysteriaBean -> {
-                        initPlugin("hysteria-plugin")
-                        pluginConfigs[port] = profile.type to bean.buildHysteriaConfig(port) {
-                            File(
-                                app.noBackupFilesDir,
-                                "hysteria_" + SystemClock.elapsedRealtime() + ".ca"
-                            ).apply {
-                                parentFile?.mkdirs()
-                                cacheFiles.add(this)
-                            }
-                        }
-                    }
                     is WireGuardBean -> {
                         initPlugin("wireguard-plugin")
                         pluginConfigs[port] = profile.type to bean.buildWireGuardUapiConf()
@@ -190,9 +164,6 @@ abstract class V2RayInstance(
                                 }
                             }
                         }
-                    }
-                    is SnellBean -> {
-                        externalInstances[port] = SnellInstance(bean, port)
                     }
                     is SSHBean -> {
                         externalInstances[port] = SSHInstance(bean, port)
@@ -317,77 +288,6 @@ abstract class V2RayInstance(
                             commands.add("-key")
                             commands.add(bean.key)
                         }
-
-                        processes.start(commands)
-                    }
-                    bean is RelayBatonBean -> {
-                        val configFile = File(
-                            context.noBackupFilesDir,
-                            "rb_" + SystemClock.elapsedRealtime() + ".toml"
-                        )
-
-                        configFile.parentFile?.mkdirs()
-                        configFile.writeText(config)
-                        cacheFiles.add(configFile)
-
-                        val commands = mutableListOf(
-                            initPlugin("relaybaton-plugin").path,
-                            "client",
-                            "--config",
-                            configFile.absolutePath
-                        )
-
-                        processes.start(commands)
-                    }
-                    bean is BrookBean -> {
-                        val commands = mutableListOf(initPlugin("brook-plugin").path)
-
-                        when (bean.protocol) {
-                            "ws" -> {
-                                commands.add("wsclient")
-                                commands.add("--wsserver")
-                            }
-                            "wss" -> {
-                                commands.add("wssclient")
-                                commands.add("--wssserver")
-                            }
-                            else -> {
-                                commands.add("client")
-                                commands.add("--server")
-                            }
-                        }
-
-                        commands.add(bean.internalUri())
-
-                        if (bean.password.isNotBlank()) {
-                            commands.add("--password")
-                            commands.add(bean.password)
-                        }
-
-                        commands.add("--socks5")
-                        commands.add("$LOCALHOST:$port")
-
-                        processes.start(commands)
-                    }
-                    bean is HysteriaBean -> {
-                        val configFile = File(
-                            context.noBackupFilesDir,
-                            "hysteria_" + SystemClock.elapsedRealtime() + ".json"
-                        )
-
-                        configFile.parentFile?.mkdirs()
-                        configFile.writeText(config)
-                        cacheFiles.add(configFile)
-
-                        val commands = mutableListOf(
-                            initPlugin("hysteria-plugin").path,
-                            "--no-check",
-                            "--config",
-                            configFile.absolutePath,
-                            "--log-level",
-                            if (DataStore.enableLog) "trace" else "warn",
-                            "client"
-                        )
 
                         processes.start(commands)
                     }

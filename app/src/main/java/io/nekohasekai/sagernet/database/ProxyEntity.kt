@@ -34,12 +34,9 @@ import io.nekohasekai.sagernet.TrojanProvider
 import io.nekohasekai.sagernet.aidl.TrafficStats
 import io.nekohasekai.sagernet.fmt.AbstractBean
 import io.nekohasekai.sagernet.fmt.KryoConverters
-import io.nekohasekai.sagernet.fmt.brook.BrookBean
 import io.nekohasekai.sagernet.fmt.buildV2RayConfig
 import io.nekohasekai.sagernet.fmt.http.HttpBean
 import io.nekohasekai.sagernet.fmt.http.toUri
-import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
-import io.nekohasekai.sagernet.fmt.hysteria.buildHysteriaConfig
 import io.nekohasekai.sagernet.fmt.internal.BalancerBean
 import io.nekohasekai.sagernet.fmt.internal.ChainBean
 import io.nekohasekai.sagernet.fmt.internal.ConfigBean
@@ -48,13 +45,10 @@ import io.nekohasekai.sagernet.fmt.naive.buildNaiveConfig
 import io.nekohasekai.sagernet.fmt.naive.toUri
 import io.nekohasekai.sagernet.fmt.pingtunnel.PingTunnelBean
 import io.nekohasekai.sagernet.fmt.pingtunnel.toUri
-import io.nekohasekai.sagernet.fmt.relaybaton.RelayBatonBean
-import io.nekohasekai.sagernet.fmt.relaybaton.buildRelayBatonConfig
 import io.nekohasekai.sagernet.fmt.shadowsocks.*
 import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
 import io.nekohasekai.sagernet.fmt.shadowsocksr.buildShadowsocksRConfig
 import io.nekohasekai.sagernet.fmt.shadowsocksr.toUri
-import io.nekohasekai.sagernet.fmt.snell.SnellBean
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
 import io.nekohasekai.sagernet.fmt.socks.toUri
 import io.nekohasekai.sagernet.fmt.ssh.SSHBean
@@ -65,7 +59,6 @@ import io.nekohasekai.sagernet.fmt.trojan_go.TrojanGoBean
 import io.nekohasekai.sagernet.fmt.trojan_go.buildTrojanGoConfig
 import io.nekohasekai.sagernet.fmt.trojan_go.toUri
 import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
-import io.nekohasekai.sagernet.fmt.v2ray.VLESSBean
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
 import io.nekohasekai.sagernet.fmt.v2ray.toUri
 import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
@@ -93,15 +86,10 @@ data class ProxyEntity(
     var ssBean: ShadowsocksBean? = null,
     var ssrBean: ShadowsocksRBean? = null,
     var vmessBean: VMessBean? = null,
-    var vlessBean: VLESSBean? = null,
     var trojanBean: TrojanBean? = null,
     var trojanGoBean: TrojanGoBean? = null,
     var naiveBean: NaiveBean? = null,
     var ptBean: PingTunnelBean? = null,
-    var rbBean: RelayBatonBean? = null,
-    var brookBean: BrookBean? = null,
-    var hysteriaBean: HysteriaBean? = null,
-    var snellBean: SnellBean? = null,
     var sshBean: SSHBean? = null,
     var wgBean: WireGuardBean? = null,
     var configBean: ConfigBean? = null,
@@ -115,15 +103,14 @@ data class ProxyEntity(
         const val TYPE_SS = 2
         const val TYPE_SSR = 3
         const val TYPE_VMESS = 4
-        const val TYPE_VLESS = 5
+//        const val TYPE_VLESS = 5
         const val TYPE_TROJAN = 6
         const val TYPE_TROJAN_GO = 7
         const val TYPE_NAIVE = 9
         const val TYPE_PING_TUNNEL = 10
-        const val TYPE_RELAY_BATON = 11
-        const val TYPE_BROOK = 12
-        const val TYPE_HYSTERIA = 15
-        const val TYPE_SNELL = 16
+//        const val TYPE_BROOK = 12
+//        const val TYPE_HYSTERIA = 15
+//        const val TYPE_SNELL = 16
         const val TYPE_SSH = 17
         const val TYPE_WG = 18
 
@@ -178,15 +165,10 @@ data class ProxyEntity(
             TYPE_SS -> ssBean = KryoConverters.shadowsocksDeserialize(byteArray)
             TYPE_SSR -> ssrBean = KryoConverters.shadowsocksRDeserialize(byteArray)
             TYPE_VMESS -> vmessBean = KryoConverters.vmessDeserialize(byteArray)
-            TYPE_VLESS -> vlessBean = KryoConverters.vlessDeserialize(byteArray)
             TYPE_TROJAN -> trojanBean = KryoConverters.trojanDeserialize(byteArray)
             TYPE_TROJAN_GO -> trojanGoBean = KryoConverters.trojanGoDeserialize(byteArray)
             TYPE_NAIVE -> naiveBean = KryoConverters.naiveDeserialize(byteArray)
             TYPE_PING_TUNNEL -> ptBean = KryoConverters.pingTunnelDeserialize(byteArray)
-            TYPE_RELAY_BATON -> rbBean = KryoConverters.relayBatonDeserialize(byteArray)
-            TYPE_BROOK -> brookBean = KryoConverters.brookDeserialize(byteArray)
-            TYPE_HYSTERIA -> hysteriaBean = KryoConverters.hysteriaDeserialize(byteArray)
-            TYPE_SNELL -> snellBean = KryoConverters.snellDeserialize(byteArray)
             TYPE_SSH -> sshBean = KryoConverters.sshDeserialize(byteArray)
             TYPE_WG -> wgBean = KryoConverters.wireguardDeserialize(byteArray)
 
@@ -215,15 +197,10 @@ data class ProxyEntity(
         TYPE_SS -> "Shadowsocks"
         TYPE_SSR -> "ShadowsocksR"
         TYPE_VMESS -> "VMess"
-        TYPE_VLESS -> "VLESS"
         TYPE_TROJAN -> "Trojan"
         TYPE_TROJAN_GO -> "Trojan-Go"
         TYPE_NAIVE -> "Naïve"
         TYPE_PING_TUNNEL -> "PingTunnel"
-        TYPE_RELAY_BATON -> "relaybaton"
-        TYPE_BROOK -> "Brook"
-        TYPE_HYSTERIA -> "Hysteria"
-        TYPE_SNELL -> "Snell"
         TYPE_SSH -> "SSH"
         TYPE_WG -> "WireGuard"
         TYPE_CHAIN -> chainName
@@ -242,15 +219,10 @@ data class ProxyEntity(
             TYPE_SS -> ssBean
             TYPE_SSR -> ssrBean
             TYPE_VMESS -> vmessBean
-            TYPE_VLESS -> vlessBean
             TYPE_TROJAN -> trojanBean
             TYPE_TROJAN_GO -> trojanGoBean
             TYPE_NAIVE -> naiveBean
             TYPE_PING_TUNNEL -> ptBean
-            TYPE_RELAY_BATON -> rbBean
-            TYPE_BROOK -> brookBean
-            TYPE_HYSTERIA -> hysteriaBean
-            TYPE_SNELL -> snellBean
             TYPE_SSH -> sshBean
             TYPE_WG -> wgBean
 
@@ -272,11 +244,7 @@ data class ProxyEntity(
 
     fun haveStandardLink(): Boolean {
         return when (requireBean()) {
-            is RelayBatonBean -> false
-            is BrookBean -> false
             is ConfigBean -> false
-            is HysteriaBean -> false
-            is SnellBean -> false
             is SSHBean -> false
             is WireGuardBean -> false
             else -> true
@@ -290,16 +258,11 @@ data class ProxyEntity(
             is ShadowsocksBean -> toUri()
             is ShadowsocksRBean -> toUri()
             is VMessBean -> toUri()
-            is VLESSBean -> toUri()
             is TrojanBean -> toUri()
             is TrojanGoBean -> toUri()
             is NaiveBean -> toUri()
             is PingTunnelBean -> toUri()
-            is RelayBatonBean -> toUniversalLink()
-            is BrookBean -> toUniversalLink()
             is ConfigBean -> toUniversalLink()
-            is HysteriaBean -> toUniversalLink()
-            is SnellBean -> toUniversalLink()
             is SSHBean -> toUniversalLink()
             is WireGuardBean -> toUniversalLink()
             else -> null
@@ -340,14 +303,6 @@ data class ProxyEntity(
                                 append("\n\n")
                                 append(bean.buildNaiveConfig(port, needMux))
                             }
-                            is RelayBatonBean -> {
-                                append("\n\n")
-                                append(bean.buildRelayBatonConfig(port))
-                            }
-                            is HysteriaBean -> {
-                                append("\n\n")
-                                append(bean.buildHysteriaConfig(port, null))
-                            }
                         }
                     }
                 }
@@ -361,7 +316,6 @@ data class ProxyEntity(
             TYPE_HTTP -> false
             TYPE_SS -> pickShadowsocksProvider() != ShadowsocksProvider.V2RAY
             TYPE_VMESS -> false
-            TYPE_VLESS -> false
             TYPE_TROJAN -> DataStore.providerTrojan != TrojanProvider.V2RAY
             TYPE_CHAIN -> false
             TYPE_BALANCER -> false
@@ -374,8 +328,6 @@ data class ProxyEntity(
         return when (type) {
             TYPE_SS -> pickShadowsocksProvider() == ShadowsocksProvider.CLASH
             TYPE_SSR -> true
-            TYPE_SNELL -> true
-            TYPE_SSH -> true
             else -> false
         }
     }
@@ -391,7 +343,7 @@ data class ProxyEntity(
     fun needCoreMux(): Boolean {
         val enableMuxForAll by lazy { DataStore.enableMuxForAll }
         return when (type) {
-            TYPE_VMESS, TYPE_VLESS -> isV2RayNetworkTcp()
+            TYPE_VMESS -> isV2RayNetworkTcp()
             TYPE_TROJAN_GO -> false
             else -> enableMuxForAll
         }
@@ -489,15 +441,10 @@ data class ProxyEntity(
         ssBean = null
         ssrBean = null
         vmessBean = null
-        vlessBean = null
         trojanBean = null
         trojanGoBean = null
         naiveBean = null
         ptBean = null
-        rbBean = null
-        brookBean = null
-        hysteriaBean = null
-        snellBean = null
         sshBean = null
         wgBean = null
 
@@ -526,10 +473,6 @@ data class ProxyEntity(
                 type = TYPE_VMESS
                 vmessBean = bean
             }
-            is VLESSBean -> {
-                type = TYPE_VLESS
-                vlessBean = bean
-            }
             is TrojanBean -> {
                 type = TYPE_TROJAN
                 trojanBean = bean
@@ -545,22 +488,6 @@ data class ProxyEntity(
             is PingTunnelBean -> {
                 type = TYPE_PING_TUNNEL
                 ptBean = bean
-            }
-            is RelayBatonBean -> {
-                type = TYPE_RELAY_BATON
-                rbBean = bean
-            }
-            is BrookBean -> {
-                type = TYPE_BROOK
-                brookBean = bean
-            }
-            is HysteriaBean -> {
-                type = TYPE_HYSTERIA
-                hysteriaBean = bean
-            }
-            is SnellBean -> {
-                type = TYPE_SNELL
-                snellBean = bean
             }
             is SSHBean -> {
                 type = TYPE_SSH
@@ -595,15 +522,10 @@ data class ProxyEntity(
                 TYPE_SS -> ShadowsocksSettingsActivity::class.java
                 TYPE_SSR -> ShadowsocksRSettingsActivity::class.java
                 TYPE_VMESS -> VMessSettingsActivity::class.java
-                TYPE_VLESS -> VLESSSettingsActivity::class.java
                 TYPE_TROJAN -> TrojanSettingsActivity::class.java
                 TYPE_TROJAN_GO -> TrojanGoSettingsActivity::class.java
                 TYPE_NAIVE -> NaiveSettingsActivity::class.java
                 TYPE_PING_TUNNEL -> PingTunnelSettingsActivity::class.java
-                TYPE_RELAY_BATON -> RelayBatonSettingsActivity::class.java
-                TYPE_BROOK -> BrookSettingsActivity::class.java
-                TYPE_HYSTERIA -> HysteriaSettingsActivity::class.java
-                TYPE_SNELL -> SnellSettingsActivity::class.java
                 TYPE_SSH -> SSHSettingsActivity::class.java
                 TYPE_WG -> WireGuardSettingsActivity::class.java
 

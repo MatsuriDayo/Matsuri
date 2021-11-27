@@ -29,20 +29,14 @@ fun parseV2Ray(link: String): StandardV2RayBean {
         return parseV2RayN(link)
     }
 
-    val bean = if (!link.startsWith("vless://")) {
-        VMessBean()
-    } else {
-        VLESSBean()
-    }
-    val url = link.replace("vmess://", "https://").replace("vless://", "https://").toHttpUrl()
+    val bean = VMessBean()
+    val url = link.replace("vmess://", "https://").toHttpUrl()
 
     bean.serverAddress = url.host
     bean.serverPort = url.port
     bean.name = url.fragment
 
     if (url.password.isNotBlank()) { // https://github.com/v2fly/v2fly-github-io/issues/26
-        (bean as VMessBean?) ?: error("Invalid vless url: $link")
-
         var protocol = url.username
         bean.type = protocol
         bean.alterId = url.password.substringAfterLast('-').toInt()
@@ -348,8 +342,11 @@ fun VMessBean.toV2rayN(): String {
 fun StandardV2RayBean.toUri(standard: Boolean = true): String {
     if (this is VMessBean && alterId > 0) return toV2rayN()
 
-    val builder = linkBuilder().username(uuid).host(serverAddress).port(serverPort)
-        .addQueryParameter("type", type).addQueryParameter("encryption", encryption)
+    val builder = linkBuilder().username(uuid)
+        .host(serverAddress)
+        .port(serverPort)
+        .addQueryParameter("type", type)
+        .addQueryParameter("encryption", encryption)
 
     when (type) {
         "tcp" -> {
@@ -436,6 +433,6 @@ fun StandardV2RayBean.toUri(standard: Boolean = true): String {
         builder.encodedFragment(name.urlSafe())
     }
 
-    return builder.toLink(if (this is VMessBean) "vmess" else "vless")
+    return builder.toLink("vmess")
 
 }

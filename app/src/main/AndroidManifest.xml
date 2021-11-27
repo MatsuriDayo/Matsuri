@@ -125,14 +125,11 @@
                 <data android:scheme="socksa" />
                 <data android:scheme="sock5" />
                 <data android:scheme="vmess" />
-                <data android:scheme="vless" />
                 <data android:scheme="trojan" />
                 <data android:scheme="trojan-go" />
                 <data android:scheme="naive+https" />
                 <data android:scheme="naive+quic" />
                 <data android:scheme="pingtunnel" />
-                <data android:scheme="relaybaton" />
-                <data android:scheme="brook" />
 
             </intent-filter>
 
@@ -160,9 +157,6 @@
             android:name="io.nekohasekai.sagernet.ui.profile.VMessSettingsActivity"
             android:configChanges="uiMode" />
         <activity
-            android:name="io.nekohasekai.sagernet.ui.profile.VLESSSettingsActivity"
-            android:configChanges="uiMode" />
-        <activity
             android:name="io.nekohasekai.sagernet.ui.profile.TrojanSettingsActivity"
             android:configChanges="uiMode" />
         <activity
@@ -173,18 +167,6 @@
             android:configChanges="uiMode" />
         <activity
             android:name="io.nekohasekai.sagernet.ui.profile.PingTunnelSettingsActivity"
-            android:configChanges="uiMode" />
-        <activity
-            android:name="io.nekohasekai.sagernet.ui.profile.RelayBatonSettingsActivity"
-            android:configChanges="uiMode" />
-        <activity
-            android:name="io.nekohasekai.sagernet.ui.profile.BrookSettingsActivity"
-            android:configChanges="uiMode" />
-        <activity
-            android:name="io.nekohasekai.sagernet.ui.profile.HysteriaSettingsActivity"
-            android:configChanges="uiMode" />
-        <activity
-            android:name="io.nekohasekai.sagernet.ui.profile.SnellSettingsActivity"
             android:configChanges="uiMode" />
         <activity
             android:name="io.nekohasekai.sagernet.ui.profile.SSHSettingsActivity"

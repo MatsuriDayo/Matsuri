@@ -34,9 +34,6 @@
                         android:id="@+id/action_new_vmess"
                         android:title="@string/action_vmess" />
                     <item
-                        android:id="@+id/action_new_vless"
-                        android:title="@string/action_vless" />
-                    <item
                         android:id="@+id/action_new_trojan"
                         android:title="@string/action_trojan" />
                     <item
@@ -48,18 +45,6 @@
                     <item
                         android:id="@+id/action_new_ping_tunnel"
                         android:title="@string/action_ping_tunnel" />
-                    <item
-                        android:id="@+id/action_new_relay_baton"
-                        android:title="@string/action_relay_baton" />
-                    <item
-                        android:id="@+id/action_new_brook"
-                        android:title="@string/action_brook" />
-                    <item
-                        android:id="@+id/action_new_hysteria"
-                        android:title="@string/action_hysteria" />
-                    <item
-                        android:id="@+id/action_new_snell"
-                        android:title="@string/action_snell" />
                     <item
                         android:id="@+id/action_new_ssh"
                         android:title="@string/action_ssh" />

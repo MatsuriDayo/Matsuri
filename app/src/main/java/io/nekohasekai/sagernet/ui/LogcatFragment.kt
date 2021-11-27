@@ -110,10 +110,7 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
                 "libtrojan:D",
                 "libtrojan:D",
                 "libnaive:D",
-                "libbrook:D",
-                "libhysteria:D",
                 "libpingtunnel:D",
-                "librelaybaton:D",
                 "libwg:D",
 
                 "*:S"

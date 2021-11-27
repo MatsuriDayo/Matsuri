@@ -204,15 +204,10 @@
     <string name="action_shadowsocks" translatable="false">Shadowsocks</string>
     <string name="action_shadowsocksr" translatable="false">ShadowsocksR</string>
     <string name="action_vmess" translatable="false">VMess</string>
-    <string name="action_vless" translatable="false">VLESS</string>
     <string name="action_trojan" translatable="false">Trojan</string>
     <string name="action_trojan_go" translatable="false">Trojan Go</string>
     <string name="action_naive" translatable="false">Naïve</string>
     <string name="action_ping_tunnel" translatable="false">Ping Tunnel</string>
-    <string name="action_relay_baton" translatable="false">RelayBaton</string>
-    <string name="action_brook" translatable="false">Brook</string>
-    <string name="action_hysteria" translatable="false">Hysteria</string>
-    <string name="action_snell" translatable="false">Snell</string>
     <string name="action_ssh" translatable="false">SSH</string>
     <string name="action_wireguard" translatable="false">WireGuard</string>
     <string name="proxy_chain">Proxy Chain</string>

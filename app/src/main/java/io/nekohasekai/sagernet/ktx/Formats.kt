@@ -23,13 +23,11 @@ import cn.hutool.core.codec.Base64
 import cn.hutool.json.JSONObject
 import io.nekohasekai.sagernet.fmt.AbstractBean
 import io.nekohasekai.sagernet.fmt.Serializable
-import io.nekohasekai.sagernet.fmt.brook.parseBrook
 import io.nekohasekai.sagernet.fmt.gson.gson
 import io.nekohasekai.sagernet.fmt.http.parseHttp
 import io.nekohasekai.sagernet.fmt.naive.parseNaive
 import io.nekohasekai.sagernet.fmt.parseUniversal
 import io.nekohasekai.sagernet.fmt.pingtunnel.parsePingTunnel
-import io.nekohasekai.sagernet.fmt.relaybaton.parseRelayBaton
 import io.nekohasekai.sagernet.fmt.shadowsocks.parseShadowsocks
 import io.nekohasekai.sagernet.fmt.shadowsocksr.parseShadowsocksR
 import io.nekohasekai.sagernet.fmt.socks.parseSOCKS
@@ -82,7 +80,7 @@ fun parseProxies(text: String): List<AbstractBean> {
             }.onFailure {
                 Logs.w(it)
             }
-        } else if (startsWith("vmess://") || startsWith("vless://")) {
+        } else if (startsWith("vmess://")) {
             Logs.d("Try parse v2ray link: $this")
             runCatching {
                 entities.add(parseV2Ray(this))
@@ -128,20 +126,6 @@ fun parseProxies(text: String): List<AbstractBean> {
             Logs.d("Try parse pt link: $this")
             runCatching {
                 entities.add(parsePingTunnel(this))
-            }.onFailure {
-                Logs.w(it)
-            }
-        } else if (startsWith("relaybaton://")) {
-            Logs.d("Try parse rb link: $this")
-            runCatching {
-                entities.add(parseRelayBaton(this))
-            }.onFailure {
-                Logs.w(it)
-            }
-        } else if (startsWith("brook://")) {
-            Logs.d("Try parse brook link: $this")
-            runCatching {
-                entities.add(parseBrook(this))
             }.onFailure {
                 Logs.w(it)
             }

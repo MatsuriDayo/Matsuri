@@ -547,17 +547,6 @@
         <item>quic</item>
     </string-array>
 
-    <string-array name="brook_protocol_entry">
-        <item>DEFAULT</item>
-        <item>WS</item>
-        <item>WSS</item>
-    </string-array>
-    <string-array name="brook_protocol_value">
-        <item />
-        <item>ws</item>
-        <item>wss</item>
-    </string-array>
-
     <string-array name="config_type_entry">
         <item>V2Ray</item>
         <item>Trojan-Go</item>

@@ -32,7 +32,6 @@ import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.fmt.V2rayBuildResult.IndexEntity
-import io.nekohasekai.sagernet.fmt.brook.BrookBean
 import io.nekohasekai.sagernet.fmt.gson.gson
 import io.nekohasekai.sagernet.fmt.http.HttpBean
 import io.nekohasekai.sagernet.fmt.internal.BalancerBean
@@ -43,7 +42,6 @@ import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
 import io.nekohasekai.sagernet.fmt.v2ray.V2RayConfig
 import io.nekohasekai.sagernet.fmt.v2ray.V2RayConfig.*
-import io.nekohasekai.sagernet.fmt.v2ray.VLESSBean
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
 import io.nekohasekai.sagernet.ktx.isIpAddress
 import io.nekohasekai.sagernet.ktx.isRunning
@@ -537,21 +535,6 @@ fun buildV2RayConfig(
                                                     })
                                             })
                                     })
-                            } else if (bean is VLESSBean) {
-                                protocol = "vless"
-                                settings = LazyOutboundConfigurationObject(this,
-                                    VLESSOutboundConfigurationObject().apply {
-                                        vnext = listOf(VLESSOutboundConfigurationObject.ServerObject()
-                                            .apply {
-                                                address = bean.serverAddress
-                                                port = bean.serverPort
-                                                users = listOf(VLESSOutboundConfigurationObject.ServerObject.UserObject()
-                                                    .apply {
-                                                        id = bean.uuidOrGenerate()
-                                                        encryption = bean.encryption
-                                                    })
-                                            })
-                                    })
                             }
 
                             streamSettings = StreamSettingsObject().apply {
@@ -777,14 +760,7 @@ fun buildV2RayConfig(
 
                 if (proxyEntity.needExternal() && !isBalancer && index != profileList.lastIndex) {
                     val mappingPort = mkPort()
-                    when (bean) {
-                        is BrookBean -> {
-                            dns.hosts[bean.serverAddress] = LOCALHOST
-                        }
-                        else -> {
-                            bean.finalAddress = LOCALHOST
-                        }
-                    }
+                    bean.finalAddress = LOCALHOST
                     bean.finalPort = mappingPort
                     bean.isChain = true
 
@@ -804,14 +780,7 @@ fun buildV2RayConfig(
                     })
                 } else if (bean.canMapping() && proxyEntity.needExternal() && needIncludeSelf) {
                     val mappingPort = mkPort()
-                    when (bean) {
-                        is BrookBean -> {
-                            dns.hosts[bean.serverAddress] = LOCALHOST
-                        }
-                        else -> {
-                            bean.finalAddress = LOCALHOST
-                        }
-                    }
+                    bean.finalAddress = LOCALHOST
                     bean.finalPort = mappingPort
 
                     inbounds.add(InboundObject().apply {

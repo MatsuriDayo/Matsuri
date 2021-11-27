@@ -27,7 +27,6 @@ import io.nekohasekai.sagernet.database.*
 import io.nekohasekai.sagernet.fmt.AbstractBean
 import io.nekohasekai.sagernet.fmt.gson.gson
 import io.nekohasekai.sagernet.fmt.http.HttpBean
-import io.nekohasekai.sagernet.fmt.hysteria.parseHysteria
 import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.fixInvalidParams
 import io.nekohasekai.sagernet.fmt.shadowsocks.parseShadowsocks
@@ -37,7 +36,6 @@ import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.fmt.trojan_go.parseTrojanGo
 import io.nekohasekai.sagernet.fmt.v2ray.V2RayConfig
-import io.nekohasekai.sagernet.fmt.v2ray.VLESSBean
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
 import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
 import io.nekohasekai.sagernet.ktx.*
@@ -499,9 +497,6 @@ object RawUpdater : GroupUpdater() {
                 json.containsKey("remote_addr") -> {
                     return listOf(json.parseTrojanGo())
                 }
-                json.containsKey("up_mbps") -> {
-                    return listOf(json.parseHysteria())
-                }
                 else -> json.forEach { _, it ->
                     if (it is JSON) {
                         proxies.addAll(parseJSON(it))
@@ -578,8 +573,8 @@ object RawUpdater : GroupUpdater() {
                         })
                     }
                 }
-                "vmess", "vless" -> {
-                    val v2rayBean = (if (protocol == "vmess") VMessBean() else VLESSBean()).applyDefaultValues()
+                "vmess" -> {
+                    val v2rayBean = VMessBean().applyDefaultValues()
                     streamSettings?.apply {
                         v2rayBean.security = security ?: v2rayBean.security
                         when (security) {
@@ -703,21 +698,6 @@ object RawUpdater : GroupUpdater() {
                                     encryption = user.security
                                     alterId = user.alterId
                                     name = tag ?: displayName() + " - ${user.security} - ${user.id}"
-                                })
-                            }
-                        }
-                    } else {
-                        v2rayBean as VLESSBean
-                        (settings.value as? V2RayConfig.VLESSOutboundConfigurationObject)?.vnext?.forEach {
-                            val vlessBean = v2rayBean.clone().apply {
-                                serverAddress = it.address
-                                serverPort = it.port
-                            }
-                            for (user in it.users) {
-                                proxies.add(vlessBean.clone().apply {
-                                    uuid = user.id
-                                    encryption = user.encryption
-                                    name = tag ?: displayName() + " - ${user.id}"
                                 })
                             }
                         }

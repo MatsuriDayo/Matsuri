@@ -29,7 +29,6 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
-import io.nekohasekai.sagernet.fmt.v2ray.VLESSBean
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
 import io.nekohasekai.sagernet.ktx.app
 
@@ -138,27 +137,17 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         wsCategory = findPreference(Key.SERVER_WS_CATEGORY)!!
 
         val alterId = findPreference<EditTextPreference>(Key.SERVER_ALTER_ID)!!
-        if (bean is VLESSBean) {
-            alterId.isVisible = false
 
-            encryption.setEntries(R.array.vless_encryption_entry)
-            encryption.setEntryValues(R.array.vless_encryption_value)
+        alterId.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
 
-            val vev = resources.getStringArray(R.array.vless_encryption_value)
-            if (encryption.value !in vev) {
-                encryption.value = vev[0]
-            }
-        } else {
-            alterId.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
+        encryption.setEntries(R.array.vmess_encryption_entry)
+        encryption.setEntryValues(R.array.vmess_encryption_value)
 
-            encryption.setEntries(R.array.vmess_encryption_entry)
-            encryption.setEntryValues(R.array.vmess_encryption_value)
-
-            val vev = resources.getStringArray(R.array.vmess_encryption_value)
-            if (encryption.value !in vev) {
-                encryption.value = "auto"
-            }
+        val vev = resources.getStringArray(R.array.vmess_encryption_value)
+        if (encryption.value !in vev) {
+            encryption.value = "auto"
         }
+
 
         findPreference<EditTextPreference>(Key.SERVER_USER_ID)!!.apply {
             summaryProvider = PasswordSummaryProvider
@@ -191,8 +180,7 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
                     security.setEntryValues(R.array.transport_layer_encryption_value)
                     security.value = DataStore.serverSecurity
 
-                    val tlev =
-                        resources.getStringArray(R.array.transport_layer_encryption_value)
+                    val tlev = resources.getStringArray(R.array.transport_layer_encryption_value)
                     if (security.value !in tlev) {
                         security.value = tlev[0]
                     }

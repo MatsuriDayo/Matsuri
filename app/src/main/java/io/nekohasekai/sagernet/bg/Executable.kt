@@ -39,10 +39,7 @@ object Executable {
         "libtrojan.so",
         "libtrojan-go.so",
         "libnaive.so",
-        "libbrook.so",
-        "libhysteria.so",
         "libpingtunnel.so",
-        "librelaybaton.so",
         "libwg.so"
     )
 

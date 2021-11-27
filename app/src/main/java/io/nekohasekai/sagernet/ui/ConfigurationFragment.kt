@@ -293,9 +293,6 @@ class ConfigurationFragment @JvmOverloads constructor(
             R.id.action_new_vmess -> {
                 startActivity(Intent(requireActivity(), VMessSettingsActivity::class.java))
             }
-            R.id.action_new_vless -> {
-                startActivity(Intent(requireActivity(), VLESSSettingsActivity::class.java))
-            }
             R.id.action_new_trojan -> {
                 startActivity(Intent(requireActivity(), TrojanSettingsActivity::class.java))
             }
@@ -307,18 +304,6 @@ class ConfigurationFragment @JvmOverloads constructor(
             }
             R.id.action_new_ping_tunnel -> {
                 startActivity(Intent(requireActivity(), PingTunnelSettingsActivity::class.java))
-            }
-            R.id.action_new_relay_baton -> {
-                startActivity(Intent(requireActivity(), RelayBatonSettingsActivity::class.java))
-            }
-            R.id.action_new_brook -> {
-                startActivity(Intent(requireActivity(), BrookSettingsActivity::class.java))
-            }
-            R.id.action_new_hysteria -> {
-                startActivity(Intent(requireActivity(), HysteriaSettingsActivity::class.java))
-            }
-            R.id.action_new_snell -> {
-                startActivity(Intent(requireActivity(), SnellSettingsActivity::class.java))
             }
             R.id.action_new_ssh -> {
                 startActivity(Intent(requireActivity(), SSHSettingsActivity::class.java))
@@ -1537,7 +1522,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                             }
                         }
 
-                        if (proxyEntity.ptBean != null || proxyEntity.brookBean != null) {
+                        if (proxyEntity.ptBean != null) {
                             popup.menu.removeItem(R.id.action_group_configuration)
                         }
 

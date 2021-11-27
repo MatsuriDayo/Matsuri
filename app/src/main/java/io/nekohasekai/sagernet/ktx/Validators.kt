@@ -31,7 +31,6 @@ import io.nekohasekai.sagernet.fmt.internal.ConfigBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean
 import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
-import io.nekohasekai.sagernet.fmt.v2ray.VLESSBean
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
 import io.nekohasekai.sagernet.group.RawUpdater
 
@@ -73,14 +72,6 @@ fun AbstractBean.isInsecure(): ValidateResult {
         }
         if (allowInsecure) return ResultInsecure(R.raw.insecure)
         if (alterId > 0) return ResultDeprecated(R.raw.vmess_md5_auth)
-    } else if (this is VLESSBean) {
-        if (security in arrayOf("", "none")) {
-            return ResultInsecure(R.raw.not_encrypted)
-        }
-        if (type == "kcp" && mKcpSeed.isBlank()) {
-            return ResultInsecure(R.raw.mkcp_no_seed)
-        }
-        if (allowInsecure) return ResultInsecure(R.raw.insecure)
     } else if (this is ConfigBean) {
         try {
             val profiles = RawUpdater.parseJSON(JSONObject(content))
