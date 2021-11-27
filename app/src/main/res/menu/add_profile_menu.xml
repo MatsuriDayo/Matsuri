@@ -57,9 +57,6 @@
                     <item
                         android:id="@+id/action_new_chain"
                         android:title="@string/proxy_chain" />
-                    <item
-                        android:id="@+id/action_new_balancer"
-                        android:title="@string/balancer" />
                 </menu>
             </item>
         </menu>

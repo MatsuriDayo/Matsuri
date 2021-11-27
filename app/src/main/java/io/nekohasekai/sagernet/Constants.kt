@@ -72,7 +72,6 @@ object Key {
     const val TRANSPROXY_PORT = "transproxyPort"
 
     const val CONNECTION_TEST_URL = "connectionTestURL"
-    const val PROBE_INTERVAL = "probeInterval"
 
     const val ENABLE_MUX = "enableMux"
     const val ENABLE_MUX_FOR_ALL = "enableMuxForAll"
@@ -154,10 +153,6 @@ object Key {
     const val SERVER_PRIVATE_KEY = "serverPrivateKey"
     const val SERVER_LOCAL_ADDRESS = "serverLocalAddress"
     const val SERVER_INSECURE_CONCURRENCY = "serverInsecureConcurrency"
-
-    const val BALANCER_TYPE = "balancerType"
-    const val BALANCER_GROUP = "balancerGroup"
-    const val BALANCER_STRATEGY = "balancerStrategy"
 
     const val ROUTE_NAME = "routeName"
     const val ROUTE_DOMAIN = "routeDomain"

@@ -317,9 +317,6 @@ class ConfigurationFragment @JvmOverloads constructor(
             R.id.action_new_chain -> {
                 startActivity(Intent(requireActivity(), ChainSettingsActivity::class.java))
             }
-            R.id.action_new_balancer -> {
-                startActivity(Intent(requireActivity(), BalancerSettingsActivity::class.java))
-            }
             R.id.action_clear_traffic_statistics -> {
                 runOnDefaultDispatcher {
                     val profiles = SagerDatabase.proxyDao.getByGroup(DataStore.currentGroupId())

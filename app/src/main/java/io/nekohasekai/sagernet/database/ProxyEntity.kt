@@ -36,7 +36,6 @@ import io.nekohasekai.sagernet.fmt.KryoConverters
 import io.nekohasekai.sagernet.fmt.buildV2RayConfig
 import io.nekohasekai.sagernet.fmt.http.HttpBean
 import io.nekohasekai.sagernet.fmt.http.toUri
-import io.nekohasekai.sagernet.fmt.internal.BalancerBean
 import io.nekohasekai.sagernet.fmt.internal.ChainBean
 import io.nekohasekai.sagernet.fmt.internal.ConfigBean
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean
@@ -93,7 +92,6 @@ data class ProxyEntity(
     var wgBean: WireGuardBean? = null,
     var configBean: ConfigBean? = null,
     var chainBean: ChainBean? = null,
-    var balancerBean: BalancerBean? = null
 ) : Parcelable {
 
     companion object {
@@ -102,24 +100,21 @@ data class ProxyEntity(
         const val TYPE_SS = 2
         const val TYPE_SSR = 3
         const val TYPE_VMESS = 4
-//        const val TYPE_VLESS = 5
+
         const val TYPE_TROJAN = 6
         const val TYPE_TROJAN_GO = 7
         const val TYPE_NAIVE = 9
         const val TYPE_PING_TUNNEL = 10
-//        const val TYPE_BROOK = 12
-//        const val TYPE_HYSTERIA = 15
-//        const val TYPE_SNELL = 16
+
         const val TYPE_SSH = 17
         const val TYPE_WG = 18
 
         const val TYPE_CHAIN = 8
-        const val TYPE_BALANCER = 14
+
         const val TYPE_CONFIG = 13
 
         val chainName by lazy { app.getString(R.string.proxy_chain) }
         val configName by lazy { app.getString(R.string.custom_config) }
-        val balancerName by lazy { app.getString(R.string.balancer) }
 
         private val placeHolderBean = SOCKSBean().applyDefaultValues()
 
@@ -173,7 +168,6 @@ data class ProxyEntity(
 
             TYPE_CONFIG -> configBean = KryoConverters.configDeserialize(byteArray)
             TYPE_CHAIN -> chainBean = KryoConverters.chainDeserialize(byteArray)
-            TYPE_BALANCER -> balancerBean = KryoConverters.balancerBeanDeserialize(byteArray)
         }
     }
 
@@ -204,7 +198,6 @@ data class ProxyEntity(
         TYPE_WG -> "WireGuard"
         TYPE_CHAIN -> chainName
         TYPE_CONFIG -> configName
-        TYPE_BALANCER -> balancerName
         else -> "Undefined type $type"
     }
 
@@ -227,7 +220,6 @@ data class ProxyEntity(
 
             TYPE_CONFIG -> configBean
             TYPE_CHAIN -> chainBean
-            TYPE_BALANCER -> balancerBean
             else -> error("Undefined type $type")
         } ?: error("Null ${displayType()} profile")
     }
@@ -236,7 +228,6 @@ data class ProxyEntity(
         return when (type) {
             TYPE_CHAIN -> false
             TYPE_CONFIG -> false
-            TYPE_BALANCER -> false
             else -> true
         }
     }
@@ -280,9 +271,8 @@ data class ProxyEntity(
                     name = "profiles.txt"
                 }
 
-                for ((isBalancer, chain) in config.index) {
+                for ((chain) in config.index) {
                     chain.entries.forEachIndexed { index, (port, profile) ->
-                        val needChain = !isBalancer && index != chain.size - 1
                         val needMux = index == 0 && DataStore.enableMux
                         when (val bean = profile.requireBean()) {
                             is ShadowsocksBean -> {
@@ -317,7 +307,6 @@ data class ProxyEntity(
             TYPE_VMESS -> false
             TYPE_TROJAN -> DataStore.providerTrojan != TrojanProvider.V2RAY
             TYPE_CHAIN -> false
-            TYPE_BALANCER -> false
             else -> true
         }
     }
@@ -413,7 +402,6 @@ data class ProxyEntity(
 
         configBean = null
         chainBean = null
-        balancerBean = null
 
         when (bean) {
             is SOCKSBean -> {
@@ -468,10 +456,6 @@ data class ProxyEntity(
                 type = TYPE_CHAIN
                 chainBean = bean
             }
-            is BalancerBean -> {
-                type = TYPE_BALANCER
-                balancerBean = bean
-            }
             else -> error("Undefined type $type")
         }
         return this
@@ -494,7 +478,6 @@ data class ProxyEntity(
 
                 TYPE_CONFIG -> ConfigSettingsActivity::class.java
                 TYPE_CHAIN -> ChainSettingsActivity::class.java
-                TYPE_BALANCER -> BalancerSettingsActivity::class.java
                 else -> throw IllegalArgumentException()
             }
         ).apply {

@@ -114,28 +114,11 @@ public class V2RayConfig {
             public List<String> protocol;
             public String attrs;
             public String outboundTag;
-            public String balancerTag;
 
             // SagerNet private
 
             public List<Integer> uidList;
             public List<String> appStatus;
-
-        }
-
-        public List<BalancerObject> balancers;
-
-        public static class BalancerObject {
-
-            public String tag;
-            public List<String> selector;
-            public StrategyObject strategy;
-
-            public static class StrategyObject {
-
-                public String type;
-
-            }
 
         }
 
@@ -840,7 +823,6 @@ public class V2RayConfig {
     public static class ObservatoryObject {
         public Set<String> subjectSelector;
         public String probeUrl;
-        public String probeInterval;
         public Boolean enableConcurrency;
     }
 

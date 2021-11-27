@@ -32,7 +32,6 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ArrayUtil;
 import io.nekohasekai.sagernet.database.SubscriptionBean;
 import io.nekohasekai.sagernet.fmt.http.HttpBean;
-import io.nekohasekai.sagernet.fmt.internal.BalancerBean;
 import io.nekohasekai.sagernet.fmt.internal.ChainBean;
 import io.nekohasekai.sagernet.fmt.internal.ConfigBean;
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean;
@@ -151,12 +150,6 @@ public class KryoConverters {
     public static ChainBean chainDeserialize(byte[] bytes) {
         if (ArrayUtil.isEmpty(bytes)) return null;
         return deserialize(new ChainBean(), bytes);
-    }
-
-    @TypeConverter
-    public static BalancerBean balancerBeanDeserialize(byte[] bytes) {
-        if (ArrayUtil.isEmpty(bytes)) return null;
-        return deserialize(new BalancerBean(), bytes);
     }
 
     @TypeConverter

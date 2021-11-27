@@ -95,10 +95,10 @@ abstract class V2RayInstance(
     open fun init() {
         v2rayPoint = V2RayInstance()
         buildConfig()
-        for ((isBalancer, chain) in config.index) {
+        for ((chain) in config.index) {
             chain.entries.forEachIndexed { index, (port, profile) ->
-                val needChain = !isBalancer && index != chain.size - 1
-                val mux = DataStore.enableMux && (isBalancer || chain.size == 0)
+                val needChain = index != chain.size - 1
+                val mux = DataStore.enableMux && (chain.size == 0)
 
                 when (val bean = profile.requireBean()) {
                     is ShadowsocksBean -> when (val provider = profile.pickShadowsocksProvider()) {
@@ -178,10 +178,10 @@ abstract class V2RayInstance(
     override fun launch() {
         val context = if (Build.VERSION.SDK_INT < 24 || SagerNet.user.isUserUnlocked) SagerNet.application else SagerNet.deviceStorage
 
-        for ((isBalancer, chain) in config.index) {
+        for ((chain) in config.index) {
             chain.entries.forEachIndexed { index, (port, profile) ->
                 val bean = profile.requireBean()
-                val needChain = !isBalancer && index != chain.size - 1
+                val needChain = index != chain.size - 1
                 val (profileType, config) = pluginConfigs[port] ?: 0 to ""
 
                 when {
