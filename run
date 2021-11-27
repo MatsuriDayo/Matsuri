@@ -1,7 +1,7 @@
 #!/bin/bash
 
 EXEC=""
-TARGET="bin"
+TARGET="buildScript"
 declare -A PARAMS
 declare -i INDEX=0
 
