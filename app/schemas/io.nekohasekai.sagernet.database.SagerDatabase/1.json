@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "1239f165d8e5bf435ab3644e8fe25ff2",
+    "identityHash": "08a77b28dd291922673402311af2af97",
     "entities": [
       {
         "tableName": "proxy_groups",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `userOrder` INTEGER NOT NULL, `ungrouped` INTEGER NOT NULL, `name` TEXT, `type` INTEGER NOT NULL, `subscription` BLOB)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `userOrder` INTEGER NOT NULL, `ungrouped` INTEGER NOT NULL, `name` TEXT, `type` INTEGER NOT NULL, `subscription` BLOB, `order` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -43,6 +43,12 @@
             "columnName": "subscription",
             "affinity": "BLOB",
             "notNull": false
+          },
+          {
+            "fieldPath": "order",
+            "columnName": "order",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -56,7 +62,7 @@
       },
       {
         "tableName": "proxy_entities",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `groupId` INTEGER NOT NULL, `type` INTEGER NOT NULL, `userOrder` INTEGER NOT NULL, `tx` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `status` INTEGER NOT NULL, `ping` INTEGER NOT NULL, `uuid` TEXT NOT NULL, `error` TEXT, `socksBean` BLOB, `httpBean` BLOB, `ssBean` BLOB, `ssrBean` BLOB, `vmessBean` BLOB, `vlessBean` BLOB, `trojanBean` BLOB, `trojanGoBean` BLOB, `naiveBean` BLOB, `ptBean` BLOB, `rbBean` BLOB, `brookBean` BLOB, `configBean` BLOB, `chainBean` BLOB, `balancerBean` BLOB)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `groupId` INTEGER NOT NULL, `type` INTEGER NOT NULL, `userOrder` INTEGER NOT NULL, `tx` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `status` INTEGER NOT NULL, `ping` INTEGER NOT NULL, `uuid` TEXT NOT NULL, `error` TEXT, `socksBean` BLOB, `httpBean` BLOB, `ssBean` BLOB, `ssrBean` BLOB, `vmessBean` BLOB, `trojanBean` BLOB, `trojanGoBean` BLOB, `naiveBean` BLOB, `ptBean` BLOB, `sshBean` BLOB, `wgBean` BLOB, `configBean` BLOB, `chainBean` BLOB)",
         "fields": [
           {
             "fieldPath": "id",
@@ -149,12 +155,6 @@
             "notNull": false
           },
           {
-            "fieldPath": "vlessBean",
-            "columnName": "vlessBean",
-            "affinity": "BLOB",
-            "notNull": false
-          },
-          {
             "fieldPath": "trojanBean",
             "columnName": "trojanBean",
             "affinity": "BLOB",
@@ -179,14 +179,14 @@
             "notNull": false
           },
           {
-            "fieldPath": "rbBean",
-            "columnName": "rbBean",
+            "fieldPath": "sshBean",
+            "columnName": "sshBean",
             "affinity": "BLOB",
             "notNull": false
           },
           {
-            "fieldPath": "brookBean",
-            "columnName": "brookBean",
+            "fieldPath": "wgBean",
+            "columnName": "wgBean",
             "affinity": "BLOB",
             "notNull": false
           },
@@ -199,12 +199,6 @@
           {
             "fieldPath": "chainBean",
             "columnName": "chainBean",
-            "affinity": "BLOB",
-            "notNull": false
-          },
-          {
-            "fieldPath": "balancerBean",
-            "columnName": "balancerBean",
             "affinity": "BLOB",
             "notNull": false
           }
@@ -229,7 +223,7 @@
       },
       {
         "tableName": "rules",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `userOrder` INTEGER NOT NULL, `enabled` INTEGER NOT NULL, `domains` TEXT NOT NULL, `ip` TEXT NOT NULL, `port` TEXT NOT NULL, `sourcePort` TEXT NOT NULL, `network` TEXT NOT NULL, `source` TEXT NOT NULL, `protocol` TEXT NOT NULL, `attrs` TEXT NOT NULL, `outbound` INTEGER NOT NULL, `reverse` INTEGER NOT NULL, `redirect` TEXT NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `userOrder` INTEGER NOT NULL, `enabled` INTEGER NOT NULL, `domains` TEXT NOT NULL, `ip` TEXT NOT NULL, `port` TEXT NOT NULL, `sourcePort` TEXT NOT NULL, `network` TEXT NOT NULL, `source` TEXT NOT NULL, `protocol` TEXT NOT NULL, `attrs` TEXT NOT NULL, `outbound` INTEGER NOT NULL, `reverse` INTEGER NOT NULL, `redirect` TEXT NOT NULL, `packages` TEXT NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -320,6 +314,12 @@
             "columnName": "redirect",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "packages",
+            "columnName": "packages",
+            "affinity": "TEXT",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -329,6 +329,65 @@
           "autoGenerate": true
         },
         "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "stats",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `packageName` TEXT NOT NULL, `tcpConnections` INTEGER NOT NULL, `udpConnections` INTEGER NOT NULL, `uplink` INTEGER NOT NULL, `downlink` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "packageName",
+            "columnName": "packageName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tcpConnections",
+            "columnName": "tcpConnections",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "udpConnections",
+            "columnName": "udpConnections",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "uplink",
+            "columnName": "uplink",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "downlink",
+            "columnName": "downlink",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_stats_packageName",
+            "unique": true,
+            "columnNames": [
+              "packageName"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_stats_packageName` ON `${TABLE_NAME}` (`packageName`)"
+          }
+        ],
         "foreignKeys": []
       },
       {
@@ -367,7 +426,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1239f165d8e5bf435ab3644e8fe25ff2')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '08a77b28dd291922673402311af2af97')"
     ]
   }
 }
