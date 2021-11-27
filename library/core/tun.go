@@ -47,11 +47,6 @@ type Tun2ray struct {
 	pcap         bool
 }
 
-const (
-	appStatusForeground = "foreground"
-	appStatusBackground = "background"
-)
-
 func NewTun2ray(fd int32, mtu int32, v2ray *V2RayInstance,
 	router string, gVisor bool, hijackDns bool, sniffing bool,
 	overrideDestination bool, fakedns bool, debug bool,
@@ -186,12 +181,6 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 			}
 
 			inbound.Uid = uint32(uid)
-
-			if uid == foregroundUid || uid == foregroundImeUid {
-				inbound.AppStatus = append(inbound.AppStatus, appStatusForeground)
-			} else {
-				inbound.AppStatus = append(inbound.AppStatus, appStatusBackground)
-			}
 		}
 	}
 
@@ -346,12 +335,6 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 			}
 
 			inbound.Uid = uint32(uid)
-			if uid == foregroundUid || uid == foregroundImeUid {
-				inbound.AppStatus = append(inbound.AppStatus, appStatusForeground)
-			} else {
-				inbound.AppStatus = append(inbound.AppStatus, appStatusBackground)
-			}
-
 		}
 
 	}

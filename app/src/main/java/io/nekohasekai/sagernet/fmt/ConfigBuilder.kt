@@ -26,7 +26,6 @@ import cn.hutool.json.JSONObject
 import com.google.gson.JsonSyntaxException
 import io.nekohasekai.sagernet.IPv6Mode
 import io.nekohasekai.sagernet.Key
-import io.nekohasekai.sagernet.bg.ForegroundDetectorService
 import io.nekohasekai.sagernet.bg.VpnService
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProxyEntity
@@ -812,19 +811,15 @@ fun buildV2RayConfig(
         }
 
         val notVpn = DataStore.serviceMode != Key.MODE_VPN
-        val foregroundDetectorServiceStarted = ForegroundDetectorService::class.isRunning()
 
         // apply user rules
         for (rule in extraRules) {
-            if (rule.packages.isNotEmpty() || rule.appStatus.isNotEmpty()) {
+            if (rule.packages.isNotEmpty()) {
                 dumpUid = true
                 if (notVpn) {
                     alerts.add(0 to rule.displayName())
                     continue
                 }
-            }
-            if (rule.appStatus.isNotEmpty() && !foregroundDetectorServiceStarted) {
-                alerts.add(1 to rule.displayName())
             }
             routing.rules.add(RoutingObject.RuleObject().apply {
                 type = "field"
@@ -833,9 +828,6 @@ fun buildV2RayConfig(
                     uidList = rule.packages.map {
                         PackageCache[it]?.takeIf { uid -> uid >= 10000 } ?: 1000
                     }.toHashSet().toList()
-                }
-                if (rule.appStatus.isNotEmpty()) {
-                    appStatus = rule.appStatus
                 }
 
                 if (rule.domains.isNotBlank()) {

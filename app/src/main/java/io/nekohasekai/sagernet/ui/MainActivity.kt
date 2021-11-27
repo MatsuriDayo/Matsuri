@@ -406,17 +406,6 @@ class MainActivity : ThemedActivity(),
                     this, getString(R.string.route_need_vpn, routeName), Toast.LENGTH_SHORT
                 ).show()
             }
-            1 -> {
-                // need fds
-
-                MaterialAlertDialogBuilder(this).setTitle(R.string.foreground_detector)
-                    .setMessage(getString(R.string.route_need_fds, routeName))
-                    .setPositiveButton(R.string.enable) { _, _ ->
-                        startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
-                    }
-                    .setNegativeButton(android.R.string.cancel, null)
-                    .show()
-            }
         }
     }
 

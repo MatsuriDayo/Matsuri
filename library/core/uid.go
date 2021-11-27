@@ -15,15 +15,3 @@ type UidDumper interface {
 func SetUidDumper(dumper UidDumper) {
 	uidDumper = dumper
 }
-
-var foregroundUid uint16
-
-func SetForegroundUid(uid int32) {
-	foregroundUid = uint16(uid)
-}
-
-var foregroundImeUid uint16
-
-func SetForegroundImeUid(uid int32) {
-	foregroundImeUid = uint16(uid)
-}

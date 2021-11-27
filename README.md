@@ -55,7 +55,6 @@ The application is designed to be used whenever possible.
 * Reverse proxy
 * Custom config (V2Ray / Trojan-Go)
 * Traffic statistics support, including real-time display and cumulative statistics
-* Foreground status based routing support
 
 ## Localization
 
