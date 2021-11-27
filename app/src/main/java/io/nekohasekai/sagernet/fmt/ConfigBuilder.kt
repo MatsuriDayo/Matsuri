@@ -317,6 +317,8 @@ fun buildV2RayConfig(
 
         outbounds = mutableListOf()
 
+        // init routing object
+        // set rules for wsUseBrowserForwarder and bypass LAN
         routing = RoutingObject().apply {
             domainStrategy = DataStore.domainStrategy
 
@@ -367,6 +369,7 @@ fun buildV2RayConfig(
 
         var rootBalancer: RoutingObject.RuleObject? = null
 
+        // returns outbound tag (wtf, it's argument)
         fun buildChain(
             tagOutbound: String,
             profileList: List<ProxyEntity>,
@@ -380,7 +383,7 @@ fun buildV2RayConfig(
             val chainMap = LinkedHashMap<Int, ProxyEntity>()
             indexMap.add(IndexEntity(isBalancer, chainMap))
             val chainOutbounds = ArrayList<OutboundObject>()
-            var chainOutbound = ""
+//            var chainOutbound = ""
 
             profileList.forEachIndexed { index, proxyEntity ->
                 val bean = proxyEntity.requireBean()
@@ -399,9 +402,11 @@ fun buildV2RayConfig(
                     needGlobal = false
                 }
 
-                if (index == profileList.lastIndex) {
-                    chainOutbound = tagIn
-                }
+                // it seems not correct
+                // profileList.lastIndex is first proxy objcet in UI and it means "front proxy"
+//                if (index == profileList.lastIndex) {
+//                    chainOutbound = tagIn
+//                }
 
                 if (needGlobal) {
                     if (globalOutbounds.contains(tagIn)) {
@@ -419,6 +424,7 @@ fun buildV2RayConfig(
                     }
                 }
 
+                //TODO all use dokodemo-door
                 if (proxyEntity.needExternal()) {
                     val localPort = mkPort()
                     chainMap[localPort] = proxyEntity
@@ -743,6 +749,7 @@ fun buildV2RayConfig(
                 currentOutbound.tag = tagIn
                 currentOutbound.domainStrategy = outboundDomainStrategy
 
+                // chain rules
                 if (!isBalancer && index > 0) {
                     if (!pastExternal) {
                         pastOutbound.proxySettings = OutboundObject.ProxySettingsObject().apply {
@@ -758,6 +765,7 @@ fun buildV2RayConfig(
                     }
                 }
 
+                // chain rules for external
                 if (proxyEntity.needExternal() && !isBalancer && index != profileList.lastIndex) {
                     val mappingPort = mkPort()
                     bean.finalAddress = LOCALHOST
@@ -778,7 +786,7 @@ fun buildV2RayConfig(
 
                         pastInboundTag = tag
                     })
-                } else if (bean.canMapping() && proxyEntity.needExternal() && needIncludeSelf) {
+                } else if (bean.canMapping() && proxyEntity.needExternal() && needIncludeSelf) { // TODO Remove
                     val mappingPort = mkPort()
                     bean.finalAddress = LOCALHOST
                     bean.finalPort = mappingPort
@@ -810,6 +818,7 @@ fun buildV2RayConfig(
 
             }
 
+            //TODO remove
             if (isBalancer) {
                 if (routing.balancers == null) routing.balancers = ArrayList()
                 routing.balancers.add(RoutingObject.BalancerObject().apply {
@@ -851,7 +860,7 @@ fun buildV2RayConfig(
                 }
             }
 
-            return chainOutbound
+            return tagOutbound
 
         }
 
@@ -872,6 +881,7 @@ fun buildV2RayConfig(
         val notVpn = DataStore.serviceMode != Key.MODE_VPN
         val foregroundDetectorServiceStarted = ForegroundDetectorService::class.isRunning()
 
+        // apply user rules
         for (rule in extraRules) {
             if (rule.packages.isNotEmpty() || rule.appStatus.isNotEmpty()) {
                 dumpUid = true

@@ -42,7 +42,7 @@ data class RuleEntity(
     var protocol: String = "",
     var attrs: String = "",
     var outbound: Long = 0,
-    var reverse: Boolean = false,
+    var reverse: Boolean = false, //TODO remove
     var redirect: String = "",
     var packages: List<String> = listOf(),
     var appStatus: List<String> = listOf(),
