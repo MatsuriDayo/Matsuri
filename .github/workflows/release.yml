@@ -33,14 +33,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Fetch Status
-        run: git submodule status library/core > libcore_status
+        run: git ls-files library/core | xargs cat | sha1sum > libcore_status
       - name: LibCore Cache
         id: cache
         uses: actions/cache@v2
         with:
           path: |
             app/libs/libcore.aar
-          key: ${{ hashFiles('.github/workflows/*', 'bin/lib/core/*', 'libcore_status') }}
+            build/v2ray-core
+          key: ${{ hashFiles('.github/workflows/*', 'buildScript/lib/core/*', 'libcore_status') }}
       - name: Install Golang
         uses: actions/setup-go@v2
         if: steps.cache.outputs.cache-hit != 'true'
@@ -65,15 +66,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Fetch Status
-        run: git submodule status 'library/shadowsocks/*' > shadowsocks_status
       - name: Shadowsocks Cache
         id: cache
         uses: actions/cache@v2
         with:
           path: |
             app/libs/shadowsocks.aar
-          key: ${{ hashFiles('.github/workflows/*', 'library/shadowsocks/build.gradle.kts', 'shadowsocks_status') }}
+          key: ${{ hashFiles('.github/workflows/*', 'library/shadowsocks/build.gradle.kts', 'buildScript/zipVersion/shadowsocks_status') }}
       - name: Install Rust
         if: steps.cache.outputs.cache-hit != 'true'
         run: ./run init action shadowsocks
@@ -99,15 +98,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Fetch Status
-        run: git submodule status 'library/shadowsocks-libev/*' > shadowsocks_libev_status
       - name: Shadowsocks Cache
         id: cache
         uses: actions/cache@v2
         with:
           path: |
             app/libs/shadowsocks-libev.aar
-          key: ${{ hashFiles('.github/workflows/*', 'library/shadowsocks-libev/build.gradle.kts', 'shadowsocks_libev_status') }}
+          key: ${{ hashFiles('.github/workflows/*', 'library/shadowsocks-libev/build.gradle.kts', 'buildScript/zipVersion/shadowsocks_libev_status') }}
       - name: Gradle cache
         uses: actions/cache@v2
         if: steps.cache.outputs.cache-hit != 'true'
@@ -134,28 +131,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Fetch Status
-        run: |
-          git submodule status 'library/shadowsocks/*' > shadowsocks_status
-          git submodule status 'library/shadowsocks-libev/*' > shadowsocks_libev_status
-          git submodule status library/core > libcore_status
+        run: git ls-files library/core | xargs cat | sha1sum > libcore_status
       - name: LibCore Cache
         uses: actions/cache@v2
         with:
           path: |
             app/libs/libcore.aar
-          key: ${{ hashFiles('.github/workflows/*', 'bin/lib/core/*', 'libcore_status') }}
+            build/v2ray-core
+          key: ${{ hashFiles('.github/workflows/*', 'buildScript/lib/core/*', 'libcore_status') }}
       - name: Shadowsocks Cache
         uses: actions/cache@v2
         with:
           path: |
             app/libs/shadowsocks.aar
-          key: ${{ hashFiles('.github/workflows/*', 'library/shadowsocks/build.gradle.kts', 'shadowsocks_status') }}
+          key: ${{ hashFiles('.github/workflows/*', 'library/shadowsocks/build.gradle.kts', 'buildScript/zipVersion/shadowsocks_status') }}
       - name: Shadowsocks (libev) Cache
         uses: actions/cache@v2
         with:
           path: |
             app/libs/shadowsocks-libev.aar
-          key: ${{ hashFiles('.github/workflows/*', 'library/shadowsocks-libev/build.gradle.kts', 'shadowsocks_libev_status') }}
+          key: ${{ hashFiles('.github/workflows/*', 'library/shadowsocks-libev/build.gradle.kts', 'buildScript/zipVersion/shadowsocks_libev_status') }}
       - name: Gradle cache
         uses: actions/cache@v2
         with:
@@ -257,28 +252,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Fetch Status
-        run: |
-          git submodule status 'library/shadowsocks/*' > shadowsocks_status
-          git submodule status 'library/shadowsocks-libev/*' > shadowsocks_libev_status
-          git submodule status library/core > libcore_status
+        run: git ls-files library/core | xargs cat | sha1sum > libcore_status
       - name: LibCore Cache
         uses: actions/cache@v2
         with:
           path: |
             app/libs/libcore.aar
-          key: ${{ hashFiles('.github/workflows/*', 'bin/lib/core/*', 'libcore_status') }}
+            build/v2ray-core
+          key: ${{ hashFiles('.github/workflows/*', 'buildScript/lib/core/*', 'libcore_status') }}
       - name: Shadowsocks Cache
         uses: actions/cache@v2
         with:
           path: |
             app/libs/shadowsocks.aar
-          key: ${{ hashFiles('.github/workflows/*', 'library/shadowsocks/build.gradle.kts', 'shadowsocks_status') }}
+          key: ${{ hashFiles('.github/workflows/*', 'library/shadowsocks/build.gradle.kts', 'buildScript/zipVersion/shadowsocks_status') }}
       - name: Shadowsocks (libev) Cache
         uses: actions/cache@v2
         with:
           path: |
             app/libs/shadowsocks-libev.aar
-          key: ${{ hashFiles('.github/workflows/*', 'library/shadowsocks-libev/build.gradle.kts', 'shadowsocks_libev_status') }}
+          key: ${{ hashFiles('.github/workflows/*', 'library/shadowsocks-libev/build.gradle.kts', 'buildScript/zipVersion/shadowsocks_libev_status') }}
       - name: Gradle cache
         uses: actions/cache@v2
         with:
