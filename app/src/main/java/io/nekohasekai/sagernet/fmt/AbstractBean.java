@@ -88,7 +88,7 @@ public abstract class AbstractBean extends Serializable implements Cloneable<Abs
         if (StrUtil.isBlank(serverAddress)) {
             serverAddress = "127.0.0.1";
         } else if (serverAddress.startsWith("[") && serverAddress.endsWith("]")) {
-            serverAddress = NetsKt.unwrapHost(serverAddress);
+            serverAddress = NetsKt.unwrapIPV6Host(serverAddress);
         }
         if (serverPort == null) {
             serverPort = 1080;

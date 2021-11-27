@@ -81,11 +81,22 @@ fun String.isIpAddress(): Boolean {
     return Validator.isIpv4(this) || Validator.isIpv6(this)
 }
 
-fun String.unwrapHost(): String {
+fun String.isIpAddressV6(): Boolean {
+    return Validator.isIpv6(this.unwrapIPV6Host())
+}
+
+// [2001:4860:4860::8888] -> 2001:4860:4860::8888
+fun String.unwrapIPV6Host(): String {
     if (startsWith("[") && endsWith("]")) {
-        return substring(1, length - 1).unwrapHost()
+        return substring(1, length - 1).unwrapIPV6Host()
     }
     return this
+}
+
+// [2001:4860:4860::8888] or 2001:4860:4860::8888 -> [2001:4860:4860::8888]
+fun String.wrapIPV6Host(): String {
+    if (!this.isIpAddressV6()) return this
+    return "[${this.unwrapIPV6Host()}]"
 }
 
 fun AbstractBean.wrapUri(): String {

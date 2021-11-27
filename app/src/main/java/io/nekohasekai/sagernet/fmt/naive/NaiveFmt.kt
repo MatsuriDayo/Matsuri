@@ -67,9 +67,12 @@ fun NaiveBean.toUri(proxyOnly: Boolean = false): String {
 
 fun NaiveBean.buildNaiveConfig(port: Int, mux: Boolean): String {
     return JSONObject().also {
+        // process ipv6
+        finalAddress = finalAddress.wrapIPV6Host()
+        serverAddress = serverAddress.wrapIPV6Host()
 
         // process httpHostName
-        if (httpHostName.isNotBlank()){
+        if (httpHostName.isNotBlank()) {
             it["host-resolver-rules"] = "MAP $httpHostName $finalAddress"
             finalAddress = httpHostName
         } else if (isChain || isChainIn) {
