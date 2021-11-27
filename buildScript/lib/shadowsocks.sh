@@ -2,7 +2,8 @@
 
 source "buildScript/init/env.sh"
 
-git submodule update --init library/shadowsocks/src/main/rust/shadowsocks-rust
+bash "buildScript/zipVersion/downloadZip.sh" library/shadowsocks/src/main/rust buildScript/zipVersion/shadowsocks_name buildScript/zipVersion/shadowsocks_status
+
 rm -rf library/shadowsocks/build/outputs/aar
 ./gradlew :library:shadowsocks:assembleRelease || exit 1
 mkdir -p app/libs
