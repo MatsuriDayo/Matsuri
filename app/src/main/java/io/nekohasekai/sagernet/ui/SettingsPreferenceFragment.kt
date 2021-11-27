@@ -61,22 +61,19 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         DataStore.initGlobal()
         addPreferencesFromResource(R.xml.global_preferences)
         val appTheme = findPreference<ColorPickerPreference>(Key.APP_THEME)!!
-        if (!isExpert) {
-            appTheme.remove()
-        } else {
-            appTheme.setOnPreferenceChangeListener { _, newTheme ->
-                if (SagerNet.started) {
-                    SagerNet.reloadService()
-                }
-                val theme = Theme.getTheme(newTheme as Int)
-                app.setTheme(theme)
-                requireActivity().apply {
-                    setTheme(theme)
-                    ActivityCompat.recreate(this)
-                }
-                true
+        appTheme.setOnPreferenceChangeListener { _, newTheme ->
+            if (SagerNet.started) {
+                SagerNet.reloadService()
             }
+            val theme = Theme.getTheme(newTheme as Int)
+            app.setTheme(theme)
+            requireActivity().apply {
+                setTheme(theme)
+                ActivityCompat.recreate(this)
+            }
+            true
         }
+
         val nightTheme = findPreference<SimpleMenuPreference>(Key.NIGHT_THEME)!!
         nightTheme.setOnPreferenceChangeListener { _, newTheme ->
             Theme.currentNightMode = (newTheme as String).toInt()

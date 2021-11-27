@@ -58,7 +58,7 @@ object Theme {
     }
 
     fun getTheme(): Int {
-        return getTheme(if (isExpert) DataStore.appTheme else defaultTheme())
+        return getTheme(DataStore.appTheme)
     }
 
     fun getTheme(theme: Int): Int {
