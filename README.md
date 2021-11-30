@@ -18,7 +18,7 @@ A proxy toolchain for Android, written in Kotlin.
 
 相较于 SagerNet 本软件的功能更少。
 
-插件与 SagerNet 通用，请从 SagerNet 下载。本软件不支持的插件无法使用。
+其他： https://nekoquq.github.io/posts/0009.html
 
 ## Documents
 
