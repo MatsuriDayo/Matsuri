@@ -140,40 +140,8 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
             }
             R.id.action_send_logcat -> {
                 val context = requireContext()
-
                 runOnDefaultDispatcher {
-                    val logFile = File.createTempFile("SagerNet ",
-                        ".log",
-                        File(app.cacheDir, "log").also { it.mkdirs() })
-
-                    var report = CrashHandler.buildReportHeader()
-
-                    report += "Logcat: \n\n"
-
-                    logFile.writeText(report)
-
-                    try {
-                        Runtime.getRuntime().exec(arrayOf("logcat", "-d")).inputStream.use(
-                            FileOutputStream(
-                                logFile, true
-                            )
-                        )
-                    } catch (e: IOException) {
-                        Logs.w(e)
-                        logFile.appendText("Export logcat error: " + CrashHandler.formatThrowable(e))
-                    }
-
-                    startActivity(
-                        Intent.createChooser(
-                            Intent(Intent.ACTION_SEND).setType("text/x-log")
-                                .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                .putExtra(
-                                    Intent.EXTRA_STREAM, FileProvider.getUriForFile(
-                                        context, BuildConfig.APPLICATION_ID + ".log", logFile
-                                    )
-                                ), context.getString(R.string.abc_shareactionprovider_share_with)
-                        )
-                    )
+                    UIUtils.sendLog(context, "Matsuri")
                 }
             }
         }

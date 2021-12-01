@@ -29,6 +29,7 @@ import io.nekohasekai.sagernet.database.preference.PublicDatabase
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.use
+import io.nekohasekai.sagernet.ui.MainActivity
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -38,46 +39,9 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
 
     @Suppress("UNNECESSARY_SAFE_CALL")
     override fun uncaughtException(thread: Thread, throwable: Throwable) {
-
-        val logFile = File.createTempFile("SagerNet Crash Report ",
-            ".log",
-            File(app.cacheDir, "log").also { it.mkdirs() }
-        )
-
-        var report = buildReportHeader()
-
-        report += "\n"
-        report += "Thread: $thread\n\n"
-
-        report += formatThrowable(throwable) + "\n\n"
-
-        report += "Logcat: \n\n"
-
-        logFile.writeText(report)
-
-        try {
-            Runtime.getRuntime().exec(arrayOf("logcat", "-d")).inputStream.use(
-                FileOutputStream(
-                    logFile, true
-                )
-            )
-        } catch (e: IOException) {
-            Logs.w(e)
-            logFile.appendText("Export logcat error: " + formatThrowable(e))
-        }
-
-        ProcessPhoenix.triggerRebirth(
-            app, Intent.createChooser(
-                Intent(Intent.ACTION_SEND).setType("text/x-log")
-                    .setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                    .putExtra(
-                        Intent.EXTRA_STREAM, FileProvider.getUriForFile(
-                            app, BuildConfig.APPLICATION_ID + ".log", logFile
-                        )
-                    ), app.getString(R.string.abc_shareactionprovider_share_with)
-            )
-        )
-
+        ProcessPhoenix.triggerRebirth(app, Intent(app, MainActivity::class.java).apply {
+            putExtra("sendLog", "Matsuri Crash")
+        })
     }
 
     fun formatThrowable(throwable: Throwable): String {

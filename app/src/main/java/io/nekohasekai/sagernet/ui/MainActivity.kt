@@ -54,6 +54,7 @@ import io.nekohasekai.sagernet.group.GroupUpdater
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.plugin.PluginManager
 import io.nekohasekai.sagernet.widget.ListHolderListener
+import kotlinx.coroutines.runBlocking
 import com.github.shadowsocks.plugin.PluginManager as ShadowsocksPluginPluginManager
 
 class MainActivity : ThemedActivity(),
@@ -66,6 +67,11 @@ class MainActivity : ThemedActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // process crash log first
+        intent?.getStringExtra("sendLog")?.apply {
+                UIUtils.sendLog(this@MainActivity, this)
+        }
 
         binding = LayoutMainBinding.inflate(layoutInflater)
         binding.fab.initProgress(binding.fabProgress)
