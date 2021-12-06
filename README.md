@@ -2,9 +2,9 @@
 
 <img align="right" style="width: 20%" src="https://avatars.githubusercontent.com/u/95122236"/>
 
-[Releases](https://github.com/MatsuriDayo/SagerNet/releases)
+[Releases](https://github.com/MatsuriDayo/Matsuri/releases)
 
-[Language: Kotlin](https://github.com/MatsuriDayo/SagerNet/search?l=kotlin)
+[Language: Kotlin](https://github.com/MatsuriDayo/Matsuri/search?l=kotlin)
 
 [License: GPL-3.0](https://www.gnu.org/licenses/gpl-3.0)
 
