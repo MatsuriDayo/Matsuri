@@ -12,7 +12,7 @@ require (
 	github.com/sagernet/sagerconnect v0.1.7
 	github.com/sirupsen/logrus v1.8.1
 	github.com/ulikunitz/xz v0.5.10
-	github.com/v2fly/v2ray-core/v4 v4.43.0
+	github.com/v2fly/v2ray-core/v4 v4.44.0
 	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
 	golang.org/x/sys v0.0.0-20211020174200-9d6173849985
 	gvisor.dev/gvisor v0.0.0
@@ -21,7 +21,7 @@ require (
 //replace gvisor.dev/gvisor v0.0.0 => ../gvisor
 replace gvisor.dev/gvisor v0.0.0 => github.com/sagernet/gvisor v0.0.0-20211022025201-1cae8baac6b3
 
-replace github.com/v2fly/v2ray-core/v4 v4.43.0 => ../../../v2ray-core
+replace github.com/v2fly/v2ray-core/v4 v4.44.0 => ../../../v2ray-core
 
 replace github.com/Dreamacro/clash v1.7.1 => github.com/sagernet/clash v1.6.5-0.20210913182617-681dd3780179
 
