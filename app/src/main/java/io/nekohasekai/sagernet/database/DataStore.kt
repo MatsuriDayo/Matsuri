@@ -25,6 +25,7 @@ import android.os.Binder
 import android.os.Build
 import androidx.preference.PreferenceDataStore
 import io.nekohasekai.sagernet.*
+import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
 import io.nekohasekai.sagernet.database.preference.PublicDatabase
 import io.nekohasekai.sagernet.database.preference.RoomPreferenceDataStore
@@ -32,6 +33,9 @@ import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.utils.DirectBoot
 
 object DataStore : OnPreferenceDataStoreChangeListener {
+
+    // share service state (and data??) in main process
+    var state: BaseService.State = BaseService.State.Idle
 
     val configurationStore = RoomPreferenceDataStore(PublicDatabase.kvPairDao)
     val profileCacheStore = RoomPreferenceDataStore(SagerDatabase.profileCacheDao)
@@ -47,7 +51,6 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     var selectedProxy by configurationStore.long(Key.PROFILE_ID)
     var currentProfile by configurationStore.long(Key.PROFILE_CURRENT)
-    var startedProfile by configurationStore.long(Key.PROFILE_STARTED)
 
     var selectedGroup by configurationStore.long(Key.PROFILE_GROUP) {
         SagerNet.currentProfile?.groupId ?: 0L

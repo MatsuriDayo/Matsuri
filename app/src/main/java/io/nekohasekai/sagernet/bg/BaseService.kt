@@ -455,7 +455,6 @@ class BaseService {
                         stopRunner(false, it.readableMessage)
                     }
                     DataStore.currentProfile = profile.id
-                    DataStore.startedProfile = profile.id
                     startProcesses()
                     data.changeState(State.Connected)
 

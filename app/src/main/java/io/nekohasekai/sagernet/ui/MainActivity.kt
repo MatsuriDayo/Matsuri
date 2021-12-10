@@ -377,6 +377,7 @@ class MainActivity : ThemedActivity(),
         binding.stats.changeState(state)
         if (msg != null) snackbar(getString(R.string.vpn_error, msg)).show()
         this.state = state
+        DataStore.state = state
 
         when (state) {
             BaseService.State.Connected, BaseService.State.Stopped -> {

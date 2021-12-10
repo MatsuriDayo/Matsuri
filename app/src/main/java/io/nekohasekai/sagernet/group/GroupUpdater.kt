@@ -22,6 +22,7 @@ package io.nekohasekai.sagernet.group
 import io.nekohasekai.sagernet.IPv6Mode
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SubscriptionType
+import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.GroupManager
 import io.nekohasekai.sagernet.database.ProxyGroup
@@ -64,7 +65,7 @@ abstract class GroupUpdater {
     protected suspend fun forceResolve(
         okHttpClient: OkHttpClient, profiles: List<AbstractBean>, groupId: Long?
     ) {
-        val connected = DataStore.startedProfile > 0
+        val connected = DataStore.state == BaseService.State.Connected
 
         var dohUrl: String? = null
         if (connected) {
@@ -180,17 +181,16 @@ abstract class GroupUpdater {
                 GroupManager.postReload(proxyGroup.id)
 
                 val subscription = proxyGroup.subscription!!
-                val connected = DataStore.startedProfile > 0
+                val connected = DataStore.state == BaseService.State.Connected
 
                 val httpClient = createProxyClient()
                 val userInterface = GroupManager.userInterface
 
-                if (userInterface != null) {
-                    if ((subscription.link?.startsWith("http://") == true || subscription.updateWhenConnectedOnly) && !connected) {
-                        if (!userInterface.confirm(app.getString(R.string.update_subscription_warning))) {
-                            finishUpdate(proxyGroup)
-                            cancel()
-                        }
+                if ((subscription.link?.startsWith("http://") == true || subscription.updateWhenConnectedOnly) && !connected) {
+                    if (userInterface == null || !userInterface.confirm(app.getString(R.string.update_subscription_warning))) {
+                        finishUpdate(proxyGroup)
+                        cancel()
+                        return@coroutineScope false
                     }
                 }
 
