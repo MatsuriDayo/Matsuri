@@ -1598,8 +1598,9 @@ class ConfigurationFragment @JvmOverloads constructor(
 
             }
 
+            var currentName = ""
             fun showCode(link: String) {
-                QRCodeDialog(link).showAllowingStateLoss(parentFragmentManager)
+                QRCodeDialog(link, currentName).showAllowingStateLoss(parentFragmentManager)
             }
 
             fun export(link: String) {
@@ -1610,6 +1611,7 @@ class ConfigurationFragment @JvmOverloads constructor(
 
             override fun onMenuItemClick(item: MenuItem): Boolean {
                 try {
+                    currentName = entity.displayName()!!
                     when (item.itemId) {
                         R.id.action_standard_qr -> showCode(entity.toLink()!!)
                         R.id.action_standard_clipboard -> export(entity.toLink()!!)

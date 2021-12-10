@@ -329,9 +329,6 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
         val subscriptionUpdateProgress = binding.subscriptionUpdateProgress
 
         override fun onMenuItemClick(item: MenuItem): Boolean {
-            fun showCode(link: String) {
-                QRCodeDialog(link).showAllowingStateLoss(parentFragmentManager)
-            }
 
             fun export(link: String) {
                 val success = SagerNet.trySetPrimaryClip(link)
@@ -341,7 +338,10 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
 
             when (item.itemId) {
                 R.id.action_universal_qr -> {
-                    showCode(proxyGroup.toUniversalLink())
+                    QRCodeDialog(
+                        proxyGroup.toUniversalLink(),
+                        proxyGroup.displayName()
+                    ).showAllowingStateLoss(parentFragmentManager)
                 }
                 R.id.action_universal_clipboard -> {
                     export(proxyGroup.toUniversalLink())
