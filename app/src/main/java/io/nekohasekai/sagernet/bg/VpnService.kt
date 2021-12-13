@@ -195,7 +195,6 @@ class VpnService : BaseVpnService(),
         val packageName = packageName
         val proxyApps = DataStore.proxyApps
         val needBypassRootUid = data.proxy!!.config.outboundTagsAll.values.any { it.ptBean != null }
-        val needIncludeSelf = data.proxy!!.config.index.any { it.chain.size > 1 }
         if (proxyApps || needBypassRootUid) {
             var bypass = DataStore.bypass
             val individual = mutableSetOf<String>()
@@ -225,7 +224,9 @@ class VpnService : BaseVpnService(),
             }
 
             individual.apply {
-                if (bypass xor needIncludeSelf) add(packageName) else remove(packageName)
+                // Allow Matsuri itself using VPN.
+                remove(packageName)
+                if (!bypass) add(packageName)
             }.forEach {
                 try {
                     if (bypass) {
@@ -239,8 +240,6 @@ class VpnService : BaseVpnService(),
                     Logs.w(ex)
                 }
             }
-        } else {
-            builder.addDisallowedApplication(packageName)
         }
 
         builder.addDnsServer(PRIVATE_VLAN4_ROUTER)

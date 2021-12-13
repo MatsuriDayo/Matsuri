@@ -75,13 +75,13 @@ fun NaiveBean.buildNaiveConfig(port: Int, mux: Boolean): String {
         if (httpHostName.isNotBlank()) {
             it["host-resolver-rules"] = "MAP $httpHostName $finalAddress"
             finalAddress = httpHostName
-        } else if (isChain || isChainIn) {
+        } else {
             if (serverAddress.isIpAddress()) {
                 // for naive, using IP as SNI name hardly happens
                 // and host-resolver-rules cannot resolve the SNI problem
                 // so do nothing
             } else {
-                it["host-resolver-rules"] = "MAP $serverAddress $LOCALHOST"
+                it["host-resolver-rules"] = "MAP $serverAddress $finalAddress"
                 finalAddress = serverAddress
             }
         }

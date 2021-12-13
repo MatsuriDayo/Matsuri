@@ -337,11 +337,11 @@ fun buildV2RayConfig(
             }
         }
 
-        // returns outbound tag (wtf, it's argument)
+        // returns outbound tag
         fun buildChain(
             chainTag: String, profileList: List<ProxyEntity>
         ): String {
-            var pastExternal = false
+            var pastExternal = false // If the past profile is external
             lateinit var pastOutbound: OutboundObject
             lateinit var currentOutbound: OutboundObject
             lateinit var pastInboundTag: String
@@ -362,9 +362,10 @@ fun buildV2RayConfig(
                 val needGlobal: Boolean
 
                 // first profile needs global, tag=proxy-global-x
-                if (index == profileList.lastIndex && !pastExternal) {
+                if (index == profileList.lastIndex) {
                     tagOut = "$TAG_AGENT-global-${proxyEntity.id}"
-                    needGlobal = true
+                    needGlobal = !pastExternal // why
+                    bean.isFirstProfile = true
                 } else {
                     // chain proxy:
                     // profile1 (in)  tag=proxy-global-x
@@ -398,7 +399,7 @@ fun buildV2RayConfig(
                     }
                 }
 
-                //TODO all use dokodemo-door
+                // Chain outbound
                 if (proxyEntity.needExternal()) {
                     val localPort = mkPort()
                     chainMap[localPort] = proxyEntity
@@ -751,12 +752,12 @@ fun buildV2RayConfig(
                     }
                 }
 
-                // chain rules for external
-                if (proxyEntity.needExternal() && index != profileList.lastIndex) {
+                // External proxy need a dokodemo-door inbound to forward the traffic
+                // For external proxy software, their traffic must goes to v2ray-core to use protected fd.
+                if (proxyEntity.needExternal()) {
                     val mappingPort = mkPort()
                     bean.finalAddress = LOCALHOST
                     bean.finalPort = mappingPort
-                    bean.isChain = true
 
                     inbounds.add(InboundObject().apply {
                         listen = LOCALHOST
@@ -772,32 +773,17 @@ fun buildV2RayConfig(
                             })
 
                         pastInboundTag = tag
-                    })
-                } else if (bean.canMapping() && proxyEntity.needExternal() && proxies.size > 1) {
-                    val mappingPort = mkPort()
-                    bean.finalAddress = LOCALHOST
-                    bean.finalPort = mappingPort
-                    if (index == profileList.lastIndex) bean.isChainIn = true
 
-                    inbounds.add(InboundObject().apply {
-                        listen = LOCALHOST
-                        port = mappingPort
-                        tag = "$chainTag-mapping-${proxyEntity.id}"
-                        protocol = "dokodemo-door"
-                        settings = LazyInboundConfigurationObject(
-                            this,
-                            DokodemoDoorInboundConfigurationObject().apply {
-                                address = bean.serverAddress
-                                network = bean.network()
-                                port = bean.serverPort
+                        // no chain rule and not outbound, so need to set to direct
+                        if (bean.isFirstProfile) {
+                            routing.rules.add(RoutingObject.RuleObject().apply {
+                                type = "field"
+                                inboundTag = listOf(tag)
+                                outboundTag = TAG_DIRECT
                             })
-                        routing.rules.add(RoutingObject.RuleObject().apply {
-                            type = "field"
-                            inboundTag = listOf(tag)
-                            outboundTag = TAG_DIRECT
-                        })
-                    })
+                        }
 
+                    })
                 }
 
                 outbounds.add(currentOutbound)
@@ -814,8 +800,7 @@ fun buildV2RayConfig(
         val tagProxy = buildChain(TAG_AGENT, proxies)
         val tagMap = mutableMapOf<Long, String>()
         extraProxies.forEach { (key, entities) ->
-            val id = key
-            tagMap[key] = buildChain("$TAG_AGENT-$id", entities)
+            tagMap[key] = buildChain("$TAG_AGENT-$key", entities)
         }
 
         val notVpn = DataStore.serviceMode != Key.MODE_VPN
@@ -986,31 +971,24 @@ fun buildV2RayConfig(
             })
         }
 
-        val bypassIP = HashSet<String>()
-        val bypassDomain = HashSet<String>()
+        // No need to "bypass IP"
+        // see buildChain()
 
-        (proxies + extraProxies.values.flatten()).filter { !it.requireBean().isChain }.forEach {
+        val directLookupDomain = HashSet<String>()
+
+        // Bypass Lookup for the first profile
+        (proxies + extraProxies.values.flatten()).filter { it.requireBean().isFirstProfile }.forEach {
             it.requireBean().apply {
                 if (!serverAddress.isIpAddress()) {
-                    bypassDomain.add("full:$serverAddress")
-                } else {
-                    bypassIP.add(serverAddress)
+                    directLookupDomain.add("full:$serverAddress")
                 }
             }
-        }
-
-        if (bypassIP.isNotEmpty()) {
-            routing.rules.add(0, RoutingObject.RuleObject().apply {
-                type = "field"
-                ip = bypassIP.toList()
-                outboundTag = TAG_DIRECT
-            })
         }
 
         if (enableDnsRouting) {
             for (bypassRule in extraRules.filter { it.isBypassRule() }) {
                 if (bypassRule.domains.isNotBlank()) {
-                    bypassDomain.addAll(bypassRule.domains.split("\n"))
+                    directLookupDomain.addAll(bypassRule.domains.split("\n"))
                 }
             }
         }
@@ -1022,17 +1000,17 @@ fun buildV2RayConfig(
             }
             "https://$address".toHttpUrlOrNull()?.apply {
                 if (!host.isIpAddress()) {
-                    bypassDomain.add("full:$host")
+                    directLookupDomain.add("full:$host")
                 }
             }
         }
 
-        if (bypassDomain.isNotEmpty()) {
+        if (directLookupDomain.isNotEmpty()) {
             dns.servers.addAll(directDNS.map {
                 DnsObject.StringOrServerObject().apply {
                     valueY = DnsObject.ServerObject().apply {
                         address = it
-                        domains = bypassDomain.toList()
+                        domains = directLookupDomain.toList()
                         skipFallback = true
                         concurrent = false
                     }
