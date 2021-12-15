@@ -17,6 +17,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	core "github.com/v2fly/v2ray-core/v4"
+	"github.com/v2fly/v2ray-core/v4/common"
 	"github.com/v2fly/v2ray-core/v4/common/buf"
 	v2rayNet "github.com/v2fly/v2ray-core/v4/common/net"
 	"github.com/v2fly/v2ray-core/v4/common/session"
@@ -117,6 +118,7 @@ func (t *Tun2ray) Close() {
 	closeIgnore(t.dev)
 }
 
+//TCP
 func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNet.Destination, conn net.Conn) {
 	inbound := &session.Inbound{
 		Source: source,
@@ -201,18 +203,34 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 		conn = &statsConn{conn, &stats.uplink, &stats.downlink}
 	}
 
-	reader, input := pipe.New()
-	link := &transport.Link{Reader: reader, Writer: connWriter{conn, buf.NewWriter(conn)}}
+	defer closeIgnore(conn)
+
+	upLinkReader, upLinkWriter := pipe.New()
+	link := &transport.Link{Reader: upLinkReader, Writer: connWriter{conn, buf.NewWriter(conn)}}
 	err := t.v2ray.dispatcher.DispatchLink(ctx, destination, link)
 	if err != nil {
 		logrus.Errorf("[TCP] dispatchLink failed: %s", err.Error())
-	} else {
-		_ = task.Run(ctx, func() error {
-			return buf.Copy(buf.NewReader(conn), input)
-		})
+		closeIgnore(link.Reader, link.Writer)
+		return
 	}
 
-	closeIgnore(conn, link.Reader, link.Writer)
+	err = task.Run(ctx, func() error {
+		// copy uplink traffic
+		return buf.Copy(buf.NewReader(conn), upLinkWriter)
+	})
+
+	// connection ends
+	if err == nil {
+		err = common.Close(link.Writer)
+		common.Close(link.Reader)
+	}
+
+	// Close/Interrupt link.Reader breaks mux?
+	if err != nil {
+		logrus.Warnf("[TCP] Error transport / closing: %s", err.Error())
+		common.Interrupt(link.Reader)
+		common.Interrupt(link.Writer)
+	}
 }
 
 type connWriter struct {
@@ -220,6 +238,7 @@ type connWriter struct {
 	buf.Writer
 }
 
+//UDP
 func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.Destination, data []byte, writeBack func([]byte, *net.UDPAddr) (int, error), closer io.Closer) {
 	natKey := source.NetAddr()
 
