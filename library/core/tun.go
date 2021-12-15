@@ -21,9 +21,7 @@ import (
 	v2rayNet "github.com/v2fly/v2ray-core/v4/common/net"
 	"github.com/v2fly/v2ray-core/v4/common/session"
 	"github.com/v2fly/v2ray-core/v4/common/task"
-	v2rayDns "github.com/v2fly/v2ray-core/v4/features/dns"
 	"github.com/v2fly/v2ray-core/v4/transport"
-	"github.com/v2fly/v2ray-core/v4/transport/internet"
 	"github.com/v2fly/v2ray-core/v4/transport/pipe"
 )
 
@@ -105,35 +103,9 @@ func NewTun2ray(fd int32, mtu int32, v2ray *V2RayInstance,
 		return nil, err
 	}
 
-	dc := v2ray.dnsClient
-
-	if c, ok := dc.(v2rayDns.ClientWithIPOption); ok {
-		if fakedns {
-			c.SetFakeDNSOption(true)
-			_, _ = dc.LookupIP("placeholder")
-		}
-		internet.UseAlternativeSystemDialer(&protectedDialer{
-			resolver: func(domain string) ([]net.IP, error) {
-				c.SetFakeDNSOption(false) // Skip FakeDNS
-				return dc.LookupIP(domain)
-			},
-		})
-	} else {
-		internet.UseAlternativeSystemDialer(&protectedDialer{
-			resolver: func(domain string) ([]net.IP, error) {
-				return dc.LookupIP(domain)
-			},
-		})
-	}
-
-	nc := &net.Resolver{PreferGo: false}
-	internet.UseAlternativeSystemDNSDialer(&protectedDialer{
-		resolver: func(domain string) ([]net.IP, error) {
-			return nc.LookupIP(context.Background(), "ip", domain)
-		},
-	})
-
+	v2ray.setupDialer(fakedns)
 	net.DefaultResolver.Dial = t.dialDNS
+
 	return t, nil
 }
 

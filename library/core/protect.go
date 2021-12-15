@@ -4,14 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
+	"os"
+	"time"
+
 	"github.com/sirupsen/logrus"
 	v2rayNet "github.com/v2fly/v2ray-core/v4/common/net"
 	"github.com/v2fly/v2ray-core/v4/features/dns"
 	"github.com/v2fly/v2ray-core/v4/transport/internet"
 	"golang.org/x/sys/unix"
-	"net"
-	"os"
-	"time"
 )
 
 var fdProtector Protector
@@ -24,6 +25,7 @@ func SetProtector(protector Protector) {
 	fdProtector = protector
 }
 
+// TODO now it is v2ray's default dialer, test for bug (VPN / non-VPN)
 type protectedDialer struct {
 	resolver func(domain string) ([]net.IP, error)
 }
@@ -69,7 +71,7 @@ func (dialer protectedDialer) dial(ctx context.Context, source v2rayNet.Address,
 		return nil, err
 	}
 
-	if !fdProtector.Protect(int32(fd)) {
+	if fdProtector != nil && !fdProtector.Protect(int32(fd)) {
 		return nil, errors.New("protect failed")
 	}
 

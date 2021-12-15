@@ -17,12 +17,14 @@ import (
 	udpProtocol "github.com/v2fly/v2ray-core/v4/common/protocol/udp"
 	"github.com/v2fly/v2ray-core/v4/common/signal"
 	"github.com/v2fly/v2ray-core/v4/features/dns"
+	v2rayDns "github.com/v2fly/v2ray-core/v4/features/dns"
 	"github.com/v2fly/v2ray-core/v4/features/extension"
 	"github.com/v2fly/v2ray-core/v4/features/routing"
 	"github.com/v2fly/v2ray-core/v4/features/stats"
 	"github.com/v2fly/v2ray-core/v4/infra/conf/serial"
 	_ "github.com/v2fly/v2ray-core/v4/main/distro/all"
 	"github.com/v2fly/v2ray-core/v4/transport"
+	"github.com/v2fly/v2ray-core/v4/transport/internet"
 )
 
 func GetV2RayVersion() string {
@@ -72,6 +74,7 @@ func (instance *V2RayInstance) LoadConfig(content string) error {
 	instance.statsManager = c.GetFeature(stats.ManagerType()).(stats.Manager)
 	instance.dispatcher = c.GetFeature(routing.DispatcherType()).(routing.Dispatcher)
 	instance.dnsClient = c.GetFeature(dns.ClientType()).(dns.Client)
+	instance.setupDialer(false)
 
 	o := c.GetFeature(extension.ObservatoryType())
 	if o != nil {
@@ -274,4 +277,38 @@ func (c *dispatcherConn) SetReadDeadline(t time.Time) error {
 
 func (c *dispatcherConn) SetWriteDeadline(t time.Time) error {
 	return nil
+}
+
+// Nekomura
+
+func (v2ray *V2RayInstance) setupDialer(fakedns bool) {
+	dc := v2ray.dnsClient
+
+	// All lookup except dnsClient -> dc.LookupIP()
+	if c, ok := dc.(v2rayDns.ClientWithIPOption); ok {
+		if fakedns {
+			c.SetFakeDNSOption(true)
+			_, _ = dc.LookupIP("placeholder")
+		}
+		internet.UseAlternativeSystemDialer(&protectedDialer{
+			resolver: func(domain string) ([]net.IP, error) {
+				c.SetFakeDNSOption(false) // Skip FakeDNS
+				return dc.LookupIP(domain)
+			},
+		})
+	} else {
+		internet.UseAlternativeSystemDialer(&protectedDialer{
+			resolver: func(domain string) ([]net.IP, error) {
+				return dc.LookupIP(domain)
+			},
+		})
+	}
+
+	// dnsClient lookup -> Android nc.LookupIP()
+	nc := &net.Resolver{PreferGo: false}
+	internet.UseAlternativeSystemDNSDialer(&protectedDialer{
+		resolver: func(domain string) ([]net.IP, error) {
+			return nc.LookupIP(context.Background(), "ip", domain)
+		},
+	})
 }
