@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -66,6 +67,17 @@ func (instance *V2RayInstance) LoadConfig(content string) error {
 	if err != nil {
 		return err
 	}
+
+	// lookup local DoH server domain before startup
+	re, _ := regexp.Compile("https\\+local://(.*)/")
+	m := re.FindStringSubmatch(content)
+	if len(m) > 1 {
+		err = SetIPForLocalDoH(m[1])
+		if err != nil {
+			return err
+		}
+	}
+
 	c, err := core.New(config)
 	if err != nil {
 		return err
@@ -281,6 +293,26 @@ func (c *dispatcherConn) SetWriteDeadline(t time.Time) error {
 
 // Nekomura
 
+var staticHosts = make(map[string][]net.IP)
+
+// call this before vpn setup
+func SetIPForLocalDoH(domain string) error {
+	if !net.ParseAddress(domain).Family().IsDomain() {
+		return nil
+	}
+
+	nc := &net.Resolver{PreferGo: false}
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
+	defer cancel()
+	ips, err := nc.LookupIP(ctx, "ip", domain)
+
+	if err == nil {
+		staticHosts[domain] = ips
+	}
+
+	return err
+}
+
 func (v2ray *V2RayInstance) setupDialer(fakedns bool) {
 	dc := v2ray.dnsClient
 
@@ -308,6 +340,10 @@ func (v2ray *V2RayInstance) setupDialer(fakedns bool) {
 	nc := &net.Resolver{PreferGo: false}
 	internet.UseAlternativeSystemDNSDialer(&protectedDialer{
 		resolver: func(domain string) ([]net.IP, error) {
+			// Stop unlimited recursion resolve of local DoH server
+			if ips, ok := staticHosts[domain]; ok && ips != nil {
+				return ips, nil
+			}
 			return nc.LookupIP(context.Background(), "ip", domain)
 		},
 	})

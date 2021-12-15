@@ -79,6 +79,7 @@
     <string name="cag_dns">DNS Settings</string>
     <string name="remote_dns">Remote DNS</string>
     <string name="direct_dns">Direct DNS</string>
+    <string name="direct_dns_use_system">Use system DNS as Direct DNS</string>
     <string name="enable_dns_routing">Enable DNS Routing</string>
     <string name="dns_routing_message">Resolve domains in bypass routes with Direct DNS. Be aware of potential DNS leaks</string>
     <string name="enable_fakedns">Enable FakeDNS</string>

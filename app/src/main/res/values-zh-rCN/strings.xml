@@ -352,6 +352,7 @@
     <string name="clear_profiles_message">您确定要清空该分组吗\?</string>
     <string name="remote_dns">远程 DNS</string>
     <string name="direct_dns">直连 DNS</string>
+    <string name="direct_dns_use_system">使用系统 DNS 作为直连 DNS</string>
     <string name="enable_dns_routing">启用 DNS 路由</string>
     <string name="dns_routing_message">使用直连 DNS 解析绕过路由中的 domains. 注意潜在的 DNS 泄漏</string>
     <string name="enable_fakedns">启用 FakeDNS</string>

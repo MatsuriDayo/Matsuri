@@ -117,7 +117,7 @@ fun buildV2RayConfig(
 
     val remoteDns = DataStore.remoteDns.split("\n")
         .mapNotNull { dns -> dns.trim().takeIf { it.isNotBlank() && !it.startsWith("#") } }
-    val directDNS = DataStore.directDns.split("\n")
+    var directDNS = DataStore.directDns.split("\n")
         .mapNotNull { dns -> dns.trim().takeIf { it.isNotBlank() && !it.startsWith("#") } }
     val enableDnsRouting = DataStore.enableDnsRouting
     val useFakeDns = DataStore.enableFakeDns
@@ -952,6 +952,11 @@ fun buildV2RayConfig(
             })
         }
 
+        // prepare direct DNS
+        if (DataStore.directDnsUseSystem && DataStore.directDnsSystem.isNotBlank()) {
+            directDNS = DataStore.directDnsSystem.split("\n")
+        }
+
         for (dns in remoteDns) {
             if (!dns.isIpAddress()) continue
             routing.rules.add(0, RoutingObject.RuleObject().apply {
@@ -1005,18 +1010,16 @@ fun buildV2RayConfig(
             }
         }
 
-        if (directLookupDomain.isNotEmpty()) {
-            dns.servers.addAll(directDNS.map {
-                DnsObject.StringOrServerObject().apply {
-                    valueY = DnsObject.ServerObject().apply {
-                        address = it
-                        domains = directLookupDomain.toList()
-                        skipFallback = true
-                        concurrent = false
-                    }
+        dns.servers.addAll(directDNS.map {
+            DnsObject.StringOrServerObject().apply {
+                valueY = DnsObject.ServerObject().apply {
+                    address = it
+                    domains = directLookupDomain.toList()
+                    skipFallback = true
+                    concurrent = false
                 }
-            })
-        }
+            }
+        })
 
         if (useFakeDns) {
             dns.servers.add(0, DnsObject.StringOrServerObject().apply {

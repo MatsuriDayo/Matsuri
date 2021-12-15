@@ -142,8 +142,16 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
 
         val remoteDns = findPreference<EditTextPreference>(Key.REMOTE_DNS)!!
         val directDns = findPreference<EditTextPreference>(Key.DIRECT_DNS)!!
+        val directDnsUseSystem = findPreference<SwitchPreference>(Key.DIRECT_DNS_USE_SYSTEM)!!
         val enableDnsRouting = findPreference<SwitchPreference>(Key.ENABLE_DNS_ROUTING)!!
         val enableFakeDns = findPreference<SwitchPreference>(Key.ENABLE_FAKEDNS)!!
+
+        directDns.isEnabled = !directDnsUseSystem.isChecked
+        directDnsUseSystem.setOnPreferenceChangeListener { _, newValue ->
+            directDns.isEnabled = !(newValue as Boolean)
+            needReload()
+            true
+        }
 
         val requireTransproxy = findPreference<SwitchPreference>(Key.REQUIRE_TRANSPROXY)!!
         val transproxyPort = findPreference<EditTextPreference>(Key.TRANSPROXY_PORT)!!

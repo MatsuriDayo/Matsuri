@@ -35,7 +35,8 @@ import io.nekohasekai.sagernet.utils.DirectBoot
 object DataStore : OnPreferenceDataStoreChangeListener {
 
     // share service state (and data??) in main process
-    var state: BaseService.State = BaseService.State.Idle
+    var state = BaseService.State.Idle
+    var directDnsSystem = ""
 
     val configurationStore = RoomPreferenceDataStore(PublicDatabase.kvPairDao)
     val profileCacheStore = RoomPreferenceDataStore(SagerDatabase.profileCacheDao)
@@ -117,6 +118,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     // https://github.com/SagerNet/SagerNet/issues/180
     var remoteDns by configurationStore.string(Key.REMOTE_DNS) { "https://1.0.0.1/dns-query" }
     var directDns by configurationStore.string(Key.DIRECT_DNS) { "https+local://223.5.5.5/dns-query" }
+    var directDnsUseSystem by configurationStore.boolean(Key.DIRECT_DNS_USE_SYSTEM)
     var enableDnsRouting by configurationStore.boolean(Key.ENABLE_DNS_ROUTING)
     var enableFakeDns by configurationStore.boolean(Key.ENABLE_FAKEDNS)
     var hosts by configurationStore.string(Key.DNS_HOSTS)
