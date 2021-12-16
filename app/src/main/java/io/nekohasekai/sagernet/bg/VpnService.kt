@@ -46,6 +46,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import libcore.AppStats
+import libcore.ErrorHandler
 import libcore.Libcore
 import libcore.TrafficListener
 import libcore.Tun2ray
@@ -193,10 +194,12 @@ class VpnService : BaseVpnService(),
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) builder.setMetered(metered)
 
         val packageName = packageName
-        val proxyApps = DataStore.proxyApps
-        val needBypassRootUid = data.proxy!!.config.outboundTagsAll.values.any { it.ptBean != null }
+        var proxyApps = DataStore.proxyApps
+        var bypass = DataStore.bypass
+        var workaroundSYSTEM = DataStore.tunImplementation == TunImplementation.SYSTEM  //猫猫问号
+        var needBypassRootUid = workaroundSYSTEM || data.proxy!!.config.outboundTagsAll.values.any { it.ptBean != null } //猫猫问号
+
         if (proxyApps || needBypassRootUid) {
-            var bypass = DataStore.bypass
             val individual = mutableSetOf<String>()
             val allApps by lazy {
                 packageManager.getInstalledPackages(PackageManager.GET_PERMISSIONS).filter {
@@ -258,7 +261,7 @@ class VpnService : BaseVpnService(),
             VPN_MTU,
             data.proxy!!.v2rayPoint,
             PRIVATE_VLAN4_ROUTER,
-            DataStore.tunImplementation == TunImplementation.GVISOR,
+            DataStore.tunImplementation,
             true,
             DataStore.trafficSniffing,
             DataStore.destinationOverride,
@@ -266,7 +269,10 @@ class VpnService : BaseVpnService(),
             DataStore.enableLog,
             data.proxy!!.config.dumpUid,
             DataStore.appTrafficStatistics,
-            DataStore.enablePcap
+            DataStore.enablePcap,
+            ErrorHandler {
+                stopRunner(false, it)
+            }
         )
     }
 

@@ -685,7 +685,7 @@
 
     <string-array name="tun_implementation">
         <item>gVisor</item>
-        <item>LwIP</item>
+        <item>System NAT</item>
     </string-array>
 
     <string-array name="hysteria_protocol">

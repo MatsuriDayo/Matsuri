@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"libcore/gvisor"
+	"libcore/nat"
 	"libcore/tun"
 	"math"
 	"net"
@@ -46,10 +47,14 @@ type Tun2ray struct {
 	pcap         bool
 }
 
+type ErrorHandler interface {
+	HandleError(err string)
+}
+
 func NewTun2ray(fd int32, mtu int32, v2ray *V2RayInstance,
-	router string, gVisor bool, hijackDns bool, sniffing bool,
+	router string, tunImpl int32, hijackDns bool, sniffing bool,
 	overrideDestination bool, fakedns bool, debug bool,
-	dumpUid bool, trafficStats bool, pcap bool) (*Tun2ray, error) {
+	dumpUid bool, trafficStats bool, pcap bool, errorHandler ErrorHandler) (*Tun2ray, error) {
 	/*	if fd < 0 {
 			return nil, errors.New("must provide a valid TUN file descriptor")
 		}
@@ -81,7 +86,7 @@ func NewTun2ray(fd int32, mtu int32, v2ray *V2RayInstance,
 		t.appStats = map[uint16]*appStats{}
 	}
 	var err error
-	if gVisor {
+	if tunImpl == 0 { // gvisor
 		var pcapFile *os.File
 		if pcap {
 			path := time.Now().UTC().String()
@@ -97,6 +102,8 @@ func NewTun2ray(fd int32, mtu int32, v2ray *V2RayInstance,
 		}
 
 		t.dev, err = gvisor.New(fd, mtu, t, gvisor.DefaultNIC, pcap, pcapFile, math.MaxUint32, ipv6Mode)
+	} else if tunImpl == 1 { // SYSTEM
+		t.dev, err = nat.New(fd, mtu, t, ipv6Mode, errorHandler.HandleError)
 	} else {
 		err = errors.New("Not supported")
 	}
@@ -125,7 +132,7 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 		Tag:    "socks",
 	}
 
-	isDns := destination.Address.String() == t.router || destination.Port == 53
+	isDns := destination.Address.String() == t.router
 	if isDns {
 		inbound.Tag = "dns-in"
 	}
