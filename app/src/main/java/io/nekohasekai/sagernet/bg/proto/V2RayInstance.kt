@@ -38,6 +38,8 @@ import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.fmt.LOCALHOST
 import io.nekohasekai.sagernet.fmt.V2rayBuildResult
 import io.nekohasekai.sagernet.fmt.buildV2RayConfig
+import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
+import io.nekohasekai.sagernet.fmt.hysteria.buildHysteriaConfig
 import io.nekohasekai.sagernet.fmt.internal.ConfigBean
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean
 import io.nekohasekai.sagernet.fmt.naive.buildNaiveConfig
@@ -143,6 +145,18 @@ abstract class V2RayInstance(
                     is PingTunnelBean -> {
                         if (needChain) error("PingTunnel is incompatible with chain")
                         initPlugin("pingtunnel-plugin")
+                    }
+                    is HysteriaBean -> {
+                        initPlugin("hysteria-plugin")
+                        pluginConfigs[port] = profile.type to bean.buildHysteriaConfig(port) {
+                            File(
+                                app.noBackupFilesDir,
+                                "hysteria_" + SystemClock.elapsedRealtime() + ".ca"
+                            ).apply {
+                                parentFile?.mkdirs()
+                                cacheFiles.add(this)
+                            }
+                        }
                     }
                     is WireGuardBean -> {
                         initPlugin("wireguard-plugin")
@@ -273,6 +287,32 @@ abstract class V2RayInstance(
                         if (bean.key.isNotBlank() && bean.key != "1") {
                             commands.add("-key")
                             commands.add(bean.key)
+                        }
+
+                        processes.start(commands)
+                    }
+                    bean is HysteriaBean -> {
+                        val configFile = File(
+                            context.noBackupFilesDir,
+                            "hysteria_" + SystemClock.elapsedRealtime() + ".json"
+                        )
+
+                        configFile.parentFile?.mkdirs()
+                        configFile.writeText(config)
+                        cacheFiles.add(configFile)
+
+                        val commands = mutableListOf(
+                            initPlugin("hysteria-plugin").path,
+                            "--no-check",
+                            "--config",
+                            configFile.absolutePath,
+                            "--log-level",
+                            if (DataStore.enableLog) "trace" else "warn",
+                            "client"
+                        )
+
+                        if (bean.protocol == HysteriaBean.PROTOCOL_FAKETCP) {
+                            commands.addAll(0, listOf("su", "-c"))
                         }
 
                         processes.start(commands)

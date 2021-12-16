@@ -32,6 +32,7 @@ import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.util.ArrayUtil;
 import io.nekohasekai.sagernet.database.SubscriptionBean;
 import io.nekohasekai.sagernet.fmt.http.HttpBean;
+import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean;
 import io.nekohasekai.sagernet.fmt.internal.ChainBean;
 import io.nekohasekai.sagernet.fmt.internal.ConfigBean;
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean;
@@ -126,6 +127,12 @@ public class KryoConverters {
     public static PingTunnelBean pingTunnelDeserialize(byte[] bytes) {
         if (ArrayUtil.isEmpty(bytes)) return null;
         return deserialize(new PingTunnelBean(), bytes);
+    }
+
+    @TypeConverter
+    public static HysteriaBean hysteriaDeserialize(byte[] bytes) {
+        if (ArrayUtil.isEmpty(bytes)) return null;
+        return deserialize(new HysteriaBean(), bytes);
     }
 
     @TypeConverter

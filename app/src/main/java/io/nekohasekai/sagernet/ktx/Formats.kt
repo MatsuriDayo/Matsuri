@@ -25,6 +25,7 @@ import io.nekohasekai.sagernet.fmt.AbstractBean
 import io.nekohasekai.sagernet.fmt.Serializable
 import io.nekohasekai.sagernet.fmt.gson.gson
 import io.nekohasekai.sagernet.fmt.http.parseHttp
+import io.nekohasekai.sagernet.fmt.hysteria.parseHysteria
 import io.nekohasekai.sagernet.fmt.naive.parseNaive
 import io.nekohasekai.sagernet.fmt.parseUniversal
 import io.nekohasekai.sagernet.fmt.pingtunnel.parsePingTunnel
@@ -66,7 +67,10 @@ fun parseProxies(text: String): List<AbstractBean> {
             }.onFailure {
                 Logs.w(it)
             }
-        } else if (startsWith("socks://") || startsWith("socks4://") || startsWith("socks4a://") || startsWith("socks5://")) {
+        } else if (startsWith("socks://") || startsWith("socks4://") || startsWith("socks4a://") || startsWith(
+                "socks5://"
+            )
+        ) {
             Logs.d("Try parse socks link: $this")
             runCatching {
                 entities.add(parseSOCKS(this))
@@ -126,6 +130,13 @@ fun parseProxies(text: String): List<AbstractBean> {
             Logs.d("Try parse pt link: $this")
             runCatching {
                 entities.add(parsePingTunnel(this))
+            }.onFailure {
+                Logs.w(it)
+            }
+        } else if (startsWith("hysteria://")) {
+            Logs.d("Try parse hysteria link: $this")
+            runCatching {
+                entities.add(parseHysteria(this))
             }.onFailure {
                 Logs.w(it)
             }

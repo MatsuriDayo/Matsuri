@@ -688,4 +688,9 @@
         <item>LwIP</item>
     </string-array>
 
+    <string-array name="hysteria_protocol">
+        <item>UDP</item>
+        <item>FakeTCP (Root Required)</item>
+    </string-array>
+
 </resources>

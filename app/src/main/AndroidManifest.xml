@@ -169,6 +169,9 @@
             android:name="io.nekohasekai.sagernet.ui.profile.PingTunnelSettingsActivity"
             android:configChanges="uiMode" />
         <activity
+            android:name="io.nekohasekai.sagernet.ui.profile.HysteriaSettingsActivity"
+            android:configChanges="uiMode" />
+        <activity
             android:name="io.nekohasekai.sagernet.ui.profile.SSHSettingsActivity"
             android:configChanges="uiMode" />
         <activity

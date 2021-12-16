@@ -36,6 +36,8 @@ import io.nekohasekai.sagernet.fmt.KryoConverters
 import io.nekohasekai.sagernet.fmt.buildV2RayConfig
 import io.nekohasekai.sagernet.fmt.http.HttpBean
 import io.nekohasekai.sagernet.fmt.http.toUri
+import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
+import io.nekohasekai.sagernet.fmt.hysteria.buildHysteriaConfig
 import io.nekohasekai.sagernet.fmt.internal.ChainBean
 import io.nekohasekai.sagernet.fmt.internal.ConfigBean
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean
@@ -88,6 +90,7 @@ data class ProxyEntity(
     var trojanGoBean: TrojanGoBean? = null,
     var naiveBean: NaiveBean? = null,
     var ptBean: PingTunnelBean? = null,
+    var hysteriaBean: HysteriaBean? = null,
     var sshBean: SSHBean? = null,
     var wgBean: WireGuardBean? = null,
     var configBean: ConfigBean? = null,
@@ -105,6 +108,7 @@ data class ProxyEntity(
         const val TYPE_TROJAN_GO = 7
         const val TYPE_NAIVE = 9
         const val TYPE_PING_TUNNEL = 10
+        const val TYPE_HYSTERIA = 15
 
         const val TYPE_SSH = 17
         const val TYPE_WG = 18
@@ -163,6 +167,7 @@ data class ProxyEntity(
             TYPE_TROJAN_GO -> trojanGoBean = KryoConverters.trojanGoDeserialize(byteArray)
             TYPE_NAIVE -> naiveBean = KryoConverters.naiveDeserialize(byteArray)
             TYPE_PING_TUNNEL -> ptBean = KryoConverters.pingTunnelDeserialize(byteArray)
+            TYPE_HYSTERIA -> hysteriaBean = KryoConverters.hysteriaDeserialize(byteArray)
             TYPE_SSH -> sshBean = KryoConverters.sshDeserialize(byteArray)
             TYPE_WG -> wgBean = KryoConverters.wireguardDeserialize(byteArray)
 
@@ -194,6 +199,7 @@ data class ProxyEntity(
         TYPE_TROJAN_GO -> "Trojan-Go"
         TYPE_NAIVE -> "Naïve"
         TYPE_PING_TUNNEL -> "PingTunnel"
+        TYPE_HYSTERIA -> "Hysteria"
         TYPE_SSH -> "SSH"
         TYPE_WG -> "WireGuard"
         TYPE_CHAIN -> chainName
@@ -215,6 +221,7 @@ data class ProxyEntity(
             TYPE_TROJAN_GO -> trojanGoBean
             TYPE_NAIVE -> naiveBean
             TYPE_PING_TUNNEL -> ptBean
+            TYPE_HYSTERIA -> hysteriaBean
             TYPE_SSH -> sshBean
             TYPE_WG -> wgBean
 
@@ -235,6 +242,7 @@ data class ProxyEntity(
     fun haveStandardLink(): Boolean {
         return when (requireBean()) {
             is ConfigBean -> false
+            is HysteriaBean -> false
             is SSHBean -> false
             is WireGuardBean -> false
             else -> true
@@ -253,6 +261,7 @@ data class ProxyEntity(
             is NaiveBean -> toUri()
             is PingTunnelBean -> toUri()
             is ConfigBean -> toUniversalLink()
+            is HysteriaBean -> toUniversalLink()
             is SSHBean -> toUniversalLink()
             is WireGuardBean -> toUniversalLink()
             else -> null
@@ -291,6 +300,10 @@ data class ProxyEntity(
                             is NaiveBean -> {
                                 append("\n\n")
                                 append(bean.buildNaiveConfig(port, needMux))
+                            }
+                            is HysteriaBean -> {
+                                append("\n\n")
+                                append(bean.buildHysteriaConfig(port, null))
                             }
                         }
                     }
@@ -397,6 +410,7 @@ data class ProxyEntity(
         trojanGoBean = null
         naiveBean = null
         ptBean = null
+        hysteriaBean = null
         sshBean = null
         wgBean = null
 
@@ -440,6 +454,10 @@ data class ProxyEntity(
                 type = TYPE_PING_TUNNEL
                 ptBean = bean
             }
+            is HysteriaBean -> {
+                type = TYPE_HYSTERIA
+                hysteriaBean = bean
+            }
             is SSHBean -> {
                 type = TYPE_SSH
                 sshBean = bean
@@ -473,6 +491,7 @@ data class ProxyEntity(
                 TYPE_TROJAN_GO -> TrojanGoSettingsActivity::class.java
                 TYPE_NAIVE -> NaiveSettingsActivity::class.java
                 TYPE_PING_TUNNEL -> PingTunnelSettingsActivity::class.java
+                TYPE_HYSTERIA -> HysteriaSettingsActivity::class.java
                 TYPE_SSH -> SSHSettingsActivity::class.java
                 TYPE_WG -> WireGuardSettingsActivity::class.java
 

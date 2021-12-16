@@ -305,6 +305,9 @@ class ConfigurationFragment @JvmOverloads constructor(
             R.id.action_new_ping_tunnel -> {
                 startActivity(Intent(requireActivity(), PingTunnelSettingsActivity::class.java))
             }
+            R.id.action_new_hysteria -> {
+                startActivity(Intent(requireActivity(), HysteriaSettingsActivity::class.java))
+            }
             R.id.action_new_ssh -> {
                 startActivity(Intent(requireActivity(), SSHSettingsActivity::class.java))
             }
