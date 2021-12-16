@@ -294,6 +294,7 @@ func (c *dispatcherConn) SetWriteDeadline(t time.Time) error {
 // Nekomura
 
 var staticHosts = make(map[string][]net.IP)
+var androidResolver = &net.Resolver{PreferGo: false}
 
 // call this before vpn setup
 func SetIPForLocalDoH(domain string) error {
@@ -301,10 +302,9 @@ func SetIPForLocalDoH(domain string) error {
 		return nil
 	}
 
-	nc := &net.Resolver{PreferGo: false}
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
 	defer cancel()
-	ips, err := nc.LookupIP(ctx, "ip", domain)
+	ips, err := androidResolver.LookupIP(ctx, "ip", domain)
 
 	if err == nil {
 		staticHosts[domain] = ips
@@ -336,15 +336,14 @@ func (v2ray *V2RayInstance) setupDialer(fakedns bool) {
 		})
 	}
 
-	// dnsClient lookup -> Android nc.LookupIP()
-	nc := &net.Resolver{PreferGo: false}
+	// dnsClient lookup -> androidResolver.LookupIP()
 	internet.UseAlternativeSystemDNSDialer(&protectedDialer{
 		resolver: func(domain string) ([]net.IP, error) {
 			// Stop unlimited recursion resolve of local DoH server
 			if ips, ok := staticHosts[domain]; ok && ips != nil {
 				return ips, nil
 			}
-			return nc.LookupIP(context.Background(), "ip", domain)
+			return androidResolver.LookupIP(context.Background(), "ip", domain)
 		},
 	})
 }

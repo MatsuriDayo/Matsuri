@@ -1,16 +1,18 @@
 package libcore
 
 import (
-	"github.com/pkg/errors"
-	"github.com/sagernet/gomobile/asset"
-	"github.com/sirupsen/logrus"
-	"github.com/v2fly/v2ray-core/v4/common/platform/filesystem"
 	"io"
 	"io/ioutil"
+	"net"
 	"os"
 	"path/filepath"
 	"strconv"
 	"sync"
+
+	"github.com/pkg/errors"
+	"github.com/sagernet/gomobile/asset"
+	"github.com/sirupsen/logrus"
+	"github.com/v2fly/v2ray-core/v4/common/platform/filesystem"
 )
 
 const (
@@ -35,6 +37,8 @@ type BoolFunc interface {
 }
 
 func InitializeV2Ray(internalAssets string, externalAssets string, prefix string, useOfficial BoolFunc) error {
+	net.DefaultResolver = androidResolver
+
 	assetsAccess = new(sync.Mutex)
 	assetsAccess.Lock()
 	extracted = make(map[string]bool)

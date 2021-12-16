@@ -72,6 +72,7 @@ dependencies {
     implementation("com.google.guava:guava:31.0.1-android")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("org.ini4j:ini4j:0.5.4")
+    implementation("io.noties.markwon:core:4.6.2")
 
     implementation("com.simplecityapps:recyclerview-fastscroll:2.0.1") {
         exclude(group = "androidx.recyclerview")
@@ -86,7 +87,6 @@ dependencies {
     implementation("androidx.room:room-ktx:2.3.0")
     implementation("com.github.MatrixDev.Roomigrant:RoomigrantLib:0.3.4")
     kapt("com.github.MatrixDev.Roomigrant:RoomigrantCompiler:0.3.4")
-
 
     implementation("editorkit:editorkit:2.0.0")
     implementation("editorkit:feature-editor:2.0.0")
