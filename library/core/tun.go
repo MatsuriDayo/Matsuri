@@ -132,7 +132,8 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 		Tag:    "socks",
 	}
 
-	isDns := destination.Address.String() == t.router
+	//TODO remove tcp dns?
+	isDns := destination.Address.String() == t.router && destination.Port.Value() == 53
 	if isDns {
 		inbound.Tag = "dns-in"
 	}
@@ -285,13 +286,31 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 		Source: source,
 		Tag:    "socks",
 	}
+
+	// change destination
+	destination2 := destination
+
+	// dns to router
 	isDns := destination.Address.String() == t.router
 
-	if !isDns && t.hijackDns {
+	// dns to all
+	if t.hijackDns {
 		dnsMsg := dns.Msg{}
 		err := dnsMsg.Unpack(data)
 		if err == nil && !dnsMsg.Response && len(dnsMsg.Question) > 0 {
-			isDns = true
+			// v2ray only support A and AAAA
+			switch dnsMsg.Question[0].Qtype {
+			case dns.TypeA:
+				isDns = true
+			case dns.TypeAAAA:
+				isDns = true
+			default:
+				if isDns {
+					// unknown dns traffic send as UDP to 1.0.0.1
+					destination2.Address = v2rayNet.ParseAddress("1.0.0.1")
+				}
+				isDns = false
+			}
 		}
 	}
 
@@ -350,7 +369,7 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 		})
 	}
 
-	conn, err := t.v2ray.dialUDP(ctx, destination, time.Minute*5)
+	conn, err := t.v2ray.dialUDP(ctx, destination, destination2, time.Minute*5)
 
 	if err != nil {
 		logrus.Errorf("[UDP] dial failed: %s", err.Error())

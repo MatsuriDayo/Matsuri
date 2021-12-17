@@ -147,15 +147,15 @@ func (instance *V2RayInstance) dialContext(ctx context.Context, destination net.
 	return buf.NewConnection(buf.ConnectionInputMulti(r.Writer), readerOpt), nil
 }
 
-func (instance *V2RayInstance) dialUDP(ctx context.Context, destination net.Destination, timeout time.Duration) (packetConn, error) {
+func (instance *V2RayInstance) dialUDP(ctx context.Context, destinationConn net.Destination, destinationV2ray net.Destination, timeout time.Duration) (packetConn, error) {
 	ctx, cancel := context.WithCancel(core.WithContext(ctx, instance.core))
-	link, err := instance.dispatcher.Dispatch(ctx, destination)
+	link, err := instance.dispatcher.Dispatch(ctx, destinationV2ray)
 	if err != nil {
 		cancel()
 		return nil, err
 	}
 	c := &dispatcherConn{
-		dest:   destination,
+		dest:   destinationConn,
 		link:   link,
 		ctx:    ctx,
 		cancel: cancel,
