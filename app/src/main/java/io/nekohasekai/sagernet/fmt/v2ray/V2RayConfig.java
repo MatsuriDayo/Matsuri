@@ -69,6 +69,7 @@ public class V2RayConfig {
             public String clientIp;
             public Boolean skipFallback;
             public List<String> domains;
+            public List<Integer> uidList; // Matsuri private
             public List<String> expectIPs;
             public Boolean concurrent;
 

@@ -806,7 +806,13 @@ fun buildV2RayConfig(
         val notVpn = DataStore.serviceMode != Key.MODE_VPN
 
         // apply user rules
+        var uidListDNSRemote = mutableListOf<Int>()
+        val uidListDNSDirect = mutableListOf<Int>()
         for (rule in extraRules) {
+            val _uidList = rule.packages.map {
+                PackageCache[it]?.takeIf { uid -> uid >= 10000 } ?: 1000
+            }.toHashSet().toList()
+
             if (rule.packages.isNotEmpty()) {
                 dumpUid = true
                 if (notVpn) {
@@ -818,9 +824,7 @@ fun buildV2RayConfig(
                 type = "field"
                 if (rule.packages.isNotEmpty()) {
                     PackageCache.awaitLoadSync()
-                    uidList = rule.packages.map {
-                        PackageCache[it]?.takeIf { uid -> uid >= 10000 } ?: 1000
-                    }.toHashSet().toList()
+                    uidList = _uidList
                 }
 
                 if (rule.domains.isNotBlank()) {
@@ -849,6 +853,14 @@ fun buildV2RayConfig(
                 }
 
                 if (rule.reverse) inboundTag = listOf("reverse-${rule.id}")
+
+                // also bypass lookup
+                // cannot use other outbound profile to lookup...
+                if (rule.outbound == -1L) {
+                    uidListDNSDirect += _uidList
+                } else if (rule.outbound == 0L) {
+                    uidListDNSRemote += _uidList
+                }
 
                 outboundTag = when (val outId = rule.outbound) {
                     0L -> tagProxy
@@ -957,6 +969,7 @@ fun buildV2RayConfig(
             directDNS = DataStore.directDnsSystem.split("\n")
         }
 
+        // routing for DNS server
         for (dns in remoteDns) {
             if (!dns.isIpAddress()) continue
             routing.rules.add(0, RoutingObject.RuleObject().apply {
@@ -978,7 +991,6 @@ fun buildV2RayConfig(
 
         // No need to "bypass IP"
         // see buildChain()
-
         val directLookupDomain = HashSet<String>()
 
         // Bypass Lookup for the first profile
@@ -1010,6 +1022,7 @@ fun buildV2RayConfig(
             }
         }
 
+        // add directDNS objects here
         dns.servers.addAll(directDNS.map {
             DnsObject.StringOrServerObject().apply {
                 valueY = DnsObject.ServerObject().apply {
@@ -1017,6 +1030,7 @@ fun buildV2RayConfig(
                     domains = directLookupDomain.toList()
                     skipFallback = true
                     concurrent = false
+                    uidList = uidListDNSDirect.toHashSet().toList()
                 }
             }
         })
@@ -1026,6 +1040,9 @@ fun buildV2RayConfig(
                 valueX = "fakedns"
             })
         }
+
+        // don't bypass
+        dns.servers[0].valueY?.uidList = uidListDNSRemote.toHashSet().toList()
 
         if (!forTest) routing.rules.add(0, RoutingObject.RuleObject().apply {
             type = "field"
