@@ -36,7 +36,6 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     // share service state (and data??) in main process
     var state = BaseService.State.Idle
-    var directDnsSystem = ""
 
     val configurationStore = RoomPreferenceDataStore(PublicDatabase.kvPairDao)
     val profileCacheStore = RoomPreferenceDataStore(SagerDatabase.profileCacheDao)

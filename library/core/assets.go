@@ -3,7 +3,6 @@ package libcore
 import (
 	"io"
 	"io/ioutil"
-	"net"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -37,7 +36,7 @@ type BoolFunc interface {
 }
 
 func InitializeV2Ray(internalAssets string, externalAssets string, prefix string, useOfficial BoolFunc) error {
-	net.DefaultResolver = androidResolver
+	setupResolvers()
 
 	assetsAccess = new(sync.Mutex)
 	assetsAccess.Lock()

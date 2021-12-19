@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"regexp"
+	gonet "net"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/v2fly/v2ray-core/v4/features/dns/localdns"
 
 	core "github.com/v2fly/v2ray-core/v4"
 	"github.com/v2fly/v2ray-core/v4/app/observatory"
@@ -66,16 +68,6 @@ func (instance *V2RayInstance) LoadConfig(content string) error {
 	}
 	if err != nil {
 		return err
-	}
-
-	// lookup local DoH server domain before startup
-	re, _ := regexp.Compile("https\\+local://(.*)/")
-	m := re.FindStringSubmatch(content)
-	if len(m) > 1 {
-		err = SetIPForLocalDoH(m[1])
-		if err != nil {
-			return err
-		}
 	}
 
 	c, err := core.New(config)
@@ -293,30 +285,62 @@ func (c *dispatcherConn) SetWriteDeadline(t time.Time) error {
 
 // Nekomura
 
-var staticHosts = make(map[string][]net.IP)
-var androidResolver = &net.Resolver{PreferGo: false}
+var androidResolver = &net.Resolver{PreferGo: false}                                  // Using Android API, lookup from current network.
+var androidUnderlyingResolver = &simpleSekaiWrapper{androidResolver: androidResolver} // Using Android API, lookup from non-VPN network.
 
-// call this before vpn setup
-func SetIPForLocalDoH(domain string) error {
-	if !net.ParseAddress(domain).Family().IsDomain() {
-		return nil
-	}
-
-	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*5))
-	defer cancel()
-	ips, err := androidResolver.LookupIP(ctx, "ip", domain)
-
-	if err == nil {
-		staticHosts[domain] = ips
-	}
-
-	return err
+type simpleSekaiWrapper struct {
+	androidResolver *net.Resolver
+	sekaiResolver   LocalResolver // passed from java (only when VPNService)
 }
 
+func (p *simpleSekaiWrapper) LookupIP(network, host string) (ret []net.IP, err error) {
+	isSekai := p.sekaiResolver != nil
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	ok := make(chan interface{})
+	defer cancel()
+
+	go func() {
+		defer func() {
+			select {
+			case <-ctx.Done():
+			default:
+				ok <- nil
+			}
+			close(ok)
+		}()
+
+		if isSekai {
+			var str string
+			str, err = p.sekaiResolver.LookupIP(network, host)
+			if err != nil {
+				return
+			}
+			// java -> go
+			ret = make([]net.IP, 0)
+			for _, ip := range strings.Split(str, ",") {
+				ret = append(ret, net.ParseIP(ip))
+			}
+		} else {
+			ret, err = p.androidResolver.LookupIP(context.Background(), network, host)
+		}
+	}()
+
+	select {
+	case <-ctx.Done():
+		return nil, errors.New(fmt.Sprintf("androidUnderlyingResolver: context cancelled! (sekai=%t)", isSekai))
+	case <-ok:
+		return
+	}
+}
+
+// setup dialer and resolver for v2ray (v2ray options)
 func (v2ray *V2RayInstance) setupDialer(fakedns bool) {
+	setupResolvers()
 	dc := v2ray.dnsClient
 
 	// All lookup except dnsClient -> dc.LookupIP()
+	// and also set protectedDialer
 	if c, ok := dc.(v2rayDns.ClientWithIPOption); ok {
 		if fakedns {
 			c.SetFakeDNSOption(true)
@@ -335,15 +359,20 @@ func (v2ray *V2RayInstance) setupDialer(fakedns bool) {
 			},
 		})
 	}
+}
 
-	// dnsClient lookup -> androidResolver.LookupIP()
+// golang: InitializeV2Ray() in assets.go
+func setupResolvers() {
+	// golang lookup -> androidResolver
+	gonet.DefaultResolver = androidResolver
+
+	// dnsClient lookup -> androidUnderlyingResolver.LookupIP()
 	internet.UseAlternativeSystemDNSDialer(&protectedDialer{
 		resolver: func(domain string) ([]net.IP, error) {
-			// Stop unlimited recursion resolve of local DoH server
-			if ips, ok := staticHosts[domain]; ok && ips != nil {
-				return ips, nil
-			}
-			return androidResolver.LookupIP(context.Background(), "ip", domain)
+			return androidUnderlyingResolver.LookupIP("ip", domain)
 		},
 	})
+
+	// "localhost" localDns lookup -> androidUnderlyingResolver.LookupIP()
+	localdns.SetLookupFunc(androidUnderlyingResolver.LookupIP)
 }

@@ -43,7 +43,6 @@ import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.fmt.TAG_SOCKS
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.plugin.PluginManager
-import io.nekohasekai.sagernet.utils.SystemDNS
 import io.nekohasekai.sagernet.utils.PackageCache
 import kotlinx.coroutines.*
 import libcore.AppStats
@@ -428,7 +427,6 @@ class BaseService {
                 return Service.START_NOT_STICKY
             }
 
-            SystemDNS.prepareSystemDNS()
             val proxy = ProxyInstance(profile, this)
             data.proxy = proxy
             BootReceiver.enabled = DataStore.persistAcrossReboot

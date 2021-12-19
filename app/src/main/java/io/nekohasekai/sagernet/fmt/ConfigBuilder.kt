@@ -964,9 +964,9 @@ fun buildV2RayConfig(
             })
         }
 
-        // prepare direct DNS
-        if (DataStore.directDnsUseSystem && DataStore.directDnsSystem.isNotBlank()) {
-            directDNS = DataStore.directDnsSystem.split("\n")
+        if (DataStore.directDnsUseSystem) {
+            // finally able to use "localDns" now...
+            directDNS = listOf("localhost")
         }
 
         // routing for DNS server

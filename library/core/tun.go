@@ -33,7 +33,6 @@ type Tun2ray struct {
 	access              sync.Mutex
 	dev                 tun.Tun
 	router              string
-	hijackDns           bool
 	v2ray               *V2RayInstance
 	udpTable            *natTable
 	fakedns             bool
@@ -47,48 +46,58 @@ type Tun2ray struct {
 	pcap         bool
 }
 
+type TunConfig struct {
+	FileDescriptor      int32
+	MTU                 int32
+	V2Ray               *V2RayInstance
+	VLAN4Router         string
+	IPv6Mode            int32
+	Implementation      int32
+	Sniffing            bool
+	OverrideDestination bool
+	FakeDNS             bool
+	Debug               bool
+	DumpUID             bool
+	TrafficStats        bool
+	PCap                bool
+	ErrorHandler        ErrorHandler
+	LocalResolver       LocalResolver
+}
+
 type ErrorHandler interface {
 	HandleError(err string)
 }
 
-func NewTun2ray(fd int32, mtu int32, v2ray *V2RayInstance,
-	router string, tunImpl int32, hijackDns bool, sniffing bool,
-	overrideDestination bool, fakedns bool, debug bool,
-	dumpUid bool, trafficStats bool, pcap bool, errorHandler ErrorHandler) (*Tun2ray, error) {
-	/*	if fd < 0 {
-			return nil, errors.New("must provide a valid TUN file descriptor")
-		}
-		// Make a copy of `fd` so that os.File's finalizer doesn't close `fd`.
-		newFd, err := unix.Dup(int(fd))
-		if err != nil {
-			return nil, err
-		}*/
+// sekaiResolver
+type LocalResolver interface {
+	LookupIP(network string, domain string) (string, error)
+}
 
-	if debug {
+func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
+	if config.Debug {
 		logrus.SetLevel(logrus.DebugLevel)
 	} else {
 		logrus.SetLevel(logrus.WarnLevel)
 	}
 	t := &Tun2ray{
-		router:              router,
-		hijackDns:           hijackDns,
-		v2ray:               v2ray,
+		router:              config.VLAN4Router,
+		v2ray:               config.V2Ray,
 		udpTable:            &natTable{},
-		sniffing:            sniffing,
-		overrideDestination: overrideDestination,
-		fakedns:             fakedns,
-		debug:               debug,
-		dumpUid:             dumpUid,
-		trafficStats:        trafficStats,
+		sniffing:            config.Sniffing,
+		overrideDestination: config.OverrideDestination,
+		fakedns:             config.FakeDNS,
+		debug:               config.Debug,
+		dumpUid:             config.DumpUID,
+		trafficStats:        config.TrafficStats,
 	}
 
-	if trafficStats {
+	if config.TrafficStats {
 		t.appStats = map[uint16]*appStats{}
 	}
 	var err error
-	if tunImpl == 0 { // gvisor
+	if config.Implementation == 0 { // gvisor
 		var pcapFile *os.File
-		if pcap {
+		if config.PCap {
 			path := time.Now().UTC().String()
 			path = externalAssetsPath + "/pcap/" + path + ".pcap"
 			err = os.MkdirAll(filepath.Dir(path), 0755)
@@ -101,9 +110,9 @@ func NewTun2ray(fd int32, mtu int32, v2ray *V2RayInstance,
 			}
 		}
 
-		t.dev, err = gvisor.New(fd, mtu, t, gvisor.DefaultNIC, pcap, pcapFile, math.MaxUint32, ipv6Mode)
-	} else if tunImpl == 1 { // SYSTEM
-		t.dev, err = nat.New(fd, mtu, t, ipv6Mode, errorHandler.HandleError)
+		t.dev, err = gvisor.New(config.FileDescriptor, config.MTU, t, gvisor.DefaultNIC, config.PCap, pcapFile, math.MaxUint32, config.IPv6Mode)
+	} else if config.Implementation == 1 { // SYSTEM
+		t.dev, err = nat.New(config.FileDescriptor, config.MTU, t, config.IPv6Mode, config.ErrorHandler.HandleError)
 	} else {
 		err = errors.New("Not supported")
 	}
@@ -111,8 +120,11 @@ func NewTun2ray(fd int32, mtu int32, v2ray *V2RayInstance,
 		return nil, err
 	}
 
-	v2ray.setupDialer(fakedns)
-	net.DefaultResolver.Dial = t.dialDNS
+	androidUnderlyingResolver.sekaiResolver = config.LocalResolver
+	config.V2Ray.setupDialer(config.FakeDNS)
+
+	// it seems safe to remove...
+	// net.DefaultResolver.Dial = t.dialDNS
 
 	return t, nil
 }
@@ -121,7 +133,7 @@ func (t *Tun2ray) Close() {
 	t.access.Lock()
 	defer t.access.Unlock()
 
-	net.DefaultResolver.Dial = nil
+	androidUnderlyingResolver.sekaiResolver = nil
 	closeIgnore(t.dev)
 }
 
@@ -228,16 +240,12 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 	})
 
 	// connection ends
-	if err == nil {
-		err = common.Close(link.Writer)
-		common.Close(link.Reader)
-	}
+	// Interrupt link.Reader breaks mux?
+	err = common.Close(link.Writer)
+	common.Close(link.Reader)
 
-	// Close/Interrupt link.Reader breaks mux?
 	if err != nil {
-		logrus.Warnf("[TCP] Error transport / closing: %s", err.Error())
-		common.Interrupt(link.Reader)
-		common.Interrupt(link.Writer)
+		logrus.Warnf("[TCP] Error closing link.Writer: %s", err.Error())
 	}
 }
 
@@ -294,23 +302,21 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 	isDns := destination.Address.String() == t.router
 
 	// dns to all
-	if t.hijackDns {
-		dnsMsg := dns.Msg{}
-		err := dnsMsg.Unpack(data)
-		if err == nil && !dnsMsg.Response && len(dnsMsg.Question) > 0 {
-			// v2ray only support A and AAAA
-			switch dnsMsg.Question[0].Qtype {
-			case dns.TypeA:
-				isDns = true
-			case dns.TypeAAAA:
-				isDns = true
-			default:
-				if isDns {
-					// unknown dns traffic send as UDP to 1.0.0.1
-					destination2.Address = v2rayNet.ParseAddress("1.0.0.1")
-				}
-				isDns = false
+	dnsMsg := dns.Msg{}
+	err := dnsMsg.Unpack(data)
+	if err == nil && !dnsMsg.Response && len(dnsMsg.Question) > 0 {
+		// v2ray only support A and AAAA
+		switch dnsMsg.Question[0].Qtype {
+		case dns.TypeA:
+			isDns = true
+		case dns.TypeAAAA:
+			isDns = true
+		default:
+			if isDns {
+				// unknown dns traffic send as UDP to 1.0.0.1
+				destination2.Address = v2rayNet.ParseAddress("1.0.0.1")
 			}
+			isDns = false
 		}
 	}
 
@@ -424,21 +430,6 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 	t.udpTable.Delete(natKey)
 }
 
-func (t *Tun2ray) dialDNS(ctx context.Context, _, _ string) (conn net.Conn, err error) {
-	conn, err = t.v2ray.dialContext(session.ContextWithInbound(ctx, &session.Inbound{
-		Tag:         "dns-in",
-		SkipFakeDNS: true,
-	}), v2rayNet.Destination{
-		Network: v2rayNet.Network_UDP,
-		Address: v2rayNet.ParseAddress("1.0.0.1"),
-		Port:    53,
-	})
-	if err == nil {
-		conn = wrappedConn{conn}
-	}
-	return
-}
-
 type wrappedConn struct {
 	net.Conn
 }
@@ -478,10 +469,4 @@ func (t *natTable) GetOrCreateLock(key string) (*sync.Cond, bool) {
 
 func (t *natTable) Delete(key string) {
 	t.mapping.Delete(key)
-}
-
-var ipv6Mode int32
-
-func SetIPv6Mode(mode int32) {
-	ipv6Mode = mode
 }
