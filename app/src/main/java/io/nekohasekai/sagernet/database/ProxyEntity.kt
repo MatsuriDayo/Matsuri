@@ -280,9 +280,10 @@ data class ProxyEntity(
                     name = "profiles.txt"
                 }
 
+                val enableMux = DataStore.enableMux
                 for ((chain) in config.index) {
                     chain.entries.forEachIndexed { index, (port, profile) ->
-                        val needMux = index == 0 && DataStore.enableMux
+                        val needMux = enableMux && (index == chain.size - 1)
                         when (val bean = profile.requireBean()) {
                             is ShadowsocksBean -> {
                                 append("\n\n")
