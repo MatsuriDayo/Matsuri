@@ -243,7 +243,7 @@ object RawUpdater : GroupUpdater() {
                                 serverPort = proxy["port"].toString().toInt()
                                 username = proxy["username"] as String?
                                 password = proxy["password"] as String?
-                                tls = proxy["tls"]?.toString() == "true"
+                                setTLS(proxy["tls"]?.toString() == "true")
                                 sni = proxy["sni"] as String?
                                 name = proxy["name"] as String?
                             })
@@ -254,7 +254,7 @@ object RawUpdater : GroupUpdater() {
                                 serverPort = proxy["port"].toString().toInt()
                                 username = proxy["username"] as String?
                                 password = proxy["password"] as String?
-                                tls = proxy["tls"]?.toString() == "true"
+                                setTLS(proxy["tls"]?.toString() == "true")
                                 sni = proxy["sni"] as String?
                                 name = proxy["name"] as String?
                             })
@@ -526,7 +526,7 @@ object RawUpdater : GroupUpdater() {
                     streamSettings?.apply {
                         when (security) {
                             "tls" -> {
-                                httpBean.tls = true
+                                httpBean.setTLS(true)
                                 tlsSettings?.serverName?.also {
                                     httpBean.sni = it
                                 }
@@ -552,7 +552,7 @@ object RawUpdater : GroupUpdater() {
                     streamSettings?.apply {
                         when (security) {
                             "tls" -> {
-                                socksBean.tls = true
+                                socksBean.setTLS(true)
                                 tlsSettings?.serverName?.also {
                                     socksBean.sni = it
                                 }

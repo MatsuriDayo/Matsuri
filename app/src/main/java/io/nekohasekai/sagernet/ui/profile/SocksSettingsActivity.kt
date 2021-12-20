@@ -21,7 +21,7 @@ package io.nekohasekai.sagernet.ui.profile
 
 import android.os.Bundle
 import androidx.preference.EditTextPreference
-import androidx.preference.SwitchPreference
+import androidx.preference.PreferenceCategory
 import com.takisoft.preferencex.PreferenceFragmentCompat
 import com.takisoft.preferencex.SimpleMenuPreference
 import io.nekohasekai.sagernet.Key
@@ -31,6 +31,8 @@ import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
 
 class SocksSettingsActivity : ProfileSettingsActivity<SOCKSBean>() {
+
+    lateinit var securityCategory: PreferenceCategory
 
     override fun createEntity() = SOCKSBean()
 
@@ -42,8 +44,13 @@ class SocksSettingsActivity : ProfileSettingsActivity<SOCKSBean>() {
         DataStore.serverProtocolVersion = protocol
         DataStore.serverUsername = username
         DataStore.serverPassword = password
-        DataStore.serverTLS = tls
+
+        DataStore.serverSecurity = security
         DataStore.serverSNI = sni
+        DataStore.serverALPN = alpn
+        DataStore.serverCertificates = certificates
+        DataStore.serverPinnedCertificateChain = pinnedPeerCertificateChainSha256
+        DataStore.serverAllowInsecure = allowInsecure
     }
 
     override fun SOCKSBean.serialize() {
@@ -54,8 +61,13 @@ class SocksSettingsActivity : ProfileSettingsActivity<SOCKSBean>() {
         protocol = DataStore.serverProtocolVersion
         username = DataStore.serverUsername
         password = DataStore.serverPassword
-        tls = DataStore.serverTLS
+
+        security = DataStore.serverSecurity
         sni = DataStore.serverSNI
+        alpn = DataStore.serverALPN
+        certificates = DataStore.serverCertificates
+        pinnedPeerCertificateChainSha256 = DataStore.serverPinnedCertificateChain
+        allowInsecure = DataStore.serverAllowInsecure
     }
 
     override fun PreferenceFragmentCompat.createPreferences(
@@ -70,13 +82,9 @@ class SocksSettingsActivity : ProfileSettingsActivity<SOCKSBean>() {
             summaryProvider = PasswordSummaryProvider
         }
         val protocol = findPreference<SimpleMenuPreference>(Key.SERVER_PROTOCOL)!!
-        val useTls = findPreference<SwitchPreference>(Key.SERVER_TLS)!!
-        val sni = findPreference<EditTextPreference>(Key.SERVER_SNI)!!
 
         fun updateProtocol(version: Int) {
             password.isVisible = version == SOCKSBean.PROTOCOL_SOCKS5
-            useTls.isVisible = version == SOCKSBean.PROTOCOL_SOCKS5
-            sni.isVisible = version == SOCKSBean.PROTOCOL_SOCKS5
         }
 
         updateProtocol(DataStore.serverProtocolVersion)
@@ -84,6 +92,18 @@ class SocksSettingsActivity : ProfileSettingsActivity<SOCKSBean>() {
             updateProtocol((newValue as String).toInt())
             true
         }
+
+        // tls settings
+        securityCategory = findPreference(Key.SERVER_SECURITY_CATEGORY)!!
+        findPreference<SimpleMenuPreference>(Key.SERVER_SECURITY)!!.setOnPreferenceChangeListener { _, newValue ->
+            updateTle(newValue as String)
+            true
+        }
+        updateTle(DataStore.serverSecurity)
     }
 
+    fun updateTle(tle: String) {
+        val isTLS = tle == "tls"
+        securityCategory.isVisible = isTLS
+    }
 }

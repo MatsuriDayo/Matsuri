@@ -20,10 +20,7 @@
 package io.nekohasekai.sagernet.fmt.socks
 
 import cn.hutool.core.codec.Base64
-import io.nekohasekai.sagernet.ktx.decodeBase64UrlSafe
-import io.nekohasekai.sagernet.ktx.toLink
-import io.nekohasekai.sagernet.ktx.unUrlSafe
-import io.nekohasekai.sagernet.ktx.urlSafe
+import io.nekohasekai.sagernet.ktx.*
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
@@ -60,7 +57,7 @@ fun parseSOCKS(link: String): SOCKSBean {
             username = url.username
             password = url.password
             name = url.fragment
-            tls = url.queryParameter("tls") == "true"
+            setTLS(url.queryParameter("tls") == "true")
             sni = url.queryParameter("sni")
         }
     }
@@ -71,7 +68,7 @@ fun SOCKSBean.toUri(): String {
     val builder = HttpUrl.Builder().scheme("http").host(serverAddress).port(serverPort)
     if (!username.isNullOrBlank()) builder.username(username)
     if (!password.isNullOrBlank()) builder.password(password)
-    if (tls) {
+    if (isTLS()) {
         builder.addQueryParameter("tls", "true")
         if (sni.isNotBlank()) {
             builder.addQueryParameter("sni", sni)

@@ -19,7 +19,7 @@
 
 package io.nekohasekai.sagernet.fmt.http
 
-import io.nekohasekai.sagernet.ktx.urlSafe
+import io.nekohasekai.sagernet.ktx.*
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
@@ -35,13 +35,13 @@ fun parseHttp(link: String): HttpBean {
         password = httpUrl.password
         sni = httpUrl.queryParameter("sni")
         name = httpUrl.fragment
-        tls = httpUrl.scheme == "https"
+        setTLS(httpUrl.scheme == "https")
     }
 }
 
 fun HttpBean.toUri(): String {
     val builder = HttpUrl.Builder()
-        .scheme(if (tls) "https" else "http")
+        .scheme(if (isTLS()) "https" else "http")
         .host(serverAddress)
         .port(serverPort)
 

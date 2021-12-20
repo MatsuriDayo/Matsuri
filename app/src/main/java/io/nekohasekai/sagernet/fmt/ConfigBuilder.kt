@@ -416,114 +416,75 @@ fun buildV2RayConfig(
                                         })
                             })
                     }
-                } else {
+                } else { // internal outbound
                     currentOutbound.apply {
                         val keepAliveInterval = DataStore.tcpKeepAliveInterval
                         val needKeepAliveInterval = keepAliveInterval !in intArrayOf(0, 15)
-
-                        if (bean is SOCKSBean) {
-                            protocol = "socks"
-                            settings = LazyOutboundConfigurationObject(
-                                this,
-                                SocksOutboundConfigurationObject().apply {
-                                    servers = listOf(
-                                        SocksOutboundConfigurationObject.ServerObject()
-                                            .apply {
-                                                address = bean.serverAddress
-                                                port = bean.serverPort
-                                                if (!bean.username.isNullOrBlank()) {
-                                                    users = listOf(SocksOutboundConfigurationObject.ServerObject.UserObject()
-                                                        .apply {
-                                                            user = bean.username
-                                                            pass = bean.password
-                                                        })
-                                                }
-                                            })
-                                    version = bean.protocolVersionName()
-                                })
-                            if (bean.tls || needKeepAliveInterval) {
-                                streamSettings = StreamSettingsObject().apply {
-                                    network = "tcp"
-                                    if (bean.tls) {
-                                        security = "tls"
-                                        tlsSettings = TLSObject().apply {
-                                            if (bean.sni.isNotBlank()) {
-                                                serverName = bean.sni
-                                            }
-                                        }
-                                    }
-                                    if (needKeepAliveInterval) {
-                                        sockopt = StreamSettingsObject.SockoptObject().apply {
-                                            tcpKeepAliveInterval = keepAliveInterval
-                                        }
-                                    }
+                        if (bean is StandardV2RayBean) {
+                            when (bean) {
+                                is SOCKSBean -> {
+                                    protocol = "socks"
+                                    settings = LazyOutboundConfigurationObject(
+                                        this, SocksOutboundConfigurationObject().apply {
+                                            servers = listOf(
+                                                SocksOutboundConfigurationObject.ServerObject().apply {
+                                                        address = bean.serverAddress
+                                                        port = bean.serverPort
+                                                        if (!bean.username.isNullOrBlank()) {
+                                                            users = listOf(SocksOutboundConfigurationObject.ServerObject.UserObject()
+                                                                .apply {
+                                                                    user = bean.username
+                                                                    pass = bean.password
+                                                                })
+                                                        }
+                                                    })
+                                            version = bean.protocolVersionName()
+                                        })
                                 }
-                            }
-                        } else if (bean is HttpBean) {
-                            protocol = "http"
-                            settings = LazyOutboundConfigurationObject(
-                                this,
-                                HTTPOutboundConfigurationObject().apply {
-                                    servers = listOf(
-                                        HTTPOutboundConfigurationObject.ServerObject()
-                                            .apply {
-                                                address = bean.serverAddress
-                                                port = bean.serverPort
-                                                if (!bean.username.isNullOrBlank()) {
-                                                    users = listOf(HTTPInboundConfigurationObject.AccountObject()
-                                                        .apply {
-                                                            user = bean.username
-                                                            pass = bean.password
-                                                        })
-                                                }
-                                            })
-                                })
-                            if (bean.tls || needKeepAliveInterval) {
-                                streamSettings = StreamSettingsObject().apply {
-                                    network = "tcp"
-                                    if (bean.tls) {
-                                        security = "tls"
-                                        tlsSettings = TLSObject().apply {
-                                            if (bean.sni.isNotBlank()) {
-                                                serverName = bean.sni
-                                            }
-                                        }
-                                    }
-                                    if (needKeepAliveInterval) {
-                                        sockopt = StreamSettingsObject.SockoptObject().apply {
-                                            tcpKeepAliveInterval = keepAliveInterval
-                                        }
-                                    }
+                                is HttpBean -> {
+                                    protocol = "http"
+                                    settings = LazyOutboundConfigurationObject(
+                                        this, HTTPOutboundConfigurationObject().apply {
+                                            servers = listOf(
+                                                HTTPOutboundConfigurationObject.ServerObject().apply {
+                                                        address = bean.serverAddress
+                                                        port = bean.serverPort
+                                                        if (!bean.username.isNullOrBlank()) {
+                                                            users = listOf(HTTPInboundConfigurationObject.AccountObject()
+                                                                .apply {
+                                                                    user = bean.username
+                                                                    pass = bean.password
+                                                                })
+                                                        }
+                                                    })
+                                        })
                                 }
-                            }
-                        } else if (bean is StandardV2RayBean) {
-                            if (bean is VMessBean) {
-                                protocol = "vmess"
-                                settings = LazyOutboundConfigurationObject(
-                                    this,
-                                    VMessOutboundConfigurationObject().apply {
-                                        vnext = listOf(
-                                            VMessOutboundConfigurationObject.ServerObject()
-                                                .apply {
-                                                    address = bean.serverAddress
-                                                    port = bean.serverPort
-                                                    users = listOf(VMessOutboundConfigurationObject.ServerObject.UserObject()
-                                                        .apply {
-                                                            id = bean.uuidOrGenerate()
-                                                            alterId = bean.alterId
-                                                            security = bean.encryption.takeIf { it.isNotBlank() }
-                                                                ?: "auto"
-                                                            experimental = ""
-                                                            if (bean.experimentalAuthenticatedLength) {
-                                                                experimental += "AuthenticatedLength"
-                                                            }
-                                                            if (bean.experimentalNoTerminationSignal) {
-                                                                experimental += "NoTerminationSignal"
-                                                            }
-                                                            if (experimental.isBlank()) experimental = null
-                                                        })
-                                                })
-                                    })
+                                is VMessBean -> {
+                                    protocol = "vmess"
+                                    settings = LazyOutboundConfigurationObject(
+                                        this, VMessOutboundConfigurationObject().apply {
+                                            vnext = listOf(
+                                                VMessOutboundConfigurationObject.ServerObject().apply {
+                                                        address = bean.serverAddress
+                                                        port = bean.serverPort
+                                                        users = listOf(VMessOutboundConfigurationObject.ServerObject.UserObject()
+                                                            .apply {
+                                                                id = bean.uuidOrGenerate()
+                                                                alterId = bean.alterId
+                                                                security = bean.encryption.takeIf { it.isNotBlank() }
+                                                                    ?: "auto"
+                                                                experimental = ""
+                                                                if (bean.experimentalAuthenticatedLength) {
+                                                                    experimental += "AuthenticatedLength"
+                                                                }
+                                                                if (bean.experimentalNoTerminationSignal) {
+                                                                    experimental += "NoTerminationSignal"
+                                                                }
+                                                                if (experimental.isBlank()) experimental = null
+                                                            })
+                                                    })
+                                        })
+                                }
                             }
 
                             streamSettings = StreamSettingsObject().apply {

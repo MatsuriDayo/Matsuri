@@ -64,6 +64,7 @@ import io.nekohasekai.sagernet.fmt.v2ray.toUri
 import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
+import io.nekohasekai.sagernet.ktx.isTLS
 import io.nekohasekai.sagernet.ktx.ssSecureList
 import io.nekohasekai.sagernet.ui.profile.*
 
@@ -191,7 +192,7 @@ data class ProxyEntity(
 
     fun displayType() = when (type) {
         TYPE_SOCKS -> socksBean!!.protocolName()
-        TYPE_HTTP -> if (httpBean!!.tls) "HTTPS" else "HTTP"
+        TYPE_HTTP -> if (httpBean!!.isTLS()) "HTTPS" else "HTTP"
         TYPE_SS -> "Shadowsocks"
         TYPE_SSR -> "ShadowsocksR"
         TYPE_VMESS -> "VMess"

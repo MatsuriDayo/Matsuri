@@ -32,6 +32,7 @@ import io.nekohasekai.sagernet.fmt.internal.ConfigBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean
 import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
+import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
 import io.nekohasekai.sagernet.group.RawUpdater
 
@@ -59,9 +60,9 @@ fun AbstractBean.isInsecure(): ValidateResult {
     } else if (this is ShadowsocksRBean) {
         return ResultDeprecated(R.raw.shadowsocksr)
     } else if (this is HttpBean) {
-        if (!tls) return ResultInsecure(R.raw.not_encrypted)
+        if (!isTLS()) return ResultInsecure(R.raw.not_encrypted)
     } else if (this is SOCKSBean) {
-        if (!tls) return ResultInsecure(R.raw.not_encrypted)
+        if (!isTLS()) return ResultInsecure(R.raw.not_encrypted)
     } else if (this is VMessBean) {
         if (security in arrayOf("", "none")) {
             if (encryption in arrayOf("none", "zero")) {
@@ -87,4 +88,14 @@ fun AbstractBean.isInsecure(): ValidateResult {
         if (allowInsecure) return ResultInsecure(R.raw.insecure)
     }
     return ResultSecure
+}
+
+//nekomura
+
+fun StandardV2RayBean.isTLS() : Boolean {
+    return security == "tls"
+}
+
+fun StandardV2RayBean.setTLS(boolean: Boolean) {
+    security = if (boolean) "tls" else ""
 }

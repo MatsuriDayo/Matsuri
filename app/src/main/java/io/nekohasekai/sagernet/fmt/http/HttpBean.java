@@ -26,33 +26,19 @@ import com.esotericsoftware.kryo.io.ByteBufferOutput;
 
 import org.jetbrains.annotations.NotNull;
 
-import io.nekohasekai.sagernet.fmt.AbstractBean;
 import io.nekohasekai.sagernet.fmt.KryoConverters;
+import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean;
 
-public class HttpBean extends AbstractBean {
+public class HttpBean extends StandardV2RayBean {
 
     public String username;
     public String password;
-
-    public boolean tls;
-
-    // The same as StandardV2RayBean
-    public String sni;
-    public String alpn;
-    public String certificates;
-    public String pinnedPeerCertificateChainSha256;
-    public Boolean allowInsecure;
 
     @Override
     public void initializeDefaultValues() {
         super.initializeDefaultValues();
         if (username == null) username = "";
         if (password == null) password = "";
-        if (sni == null) sni = "";
-        if (alpn == null) alpn = "";
-        if (certificates == null) certificates = "";
-        if (pinnedPeerCertificateChainSha256 == null) pinnedPeerCertificateChainSha256 = "";
-        if (allowInsecure == null) allowInsecure = false;
     }
 
     @Override
@@ -61,14 +47,6 @@ public class HttpBean extends AbstractBean {
         super.serialize(output);
         output.writeString(username);
         output.writeString(password);
-        output.writeBoolean(tls);
-        if (tls) {
-            output.writeString(sni);
-            output.writeString(alpn);
-            output.writeString(certificates);
-            output.writeString(pinnedPeerCertificateChainSha256);
-            output.writeBoolean(allowInsecure);
-        }
     }
 
     @Override
@@ -77,14 +55,6 @@ public class HttpBean extends AbstractBean {
         super.deserialize(input);
         username = input.readString();
         password = input.readString();
-        tls = input.readBoolean();
-        if (tls) {
-            sni = input.readString();
-            alpn = input.readString();
-            certificates = input.readString();
-            pinnedPeerCertificateChainSha256 = input.readString();
-            allowInsecure = input.readBoolean();
-        }
     }
 
     @NotNull
