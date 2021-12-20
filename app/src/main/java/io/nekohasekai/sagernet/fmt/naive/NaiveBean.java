@@ -38,7 +38,7 @@ public class NaiveBean extends AbstractBean {
     public String username;
     public String password;
     public String extraHeaders;
-    public String httpHostName;
+    public String sni;
     public String certificates;
     public Integer insecureConcurrency;
 
@@ -51,7 +51,7 @@ public class NaiveBean extends AbstractBean {
         if (password == null) password = "";
         if (extraHeaders == null) extraHeaders = "";
         if (certificates == null) certificates = "";
-        if (httpHostName == null) httpHostName = "";
+        if (sni == null) sni = "";
         if (insecureConcurrency == null) insecureConcurrency = 0;
     }
 
@@ -62,9 +62,10 @@ public class NaiveBean extends AbstractBean {
         output.writeString(proto);
         output.writeString(username);
         output.writeString(password);
+        // note: sequence is different from SagerNet,,,
         output.writeString(extraHeaders);
         output.writeString(certificates);
-        output.writeString(httpHostName);
+        output.writeString(sni);
         output.writeInt(insecureConcurrency);
     }
 
@@ -78,7 +79,7 @@ public class NaiveBean extends AbstractBean {
         extraHeaders = input.readString();
         if (version >= 2) {
             certificates = input.readString();
-            httpHostName = input.readString();
+            sni = input.readString();
         }
         if (version >= 1) {
             insecureConcurrency = input.readInt();

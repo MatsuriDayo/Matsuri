@@ -39,9 +39,9 @@ class NaiveSettingsActivity : ProfileSettingsActivity<NaiveBean>() {
         DataStore.serverUsername = username
         DataStore.serverPassword = password
         DataStore.serverProtocol = proto
-        DataStore.serverHeaders = extraHeaders
-        DataStore.serverHost = httpHostName
+        DataStore.serverSNI = sni
         DataStore.serverCertificates = certificates
+        DataStore.serverHeaders = extraHeaders
         DataStore.serverInsecureConcurrency = insecureConcurrency
     }
 
@@ -52,9 +52,9 @@ class NaiveSettingsActivity : ProfileSettingsActivity<NaiveBean>() {
         username = DataStore.serverUsername
         password = DataStore.serverPassword
         proto = DataStore.serverProtocol
-        extraHeaders = DataStore.serverHeaders.replace("\r\n", "\n")
-        httpHostName = DataStore.serverHost
+        sni = DataStore.serverSNI
         certificates = DataStore.serverCertificates
+        extraHeaders = DataStore.serverHeaders.replace("\r\n", "\n")
         insecureConcurrency = DataStore.serverInsecureConcurrency
     }
 
@@ -68,6 +68,9 @@ class NaiveSettingsActivity : ProfileSettingsActivity<NaiveBean>() {
         }
         findPreference<EditTextPreference>(Key.SERVER_PASSWORD)!!.apply {
             summaryProvider = PasswordSummaryProvider
+        }
+        findPreference<EditTextPreference>(Key.SERVER_INSECURE_CONCURRENCY)!!.apply {
+            setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
         }
     }
 

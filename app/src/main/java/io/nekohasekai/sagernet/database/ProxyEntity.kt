@@ -300,7 +300,7 @@ data class ProxyEntity(
                             }
                             is NaiveBean -> {
                                 append("\n\n")
-                                append(bean.buildNaiveConfig(port, needMux))
+                                append(bean.buildNaiveConfig(port))
                             }
                             is HysteriaBean -> {
                                 append("\n\n")

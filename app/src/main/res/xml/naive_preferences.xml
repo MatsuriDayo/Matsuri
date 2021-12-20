@@ -44,9 +44,9 @@
             app:title="@string/extra_headers"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
-            app:icon="@drawable/ic_baseline_airplanemode_active_24"
-            app:key="serverHost"
-            app:title="@string/http_host"
+            app:icon="@drawable/ic_action_copyright"
+            app:key="serverSNI"
+            app:title="@string/sni"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
             app:icon="@drawable/ic_baseline_vpn_key_24"

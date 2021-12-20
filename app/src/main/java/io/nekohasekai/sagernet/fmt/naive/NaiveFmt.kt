@@ -36,6 +36,8 @@ fun parseNaive(link: String): NaiveBean {
         serverPort = url.port
         username = url.username
         password = url.password
+        sni = url.queryParameter("sni")
+        certificates = url.queryParameter("cert")
         extraHeaders = url.queryParameter("extra-headers")?.unUrlSafe()?.replace("\r\n", "\n")
         insecureConcurrency = url.queryParameter("insecure-concurrency")?.toIntOrNull()
         name = url.fragment
@@ -52,6 +54,12 @@ fun NaiveBean.toUri(proxyOnly: Boolean = false): String {
         }
     }
     if (!proxyOnly) {
+        if (sni.isNotBlank()) {
+            builder.addQueryParameter("sni", sni)
+        }
+        if (certificates.isNotBlank()) {
+            builder.addQueryParameter("cert", certificates)
+        }
         if (extraHeaders.isNotBlank()) {
             builder.addQueryParameter("extra-headers", extraHeaders)
         }
@@ -65,16 +73,16 @@ fun NaiveBean.toUri(proxyOnly: Boolean = false): String {
     return builder.toLink(if (proxyOnly) proto else "naive+$proto", false)
 }
 
-fun NaiveBean.buildNaiveConfig(port: Int, mux: Boolean): String {
+fun NaiveBean.buildNaiveConfig(port: Int): String {
     return JSONObject().also {
         // process ipv6
         finalAddress = finalAddress.wrapIPV6Host()
         serverAddress = serverAddress.wrapIPV6Host()
 
-        // process httpHostName
-        if (httpHostName.isNotBlank()) {
-            it["host-resolver-rules"] = "MAP $httpHostName $finalAddress"
-            finalAddress = httpHostName
+        // process sni
+        if (sni.isNotBlank()) {
+            it["host-resolver-rules"] = "MAP $sni $finalAddress"
+            finalAddress = sni
         } else {
             if (serverAddress.isIpAddress()) {
                 // for naive, using IP as SNI name hardly happens
@@ -93,9 +101,6 @@ fun NaiveBean.buildNaiveConfig(port: Int, mux: Boolean): String {
         }
         if (DataStore.enableLog) {
             it["log"] = ""
-        }
-        if (mux) {
-            it["concurrency"] = DataStore.muxConcurrency
         }
         if (insecureConcurrency > 0) {
             it["insecure-concurrency"] = insecureConcurrency
