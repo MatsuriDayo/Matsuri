@@ -24,6 +24,8 @@
         <item>@color/material_grey_500</item>
         <item>@color/material_blue_grey_500</item>
         <item>@color/material_light_black</item>
+
+        <item>@color/color_pink_ssr</item>
     </integer-array>
 
     <color name="material_amber_100">#FFECB3</color>
@@ -282,5 +284,6 @@
 
     <color name="fab_color_progress">@color/material_light_black</color>
 
+    <color name="color_pink_ssr">#fb7299</color>
 
 </resources>

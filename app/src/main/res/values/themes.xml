@@ -131,6 +131,14 @@
         <item name="primaryOrTextPrimary">?android:textColorPrimary</item>
     </style>
 
+    <style name="Theme.SagerNet.Pink_SSR">
+        <item name="colorPrimary">@color/color_pink_ssr</item>
+        <item name="colorPrimaryDark">@color/color_pink_ssr</item>
+        <item name="colorAccent">@color/color_pink_ssr</item>
+        <item name="colorMaterial100">@color/color_pink_ssr</item>
+        <item name="colorMaterial300">@color/color_pink_ssr</item>
+    </style>
+
     <style name="Theme.SagerNet.Amber">
         <item name="colorPrimary">@color/material_amber_500</item>
         <item name="colorPrimaryDark">@color/material_amber_700</item>
