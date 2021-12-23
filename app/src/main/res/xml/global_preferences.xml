@@ -186,7 +186,6 @@
             app:title="@string/direct_dns"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreference
-            app:icon="@drawable/ic_baseline_camera_24"
             app:key="directDnsUseSystem"
             app:title="@string/direct_dns_use_system" />
         <EditTextPreference

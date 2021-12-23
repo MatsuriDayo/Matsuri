@@ -123,9 +123,6 @@ func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
 	androidUnderlyingResolver.sekaiResolver = config.LocalResolver
 	config.V2Ray.setupDialer(config.FakeDNS)
 
-	// it seems safe to remove...
-	// net.DefaultResolver.Dial = t.dialDNS
-
 	return t, nil
 }
 
@@ -144,7 +141,6 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 		Tag:    "socks",
 	}
 
-	//TODO remove tcp dns?
 	isDns := destination.Address.String() == t.router && destination.Port.Value() == 53
 	if isDns {
 		inbound.Tag = "dns-in"

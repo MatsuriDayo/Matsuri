@@ -199,8 +199,8 @@ class VpnService : BaseVpnService(),
         val packageName = packageName
         var proxyApps = DataStore.proxyApps
         var bypass = DataStore.bypass
-        var workaroundSYSTEM = DataStore.tunImplementation == TunImplementation.SYSTEM  //猫猫问号
-        var needBypassRootUid = workaroundSYSTEM || data.proxy!!.config.outboundTagsAll.values.any { it.ptBean != null } //猫猫问号
+        var workaroundSYSTEM = DataStore.tunImplementation == TunImplementation.SYSTEM
+        var needBypassRootUid = workaroundSYSTEM || data.proxy!!.config.outboundTagsAll.values.any { it.ptBean != null }
 
         if (proxyApps || needBypassRootUid) {
             val individual = mutableSetOf<String>()

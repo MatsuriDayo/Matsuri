@@ -41,7 +41,7 @@ data class RuleEntity(
     var protocol: String = "",
     var attrs: String = "",
     var outbound: Long = 0,
-    var reverse: Boolean = false, //TODO remove
+    var reverse: Boolean = false,
     var redirect: String = "",
     var packages: List<String> = listOf(),
 ) : Parcelable {

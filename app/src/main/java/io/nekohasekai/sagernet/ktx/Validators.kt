@@ -90,8 +90,6 @@ fun AbstractBean.isInsecure(): ValidateResult {
     return ResultSecure
 }
 
-//nekomura
-
 fun StandardV2RayBean.isTLS() : Boolean {
     return security == "tls"
 }
