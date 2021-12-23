@@ -31,6 +31,7 @@ import android.view.MenuItem
 import android.widget.Toast
 import androidx.annotation.IdRes
 import androidx.core.view.ViewCompat
+import androidx.core.view.get
 import androidx.preference.PreferenceDataStore
 import cn.hutool.core.codec.Base64Decoder
 import cn.hutool.core.util.ZipUtil
@@ -67,11 +68,6 @@ class MainActivity : ThemedActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // process crash log first
-        intent?.getStringExtra("sendLog")?.apply {
-                UIUtils.sendLog(this@MainActivity, this)
-        }
 
         binding = LayoutMainBinding.inflate(layoutInflater)
         binding.fab.initProgress(binding.fabProgress)

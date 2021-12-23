@@ -29,6 +29,7 @@ import io.nekohasekai.sagernet.database.preference.PublicDatabase
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.use
+import io.nekohasekai.sagernet.ui.BlankActivity
 import io.nekohasekai.sagernet.ui.MainActivity
 import java.io.*
 import java.text.SimpleDateFormat
@@ -39,7 +40,7 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
 
     @Suppress("UNNECESSARY_SAFE_CALL")
     override fun uncaughtException(thread: Thread, throwable: Throwable) {
-        ProcessPhoenix.triggerRebirth(app, Intent(app, MainActivity::class.java).apply {
+        ProcessPhoenix.triggerRebirth(app, Intent(app, BlankActivity::class.java).apply {
             putExtra("sendLog", "Matsuri Crash")
         })
     }

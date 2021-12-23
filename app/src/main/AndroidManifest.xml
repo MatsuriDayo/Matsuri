@@ -68,6 +68,10 @@
             android:resource="@xml/shortcuts" />
 
         <activity
+            android:name="io.nekohasekai.sagernet.ui.BlankActivity"
+            android:configChanges="uiMode" />
+
+        <activity
             android:name="io.nekohasekai.sagernet.ui.MainActivity"
             android:configChanges="uiMode"
             android:exported="true"
