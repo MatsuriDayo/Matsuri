@@ -361,7 +361,6 @@ func (v2ray *V2RayInstance) setupDialer(fakedns bool) {
 	}
 }
 
-// golang: InitializeV2Ray() in assets.go
 func setupResolvers() {
 	// golang lookup -> androidResolver
 	gonet.DefaultResolver = androidResolver

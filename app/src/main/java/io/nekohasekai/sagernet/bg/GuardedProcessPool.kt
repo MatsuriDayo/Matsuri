@@ -26,13 +26,13 @@ import android.os.SystemClock
 import android.system.ErrnoException
 import android.system.Os
 import android.system.OsConstants
-import android.util.Log
 import androidx.annotation.MainThread
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.utils.Commandline
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import libcore.Libcore
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -68,10 +68,10 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
             try {
                 while (true) {
                     thread(name = "stderr-$cmdName") {
-                        streamLogger(process.errorStream) { Log.e(cmdName, it) }
+                        streamLogger(process.errorStream) { Libcore.nekoLogWrite(2, cmdName, it) }
                     }
                     thread(name = "stdout-$cmdName") {
-                        streamLogger(process.inputStream) { Log.i(cmdName, it) }
+                        streamLogger(process.inputStream) { Libcore.nekoLogWrite(4, cmdName, it) }
                         // this thread also acts as a daemon thread for waitFor
                         runBlocking { exitChannel.send(process.waitFor()) }
                     }

@@ -35,6 +35,7 @@ import android.net.ConnectivityManager
 import android.os.Build
 import android.os.StrictMode
 import android.os.UserManager
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
@@ -45,7 +46,6 @@ import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.app
-import io.nekohasekai.sagernet.ktx.checkMT
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.MainActivity
 import io.nekohasekai.sagernet.utils.CrashHandler
@@ -77,20 +77,21 @@ class SagerNet : Application(),
         Thread.setDefaultUncaughtExceptionHandler(CrashHandler)
         DataStore.init()
         updateNotificationChannels()
+
         Seq.setContext(this)
 
+        // matsuri: init core (sn: extract v2ray assets
         externalAssets.mkdirs()
-        Libcore.initializeV2Ray(
-            filesDir.absolutePath + "/", externalAssets.absolutePath + "/", "v2ray/"
-        ) {
+        Libcore.initCore(filesDir.absolutePath + "/", externalAssets.absolutePath + "/", "v2ray/", {
             DataStore.rulesProvider == 0
-        }
+        }, cacheDir.absolutePath, {
+            Toast.makeText(this, it, Toast.LENGTH_LONG).show()
+        })
         Libcore.setenv("v2ray.conf.geoloader", "memconservative")
         Libcore.setUidDumper(UidDumper)
 
         runOnDefaultDispatcher {
             PackageCache.register()
-            checkMT()
         }
 
         Theme.apply(this)

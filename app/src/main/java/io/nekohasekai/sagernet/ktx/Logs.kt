@@ -19,8 +19,8 @@
 
 package io.nekohasekai.sagernet.ktx
 
-import android.util.Log
 import cn.hutool.core.util.StrUtil
+import libcore.Libcore
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -31,56 +31,50 @@ object Logs {
         return StrUtil.subAfter(stackTrace[4].className, ".", true)
     }
 
+    // level int use logrus.go
+
     fun v(message: String) {
-        //  if (BuildConfig.DEBUG) {
-        Log.v(mkTag(), message)
-//        }
+        Libcore.nekoLogWrite(6, mkTag(), message)
     }
 
     fun v(message: String, exception: Throwable) {
-        //  if (BuildConfig.DEBUG) {
-        Log.v(mkTag(), message, exception)
-//        }
+        Libcore.nekoLogWrite(6, mkTag(), message + "\n" + exception.stackTraceToString())
     }
 
     fun d(message: String) {
-        //  if (BuildConfig.DEBUG) {
-        Log.d(mkTag(), message)
-//        }
+        Libcore.nekoLogWrite(5, mkTag(), message)
     }
 
     fun d(message: String, exception: Throwable) {
-        //  if (BuildConfig.DEBUG) {
-        Log.d(mkTag(), message, exception)
-//        }
+        Libcore.nekoLogWrite(5, mkTag(), message + "\n" + exception.stackTraceToString())
     }
 
     fun i(message: String) {
-        Log.i(mkTag(), message)
+        Libcore.nekoLogWrite(4, mkTag(), message)
     }
 
     fun i(message: String, exception: Throwable) {
-        Log.i(mkTag(), message, exception)
+        Libcore.nekoLogWrite(4, mkTag(), message + "\n" + exception.stackTraceToString())
     }
 
     fun w(message: String) {
-        Log.w(mkTag(), message)
+        Libcore.nekoLogWrite(3, mkTag(), message)
     }
 
     fun w(message: String, exception: Throwable) {
-        Log.w(mkTag(), message, exception)
+        Libcore.nekoLogWrite(3, mkTag(), message + "\n" + exception.stackTraceToString())
     }
 
     fun w(exception: Throwable) {
-        Log.w(mkTag(), exception)
+        Libcore.nekoLogWrite(3, mkTag(), exception.stackTraceToString())
     }
 
     fun e(message: String) {
-        Log.e(mkTag(), message)
+        Libcore.nekoLogWrite(2, mkTag(), message)
     }
 
     fun e(message: String, exception: Throwable) {
-        Log.e(mkTag(), message, exception)
+        Libcore.nekoLogWrite(2, mkTag(), message + "\n" + exception.stackTraceToString())
     }
 
 }

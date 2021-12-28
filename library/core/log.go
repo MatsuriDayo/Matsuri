@@ -1,81 +1,31 @@
-//go:build android
-// +build android
-
 package libcore
 
-/*
-   #cgo LDFLAGS: -landroid -llog
-
-   #include <android/log.h>
-   #include <string.h>
-   #include <stdlib.h>
-*/
-import "C"
 import (
+	"bytes"
 	"fmt"
-	"github.com/sirupsen/logrus"
+	"io/ioutil"
 	"log"
+	"os"
 	"strings"
-	"unsafe"
+	"sync"
+
+	"github.com/sirupsen/logrus"
 
 	appLog "github.com/v2fly/v2ray-core/v4/app/log"
 	commonLog "github.com/v2fly/v2ray-core/v4/common/log"
 )
 
-var (
-	tag      = C.CString("libcore")
-	tagV2Ray = C.CString("v2ray-core")
-)
+type logrusFormatter struct{}
 
-var levels = []logrus.Level{
-	logrus.PanicLevel,
-	logrus.FatalLevel,
-	logrus.ErrorLevel,
-	logrus.WarnLevel,
-	logrus.InfoLevel,
-	logrus.DebugLevel,
-}
-
-type androidHook struct {
-}
-
-type androidFormatter struct{}
-
-func (f *androidFormatter) Format(entry *logrus.Entry) ([]byte, error) {
-
-	msgWithLevel := fmt.Sprint("[", strings.Title(entry.Level.String()), "] ", entry.Message)
-	return []byte(msgWithLevel), nil
-}
-
-func (hook *androidHook) Levels() []logrus.Level {
-	return levels
-}
-
-func (hook *androidHook) Fire(e *logrus.Entry) error {
-	formatted, err := logrus.StandardLogger().Formatter.Format(e)
-	if err != nil {
-		return err
+func (f *logrusFormatter) Format(entry *logrus.Entry) ([]byte, error) {
+	msg := fmt.Sprint("[", entry.Time.Format("2006-01-02 15:04:05"), "] ")
+	msg += fmt.Sprint("[", strings.Title(entry.Level.String()), "] ")
+	for k, v := range entry.Data {
+		msg += fmt.Sprintf("[%s=%v] ", k, v)
 	}
-	str := C.CString(string(formatted))
-
-	var priority C.int
-	switch e.Level {
-	case logrus.PanicLevel:
-		priority = C.ANDROID_LOG_FATAL
-	case logrus.FatalLevel:
-		priority = C.ANDROID_LOG_FATAL
-	case logrus.ErrorLevel:
-		priority = C.ANDROID_LOG_ERROR
-	case logrus.WarnLevel:
-		priority = C.ANDROID_LOG_WARN
-	case logrus.InfoLevel:
-		priority = C.ANDROID_LOG_INFO
-	case logrus.DebugLevel:
-		priority = C.ANDROID_LOG_DEBUG
-	}
-	C.__android_log_write(priority, tag, str)
-	C.free(unsafe.Pointer(str))
-	return nil
+	msg += entry.Message
+	msg += "\n"
+	return []byte(msg), nil
 }
 
 type v2rayLogWriter struct {
@@ -83,26 +33,24 @@ type v2rayLogWriter struct {
 
 func (w *v2rayLogWriter) Write(s string) error {
 
-	var priority C.int
+	var priority logrus.Level
 	if strings.Contains(s, "[Debug]") {
 		s = strings.Replace(s, "[Debug]", "", 1)
-		priority = C.ANDROID_LOG_DEBUG
+		priority = logrus.DebugLevel
 	} else if strings.Contains(s, "[Info]") {
 		s = strings.Replace(s, "[Info]", "", 1)
-		priority = C.ANDROID_LOG_INFO
+		priority = logrus.InfoLevel
 	} else if strings.Contains(s, "[Warn]") {
 		s = strings.Replace(s, "[Warn]", "", 1)
-		priority = C.ANDROID_LOG_WARN
+		priority = logrus.WarnLevel
 	} else if strings.Contains(s, "[Error]") {
 		s = strings.Replace(s, "[Error]", "", 1)
-		priority = C.ANDROID_LOG_ERROR
+		priority = logrus.ErrorLevel
 	} else {
-		priority = C.ANDROID_LOG_DEBUG
+		priority = logrus.DebugLevel
 	}
 
-	str := C.CString(strings.TrimSpace(s))
-	C.__android_log_write(priority, tagV2Ray, str)
-	C.free(unsafe.Pointer(str))
+	NekoLogWrite(int32(priority), "v2ray-core", s)
 	return nil
 }
 
@@ -113,17 +61,119 @@ func (w *v2rayLogWriter) Close() error {
 type stdLogWriter struct{}
 
 func (stdLogWriter) Write(p []byte) (n int, err error) {
-	str := C.CString(string(p))
-	C.__android_log_write(C.ANDROID_LOG_INFO, tag, str)
-	C.free(unsafe.Pointer(str))
+	NekoLogWrite(int32(logrus.InfoLevel), "stdLogWriter", string(p))
 	return len(p), nil
 }
 
-func init() {
+// manage log file
+var _logfile *logfile
+
+type logfile struct {
+	f    *os.File
+	buf  bytes.Buffer
+	lock sync.Mutex
+}
+
+func (lp *logfile) Write(p []byte) (n int, err error) {
+	// locked, don't call NekoLogWrite or logrus here.
+	lp.lock.Lock()
+	defer lp.lock.Unlock()
+
+	// Truncate long file
+	max := 50 * 1024
+	if lp.f != nil {
+		if offset, _ := lp.f.Seek(0, os.SEEK_END); offset > int64(max) {
+			lp.f.Seek(0, os.SEEK_SET)
+			data, _ := ioutil.ReadAll(lp.f)
+			lp.f.Truncate(0)
+			lp.f.Write(data[len(data)-max:])
+		}
+	} else {
+		if lp.buf.Len() > max {
+			data := lp.buf.Bytes()
+			lp.buf.Reset()
+			lp.buf.Write(data[len(data)-max:])
+		}
+	}
+
+	if lp.f != nil {
+		return lp.f.Write(p)
+	} else {
+		return lp.buf.Write(p)
+	}
+}
+
+func (lp *logfile) Clear() {
+	lp.lock.Lock()
+	defer lp.lock.Unlock()
+
+	lp.f.Truncate(0)
+}
+
+func (lp *logfile) Get() []byte {
+	lp.lock.Lock()
+	defer lp.lock.Unlock()
+
+	var a []byte
+
+	if lp.f != nil {
+		lp.f.Seek(0, os.SEEK_SET)
+		a, _ = ioutil.ReadAll(lp.f)
+	} else {
+		a = lp.buf.Bytes()
+	}
+
+	if a == nil || len(a) == 0 { //this crash
+		return []byte{0}
+	}
+	return a
+}
+
+func (lp *logfile) init(path string) (err error) {
+	lp.lock.Lock()
+	defer lp.lock.Unlock()
+
+	lp.f, err = os.OpenFile(path, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0644)
+	if err != nil {
+		return
+	}
+
+	// read buffer (it's fake, can't read in diffrent process)
+	b := lp.buf.Bytes()
+	if len(b) > 0 {
+		lp.f.Write(b)
+		lp.buf.Reset()
+	}
+	return
+}
+
+func NekoLogWrite(level int32, tag, str string) {
+	logrus.StandardLogger().WithField("tag", tag).Log(logrus.Level(level), strings.Trim(str, "\n"))
+}
+
+func NekoLogClear() {
+	if _logfile != nil {
+		_logfile.Clear()
+	}
+}
+
+func NekoLogGet() []byte {
+	if _logfile != nil {
+		return _logfile.Get()
+	}
+	return []byte{0}
+}
+
+func setupLogger(path string) (err error) {
+	//init neko logger
+	logrus.SetFormatter(&logrusFormatter{})
+	_logfile = &logfile{}
+	err = _logfile.init(path)
+	logrus.SetOutput(_logfile)
+
+	//replace loggers
 	log.SetOutput(stdLogWriter{})
 	log.SetFlags(log.Flags() &^ log.LstdFlags)
-	logrus.SetFormatter(&androidFormatter{})
-	logrus.AddHook(&androidHook{})
 
 	_ = appLog.RegisterHandlerCreator(appLog.LogType_Console, func(lt appLog.LogType,
 		options appLog.HandlerCreatorOptions) (commonLog.Handler, error) {
@@ -131,4 +181,6 @@ func init() {
 			return &v2rayLogWriter{}
 		}), nil
 	})
+
+	return
 }

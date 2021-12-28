@@ -19,41 +19,29 @@
 package io.nekohasekai.sagernet.ui
 
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.graphics.Typeface
+import android.graphics.Color
+import android.graphics.text.LineBreaker.BREAK_STRATEGY_SIMPLE
+import android.os.Build
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+import android.text.style.ForegroundColorSpan
 import android.view.*
+import android.widget.ScrollView
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.FileProvider
-import androidx.core.graphics.TypefaceCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import cn.hutool.core.util.RuntimeUtil
-import com.termux.terminal.TerminalColors
-import com.termux.terminal.TerminalSession
-import com.termux.terminal.TerminalSessionClient
-import com.termux.view.TerminalViewClient
-import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.databinding.LayoutLogcatBinding
 import io.nekohasekai.sagernet.ktx.*
-import io.nekohasekai.sagernet.utils.CrashHandler
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
+import libcore.Libcore
 import java.util.*
-import kotlin.math.max
-import kotlin.math.min
 
 class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
-    TerminalSessionClient,
-    TerminalViewClient,
     Toolbar.OnMenuItemClickListener {
 
     lateinit var binding: LayoutLogcatBinding
-    var fontSize = dp2px(8)
 
-    @SuppressLint("RestrictedApi")
+    @SuppressLint("RestrictedApi", "WrongConstant")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         toolbar.setTitle(R.string.menu_log)
@@ -62,62 +50,45 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
         toolbar.setOnMenuItemClickListener(this)
 
         binding = LayoutLogcatBinding.bind(view)
-        val terminalView = binding.terminalView
 
-        // Make it divisible by 2 since that is the minimal adjustment step:
-        if (fontSize % 2 == 1) fontSize--
+        if (Build.VERSION.SDK_INT >= 23) {
+            binding.textview.breakStrategy = 0 // simple
+        }
 
-        terminalView.setTerminalViewClient(this)
-        terminalView.setTextSize(fontSize)
-        terminalView.setTypeface(
-            TypefaceCompat.createFromResourcesFontFile(
-                view.context,
-                resources,
-                R.font.jetbrains_mono,
-                "res/font/jetbrains_mono.ttf",
-                Typeface.MONOSPACE.style,
-            )
-        )
+        binding.textview.setOnClickListener { reloadSession() }
+
+        activity?.apply {
+            if (this is MainActivity) {
+                this.binding.stats.performHide()
+            }
+        }
 
         reloadSession()
-
-        registerForContextMenu(terminalView)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        binding.terminalView.showContextMenu()
     }
 
     fun reloadSession() {
-        val terminalView = binding.terminalView
-        terminalView.mTermSession?.also {
-            it.finishIfRunning()
+        val span = SpannableString(String(Libcore.nekoLogGet()))
+        var offset = 0
+        for (line in span.lines()) {
+            var color = ForegroundColorSpan(Color.RED)
+            when {
+                line.contains(" [Debug] ") -> {
+                    color = ForegroundColorSpan(Color.GRAY)
+                }
+                line.contains(" [Info] ") -> {
+                    color = ForegroundColorSpan(Color.BLACK)
+                }
+            }
+            span.setSpan(
+                color, offset, offset + line.length, SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            offset += line.length + 1
         }
-        val session = TerminalSession(
-            "/system/bin/logcat", app.cacheDir.absolutePath, arrayOf(
-                "-C",
-                "-v",
-                "tag,color",
-                "AndroidRuntime:D",
-                "ProxyInstance:D",
-                "GuardedProcessPool:D",
-                "VpnService:D",
-                "libcore:D",
-                "v2ray-core:D",
+        binding.textview.text = span
 
-                "libsslocal:D",
-                "libss-local:D",
-                "libtrojan:D",
-                "libtrojan:D",
-                "libnaive:D",
-                "libpingtunnel:D",
-                "libwg:D",
-
-                "*:S"
-            ), arrayOf(), 3000, this
-        )
-        terminalView.attachSession(session)
-        terminalView.updateSize()
+        binding.scroolview.post {
+            binding.scroolview.fullScroll(ScrollView.FOCUS_DOWN)
+        }
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
@@ -125,6 +96,7 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
             R.id.action_clear_logcat -> {
                 runOnDefaultDispatcher {
                     try {
+                        Libcore.nekoLogClear()
                         RuntimeUtil.exec("/system/bin/logcat", "-c").waitFor()
                     } catch (e: Exception) {
                         onMainDispatcher {
@@ -150,173 +122,5 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
 
     override fun onDestroy() {
         super.onDestroy()
-
-        if (::binding.isInitialized) {
-            binding.terminalView.mTermSession?.finishIfRunning()
-        }
     }
-
-    override fun onTextChanged(changedSession: TerminalSession?) {
-    }
-
-    override fun onTitleChanged(changedSession: TerminalSession?) {
-    }
-
-    override fun onSessionFinished(finishedSession: TerminalSession?) {
-    }
-
-    override fun onCopyTextToClipboard(session: TerminalSession?, text: String?) {
-        if (text.isNullOrBlank()) return
-        SagerNet.trySetPrimaryClip(text)
-        snackbar(R.string.copy_success).show()
-    }
-
-    override fun onPasteTextFromClipboard(session: TerminalSession) {
-    }
-
-    override fun onBell(session: TerminalSession?) {
-    }
-
-    override fun onColorsChanged(session: TerminalSession?) {
-    }
-
-    override fun onTerminalCursorStateChange(state: Boolean) {
-    }
-
-    override fun getTerminalCursorStyle(): Int {
-        return 0
-    }
-
-    override fun onScale(scale: Float): Float {
-        if (scale < 0.9f || scale > 1.1f) {
-            val increase = scale > 1f
-            changeFontSize(increase)
-            return 1.0f
-        }
-        return scale
-    }
-
-    companion object {
-        private val MIN_FONTSIZE = dp2px(4)
-        private val MAX_FONTSIZE = dp2px(12)
-    }
-
-    private fun changeFontSize(increase: Boolean) {
-        val terminalView = binding.terminalView
-        fontSize += if (increase) 1 else -1
-        fontSize = max(MIN_FONTSIZE, min(fontSize, MAX_FONTSIZE))
-        terminalView.setTextSize(fontSize)
-    }
-
-
-    override fun onSingleTapUp(e: MotionEvent?) {
-    }
-
-    override fun shouldBackButtonBeMappedToEscape(): Boolean {
-        return false
-    }
-
-    override fun shouldEnforceCharBasedInput(): Boolean {
-        return false
-    }
-
-    override fun shouldUseCtrlSpaceWorkaround(): Boolean {
-        return false
-    }
-
-    override fun isTerminalViewSelected(): Boolean {
-        return true
-    }
-
-    override fun copyModeChanged(copyMode: Boolean) {
-        val activity = requireActivity() as MainActivity
-        // Disable drawer while copying.
-        activity.binding.drawerLayout.setDrawerLockMode(if (copyMode) DrawerLayout.LOCK_MODE_LOCKED_CLOSED else DrawerLayout.LOCK_MODE_UNLOCKED)
-    }
-
-    override fun onKeyDown(keyCode: Int, e: KeyEvent?, session: TerminalSession?): Boolean {
-        return false
-    }
-
-    override fun onKeyUp(keyCode: Int, e: KeyEvent?): Boolean {
-        return false
-    }
-
-    override fun onLongPress(event: MotionEvent?): Boolean {
-        return false
-    }
-
-    override fun readControlKey(): Boolean {
-        return false
-    }
-
-    override fun readAltKey(): Boolean {
-        return false
-    }
-
-    override fun readShiftKey(): Boolean {
-        return false
-    }
-
-    override fun readFnKey(): Boolean {
-        return false
-    }
-
-    override fun onCodePoint(
-        codePoint: Int, ctrlDown: Boolean, session: TerminalSession?
-    ): Boolean {
-        return false
-    }
-
-    override fun disableInput(): Boolean {
-        return true
-    }
-
-    override fun onEmulatorSet() {
-        val props = Properties()
-        props.load(requireContext().assets.open("terminal.properties"))
-        TerminalColors.COLOR_SCHEME.updateWith(props)
-        val emulator = binding.terminalView.mTermSession.emulator
-        emulator.mColors.reset()
-    }
-
-    override fun onScroll(offset: Int) {
-        val activity = requireActivity() as MainActivity
-        val topRow = binding.terminalView.topRow
-        if (offset < 0) {
-            activity.binding.stats.apply {
-                if (isShown) performHide()
-            }
-        }
-
-        val screen = binding.terminalView.mEmulator.screen
-
-        if (topRow == 0 && screen.activeTranscriptRows > 0) activity.binding.fab.apply {
-            if (isShown) hide()
-        } else activity.binding.fab.apply {
-            if (!isShown) show()
-        }
-    }
-
-    override fun logError(tag: String?, message: String?) {
-    }
-
-    override fun logWarn(tag: String?, message: String?) {
-    }
-
-    override fun logInfo(tag: String?, message: String?) {
-    }
-
-    override fun logDebug(tag: String?, message: String?) {
-    }
-
-    override fun logVerbose(tag: String?, message: String?) {
-    }
-
-    override fun logStackTraceWithMessage(tag: String?, message: String?, e: Exception?) {
-    }
-
-    override fun logStackTrace(tag: String?, e: Exception?) {
-    }
-
 }

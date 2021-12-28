@@ -74,7 +74,7 @@ type LocalResolver interface {
 }
 
 func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
-	if config.Debug {
+	if config.Debug { // TODO should move to LoadConfig
 		logrus.SetLevel(logrus.DebugLevel)
 	} else {
 		logrus.SetLevel(logrus.WarnLevel)

@@ -14,8 +14,8 @@ wget -q -O tmp.zip https://github.com/SagerNet/preferencex-android/archive/2bdf5
 unzip tmp.zip > /dev/null 2>&1
 mv preferencex-android-* preferencex
 
-wget -q -O tmp.zip https://github.com/SagerNet/termux-view/archive/c4127827ef013970bcd0f930f65b991bb12878f4.zip
-unzip tmp.zip > /dev/null 2>&1
-mv termux-view-* termux-view
+# wget -q -O tmp.zip https://github.com/SagerNet/termux-view/archive/c4127827ef013970bcd0f930f65b991bb12878f4.zip
+# unzip tmp.zip > /dev/null 2>&1
+# mv termux-view-* termux-view
 
 rm tmp.zip

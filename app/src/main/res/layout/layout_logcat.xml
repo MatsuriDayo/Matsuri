@@ -16,14 +16,21 @@
         android:layout_height="match_parent"
         android:padding="8dp">
 
-        <com.termux.view.TerminalView
-            android:id="@+id/terminal_view"
+        <ScrollView
+            android:id="@+id/scroolview"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:autofillHints="password"
-            android:focusableInTouchMode="true"
-            android:scrollbarThumbVertical="@drawable/terminal_scroll_shape"
-            android:scrollbars="vertical" />
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:ems="10"
+                android:focusable="true"
+                android:gravity="start|top"
+                tools:ignore="LabelFor" />
+        </ScrollView>
     </LinearLayout>
 
 

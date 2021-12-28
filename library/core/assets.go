@@ -35,9 +35,7 @@ type BoolFunc interface {
 	Invoke() bool
 }
 
-func InitializeV2Ray(internalAssets string, externalAssets string, prefix string, useOfficial BoolFunc) error {
-	setupResolvers()
-
+func extractV2RayAssets(internalAssets string, externalAssets string, prefix string, useOfficial BoolFunc) error {
 	assetsAccess = new(sync.Mutex)
 	assetsAccess.Lock()
 	extracted = make(map[string]bool)

@@ -10,6 +10,7 @@ import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ktx.use
 import io.nekohasekai.sagernet.utils.CrashHandler
+import libcore.Libcore
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -34,6 +35,8 @@ object UIUtils {
                     logFile, true
                 )
             )
+            logFile.appendText("\n")
+            logFile.appendBytes(Libcore.nekoLogGet())
         } catch (e: IOException) {
             Logs.w(e)
             logFile.appendText("Export logcat error: " + CrashHandler.formatThrowable(e))
