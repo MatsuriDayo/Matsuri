@@ -165,7 +165,7 @@ fun Project.setupKotlinCommon() {
 }
 
 fun Project.setupNdk() {
-    android.ndkVersion = "21.4.7075529"
+    android.ndkVersion = "23.1.7779620"
 }
 
 fun Project.setupNdkLibrary() {
@@ -485,6 +485,7 @@ fun Project.setupApp() {
     }
 
     dependencies {
+        add("implementation", kotlin("stdlib", "${rootProject.extra["kotlinVersion"]}"))
         add("implementation", project(":plugin:api"))
         add("testImplementation", "junit:junit:4.13.2")
         add("androidTestImplementation", "androidx.test.ext:junit:1.1.3")
