@@ -2,7 +2,6 @@ package libcore
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -72,7 +71,7 @@ func (dialer protectedDialer) dial(ctx context.Context, source v2rayNet.Address,
 	}
 
 	if fdProtector != nil && !fdProtector.Protect(int32(fd)) {
-		return nil, errors.New("protect failed")
+		return nil, newError("protect failed")
 	}
 
 	if sockopt != nil {
@@ -101,7 +100,7 @@ func (dialer protectedDialer) dial(ctx context.Context, source v2rayNet.Address,
 
 	file := os.NewFile(uintptr(fd), "socket")
 	if file == nil {
-		return nil, errors.New("failed to connect to fd")
+		return nil, newError("failed to connect to fd")
 	}
 
 	switch destination.Network {

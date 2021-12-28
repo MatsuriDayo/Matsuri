@@ -2,7 +2,6 @@ package libcore
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	gonet "net"
@@ -91,10 +90,10 @@ func (instance *V2RayInstance) Start() error {
 	instance.access.Lock()
 	defer instance.access.Unlock()
 	if instance.started {
-		return errors.New("already started")
+		return newError("already started")
 	}
 	if instance.core == nil {
-		return errors.New("not initialized")
+		return newError("not initialized")
 	}
 	err := instance.core.Start()
 	if err != nil {
@@ -328,7 +327,7 @@ func (p *simpleSekaiWrapper) LookupIP(network, host string) (ret []net.IP, err e
 
 	select {
 	case <-ctx.Done():
-		return nil, errors.New(fmt.Sprintf("androidUnderlyingResolver: context cancelled! (sekai=%t)", isSekai))
+		return nil, newError(fmt.Sprintf("androidUnderlyingResolver: context cancelled! (sekai=%t)", isSekai))
 	case <-ok:
 		return
 	}

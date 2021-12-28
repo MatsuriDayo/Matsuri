@@ -2,13 +2,12 @@ package libcore
 
 import (
 	"github.com/golang/protobuf/proto"
-	"github.com/pkg/errors"
 	"github.com/v2fly/v2ray-core/v4/app/observatory"
 )
 
 func (instance *V2RayInstance) GetObservatoryStatus() ([]byte, error) {
 	if instance.observatory == nil {
-		return nil, errors.New("observatory unavailable")
+		return nil, newError("observatory unavailable")
 	}
 	resp, err := instance.observatory.GetObservation(nil)
 	if err != nil {
@@ -19,7 +18,7 @@ func (instance *V2RayInstance) GetObservatoryStatus() ([]byte, error) {
 
 func (instance *V2RayInstance) UpdateStatus(status []byte) error {
 	if instance.observatory == nil {
-		return errors.New("observatory unavailable")
+		return newError("observatory unavailable")
 	}
 	s := new(observatory.OutboundStatus)
 	err := proto.Unmarshal(status, s)

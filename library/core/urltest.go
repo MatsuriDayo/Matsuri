@@ -3,7 +3,6 @@ package libcore
 import (
 	"context"
 	"fmt"
-	"github.com/pkg/errors"
 	core "github.com/v2fly/v2ray-core/v4"
 	v2rayNet "github.com/v2fly/v2ray-core/v4/common/net"
 	"github.com/v2fly/v2ray-core/v4/common/session"
@@ -21,7 +20,7 @@ func urlTest(dialContext func(ctx context.Context, network, addr string) (net.Co
 	req, err := http.NewRequestWithContext(context.Background(), "GET", link, nil)
 	req.Header.Set("User-Agent", "curl/7.74.0")
 	if err != nil {
-		return 0, errors.WithMessage(err, "create get request")
+		return 0, newError("create get request").Base(err)
 	}
 	start := time.Now()
 	resp, err := (&http.Client{

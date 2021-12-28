@@ -71,16 +71,6 @@ class ProxyInstance(profile: ProxyEntity, val service: BaseService.Interface) : 
             }
         }
 
-        if (DataStore.allowAccess) {
-            val api = ApiInstance()
-            try {
-                api.launch()
-                externalInstances[11451] = api
-            } catch (e: Exception) {
-                Logs.w("Failed to start api server", e)
-            }
-        }
-
         /* if (BuildConfig.DEBUG && DataStore.enableLog) {
              externalInstances[9999] = DebugInstance().apply {
                  launch()

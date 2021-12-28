@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/miekg/dns"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	core "github.com/v2fly/v2ray-core/v4"
 	"github.com/v2fly/v2ray-core/v4/common"
@@ -102,11 +101,11 @@ func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
 			path = externalAssetsPath + "/pcap/" + path + ".pcap"
 			err = os.MkdirAll(filepath.Dir(path), 0755)
 			if err != nil {
-				return nil, errors.WithMessage(err, "unable to create pcap dir")
+				return nil, newError("unable to create pcap dir").Base(err)
 			}
 			pcapFile, err = os.Create(path)
 			if err != nil {
-				return nil, errors.WithMessage(err, "unable to create pcap file")
+				return nil, newError("unable to create pcap file").Base(err)
 			}
 		}
 
@@ -114,7 +113,7 @@ func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
 	} else if config.Implementation == 1 { // SYSTEM
 		t.dev, err = nat.New(config.FileDescriptor, config.MTU, t, config.IPv6Mode, config.ErrorHandler.HandleError)
 	} else {
-		err = errors.New("Not supported")
+		err = newError("Not supported")
 	}
 	if err != nil {
 		return nil, err

@@ -13,8 +13,6 @@ import (
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
 )
 
-//go:generate go run ../errorgen
-
 var _ tun.Tun = (*SystemTun)(nil)
 
 var (

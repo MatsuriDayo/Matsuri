@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/Dreamacro/clash/adapter/outbound"
 	clashC "github.com/Dreamacro/clash/constant"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
 	"net"
@@ -59,7 +58,7 @@ func (s *sshClient) connect() (*ssh.Client, error) {
 
 	client, err := ssh.Dial("tcp", s.Addr(), config)
 	if err != nil {
-		err = errors.WithMessage(err, "connect ssh")
+		err = newError("connect ssh").Base(err)
 		logrus.Warnf("%v", err)
 		return nil, err
 	}
@@ -121,7 +120,7 @@ func NewSSHInstance(socksPort int32, serverAddress string, serverPort int32, use
 			signer, err = ssh.ParsePrivateKeyWithPassphrase([]byte(pem), []byte(passphrase))
 		}
 		if err != nil {
-			return nil, errors.WithMessage(err, "parse private key")
+			return nil, newError("parse private key").Base(err)
 		}
 		out.auth = []ssh.AuthMethod{ssh.PublicKeys(signer)}
 	}
@@ -135,7 +134,7 @@ func NewSSHInstance(socksPort int32, serverAddress string, serverPort int32, use
 			key, _, _, _, err := ssh.ParseAuthorizedKey([]byte(pubKey))
 			if err != nil {
 				if err != nil {
-					return nil, errors.WithMessage(err, "parse public key")
+					return nil, newError("parse public key").Base(err)
 				}
 			}
 			keys = append(keys, key)

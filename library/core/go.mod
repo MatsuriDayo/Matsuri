@@ -6,10 +6,8 @@ require (
 	github.com/Dreamacro/clash v1.7.1
 	github.com/golang/protobuf v1.5.2
 	github.com/miekg/dns v1.1.43
-	github.com/pkg/errors v0.9.1
 	github.com/sagernet/gomobile v0.0.0-20210905032500-701a995ff844
 	github.com/sagernet/libping v0.1.1
-	github.com/sagernet/sagerconnect v0.1.7
 	github.com/sirupsen/logrus v1.8.1
 	github.com/ulikunitz/xz v0.5.10
 	github.com/v2fly/v2ray-core/v4 v4.44.0
@@ -48,6 +46,7 @@ require (
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/pires/go-proxyproto v0.6.1 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/riobard/go-bloom v0.0.0-20200614022211-cdc8013cb5b3 // indirect
 	github.com/seiflotfy/cuckoofilter v0.0.0-20201222105146-bc6005554a0c // indirect
 	github.com/v2fly/BrowserBridge v0.0.0-20210430233438-0570fc1d7d08 // indirect

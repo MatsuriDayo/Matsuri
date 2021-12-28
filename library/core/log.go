@@ -96,6 +96,7 @@ func (lp *logfile) Write(p []byte) (n int, err error) {
 		}
 	}
 
+	//TODO log by entry, show color
 	if lp.f != nil {
 		return lp.f.Write(p)
 	} else {

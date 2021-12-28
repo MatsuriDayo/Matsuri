@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/pkg/errors"
 	"github.com/sagernet/gomobile/asset"
 	"github.com/sirupsen/logrus"
 	"github.com/v2fly/v2ray-core/v4/common/platform/filesystem"
@@ -138,12 +137,12 @@ func extractAssetName(name string, force bool) error {
 	loadAssetVersion := func() error {
 		av, err := asset.Open(assetsPrefix + version)
 		if err != nil {
-			return errors.WithMessage(err, "open version in assets")
+			return newError("open version in assets").Base(err)
 		}
 		b, err := ioutil.ReadAll(av)
 		closeIgnore(av)
 		if err != nil {
-			return errors.WithMessage(err, "read internal version")
+			return newError("read internal version").Base(err)
 		}
 		assetVersion = string(b)
 		return nil

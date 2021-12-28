@@ -11,7 +11,6 @@ import (
 	"github.com/Dreamacro/clash/constant"
 	clashC "github.com/Dreamacro/clash/constant"
 	"github.com/Dreamacro/clash/listener/socks"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/v2fly/v2ray-core/v4/common/task"
 	"io"
@@ -55,18 +54,18 @@ func (s *ClashBasedInstance) Start() error {
 	defer s.access.Unlock()
 
 	if s.started {
-		return errors.New("already started")
+		return newError("already started")
 	}
 
 	addr := fmt.Sprintf("127.0.0.1:%d", s.socksPort)
 
 	in, err := socks.New(addr, s.ctx)
 	if err != nil {
-		return errors.WithMessage(err, "create socks inbound")
+		return newError("create socks inbound").Base(err)
 	}
 	udpIn, err := socks.NewUDP(addr, s.udpCtx)
 	if err != nil {
-		return errors.WithMessage(err, "create socks udp inbound")
+		return newError("create socks udp inbound").Base(err)
 	}
 	s.in = in
 	s.udpIn = udpIn
@@ -81,7 +80,7 @@ func (s *ClashBasedInstance) Close() error {
 	defer s.access.Unlock()
 
 	if !s.started {
-		return errors.New("not started")
+		return newError("not started")
 	}
 
 	closeIgnore(s.in, s.udpIn, s.out, s.ctx, s.udpCtx)
