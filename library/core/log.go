@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"syscall"
 
 	"github.com/sirupsen/logrus"
 
@@ -69,15 +70,30 @@ func (stdLogWriter) Write(p []byte) (n int, err error) {
 var _logfile *logfile
 
 type logfile struct {
-	f    *os.File
-	buf  bytes.Buffer
-	lock sync.Mutex
+	f     *os.File
+	buf   bytes.Buffer
+	mutex sync.Mutex
+}
+
+func (lp *logfile) lock() {
+	if lp.f != nil {
+		syscall.Flock(int(lp.f.Fd()), syscall.LOCK_EX)
+	} else {
+		lp.mutex.Lock()
+	}
+}
+func (lp *logfile) unlock() {
+	if lp.f != nil {
+		syscall.Flock(int(lp.f.Fd()), syscall.LOCK_UN)
+	} else {
+		lp.mutex.Unlock()
+	}
 }
 
 func (lp *logfile) Write(p []byte) (n int, err error) {
 	// locked, don't call NekoLogWrite or logrus here.
-	lp.lock.Lock()
-	defer lp.lock.Unlock()
+	lp.lock()
+	defer lp.unlock()
 
 	// Truncate long file
 	max := 50 * 1024
@@ -105,15 +121,15 @@ func (lp *logfile) Write(p []byte) (n int, err error) {
 }
 
 func (lp *logfile) Clear() {
-	lp.lock.Lock()
-	defer lp.lock.Unlock()
+	lp.lock()
+	defer lp.unlock()
 
 	lp.f.Truncate(0)
 }
 
 func (lp *logfile) Get() []byte {
-	lp.lock.Lock()
-	defer lp.lock.Unlock()
+	lp.lock()
+	defer lp.unlock()
 
 	var a []byte
 
@@ -131,8 +147,8 @@ func (lp *logfile) Get() []byte {
 }
 
 func (lp *logfile) init(path string) (err error) {
-	lp.lock.Lock()
-	defer lp.lock.Unlock()
+	lp.lock()
+	defer lp.unlock()
 
 	lp.f, err = os.OpenFile(path, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0644)
 	if err != nil {
