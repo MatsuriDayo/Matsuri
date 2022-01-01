@@ -1,3 +1,22 @@
+/******************************************************************************
+ *                                                                            *
+ * Copyright (C) 2021 by nekohasekai <contact-sagernet@sekai.icu>             *
+ *                                                                            *
+ * This program is free software: you can redistribute it and/or modify       *
+ * it under the terms of the GNU General Public License as published by       *
+ * the Free Software Foundation, either version 3 of the License, or          *
+ *  (at your option) any later version.                                       *
+ *                                                                            *
+ * This program is distributed in the hope that it will be useful,            *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+ * GNU General Public License for more details.                               *
+ *                                                                            *
+ * You should have received a copy of the GNU General Public License          *
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.       *
+ *                                                                            *
+ ******************************************************************************/
+
 package io.nekohasekai.sagernet.ui
 
 import android.app.Activity
@@ -14,8 +33,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.getSystemService
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.SagerApp
+import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.broadcastReceiver
 
 class VpnRequestActivity : AppCompatActivity() {
@@ -50,7 +70,7 @@ class VpnRequestActivity : AppCompatActivity() {
                 cachedIntent = intent
                 return null
             }
-            SagerApp.startService()
+            SagerNet.startService()
             return SynchronousResult(false)
         }
 
@@ -59,10 +79,10 @@ class VpnRequestActivity : AppCompatActivity() {
 
         override fun parseResult(resultCode: Int, intent: Intent?) =
             if (resultCode == Activity.RESULT_OK) {
-                SagerApp.startService()
+                SagerNet.startService()
                 false
             } else {
-//            Timber.e("Failed to start VpnService: $intent")
+                Logs.e("Failed to start VpnService: $intent")
                 true
             }
     }

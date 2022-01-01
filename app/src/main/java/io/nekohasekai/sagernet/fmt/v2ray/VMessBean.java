@@ -1,77 +1,73 @@
+/******************************************************************************
+ *                                                                            *
+ * Copyright (C) 2021 by nekohasekai <contact-sagernet@sekai.icu>             *
+ *                                                                            *
+ * This program is free software: you can redistribute it and/or modify       *
+ * it under the terms of the GNU General Public License as published by       *
+ * the Free Software Foundation, either version 3 of the License, or          *
+ *  (at your option) any later version.                                       *
+ *                                                                            *
+ * This program is distributed in the hope that it will be useful,            *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+ * GNU General Public License for more details.                               *
+ *                                                                            *
+ * You should have received a copy of the GNU General Public License          *
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.       *
+ *                                                                            *
+ ******************************************************************************/
+
 package io.nekohasekai.sagernet.fmt.v2ray;
 
-import com.esotericsoftware.kryo.io.ByteBufferInput;
-import com.esotericsoftware.kryo.io.ByteBufferOutput;
+import androidx.annotation.NonNull;
 
-import cn.hutool.core.util.StrUtil;
+import org.jetbrains.annotations.NotNull;
+
 import io.nekohasekai.sagernet.fmt.AbstractBean;
+import io.nekohasekai.sagernet.fmt.KryoConverters;
+import moe.matsuri.nya.utils.JavaUtil;
 
-public class VMessBean extends AbstractBean {
+public class VMessBean extends StandardV2RayBean {
 
-    public String uuid;
-    public String path;
+    public Integer alterId;
 
-    public String tag;
-    public boolean tls;
-    public String network;
-    public int kcpUpLinkCapacity;
-    public int kcpDownLinkCapacity;
-    public String header;
-    public int mux;
+    public Boolean experimentalAuthenticatedLength;
+    public Boolean experimentalNoTerminationSignal;
 
-    // custom
+    @Override
+    public void initializeDefaultValues() {
+        super.initializeDefaultValues();
 
-    public String requestHost;
-    public String sni;
-    public String security;
-    public int alterId;
-
-    protected void initDefaultValues() {
-        if (StrUtil.isBlank(network)) {
-            network = "tls";
-        }
-        if (StrUtil.isBlank(security)) {
-            security = "auto";
-        }
+        alterId = alterId != null ? alterId : 0;
+        encryption = JavaUtil.isNotBlank(encryption) ? encryption : "auto";
+        experimentalAuthenticatedLength = experimentalAuthenticatedLength != null ? experimentalAuthenticatedLength : false;
+        experimentalNoTerminationSignal = experimentalNoTerminationSignal != null ? experimentalNoTerminationSignal : false;
     }
 
     @Override
-    public void serialize(ByteBufferOutput output) {
-        output.writeInt(0);
-        super.serialize(output);
-        output.writeString(uuid);
-        output.writeString(tag);
-        output.writeBoolean(tls);
-        output.writeString(network);
-        output.writeInt(kcpUpLinkCapacity);
-        output.writeInt(kcpDownLinkCapacity);
-        output.writeString(header);
-        output.writeInt(mux);
-
-        // custom
-        output.writeString(requestHost);
-        output.writeString(sni);
-        output.writeString(security);
-        output.writeInt(alterId);
+    public void applyFeatureSettings(AbstractBean other) {
+        if (!(other instanceof VMessBean)) return;
+        VMessBean bean = ((VMessBean) other);
+        bean.experimentalAuthenticatedLength = experimentalAuthenticatedLength;
+        bean.experimentalNoTerminationSignal = experimentalNoTerminationSignal;
     }
 
+    @NotNull
     @Override
-    public void deserialize(ByteBufferInput input) {
-        int version = input.readInt();
-        super.deserialize(input);
-        uuid = input.readString();
-        tag = input.readString();
-        tls = input.readBoolean();
-        network = input.readString();
-        kcpUpLinkCapacity = input.readInt();
-        kcpDownLinkCapacity = input.readInt();
-        header = input.readString();
-        mux = input.readInt();
-
-        // custom
-        requestHost = input.readString();
-        sni = input.readString();
-        security = input.readString();
-        alterId = input.readInt();
+    public VMessBean clone() {
+        return KryoConverters.deserialize(new VMessBean(), KryoConverters.serialize(this));
     }
+
+    public static final Creator<VMessBean> CREATOR = new CREATOR<VMessBean>() {
+        @NonNull
+        @Override
+        public VMessBean newInstance() {
+            return new VMessBean();
+        }
+
+        @Override
+        public VMessBean[] newArray(int size) {
+            return new VMessBean[size];
+        }
+    };
 }

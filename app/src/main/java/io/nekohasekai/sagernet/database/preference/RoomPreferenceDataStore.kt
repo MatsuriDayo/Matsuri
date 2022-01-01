@@ -1,7 +1,27 @@
+/******************************************************************************
+ *                                                                            *
+ * Copyright (C) 2021 by nekohasekai <contact-sagernet@sekai.icu>             *
+ * Copyright (C) 2021 by Max Lv <max.c.lv@gmail.com>                          *
+ * Copyright (C) 2021 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
+ *                                                                            *
+ * This program is free software: you can redistribute it and/or modify       *
+ * it under the terms of the GNU General Public License as published by       *
+ * the Free Software Foundation, either version 3 of the License, or          *
+ *  (at your option) any later version.                                       *
+ *                                                                            *
+ * This program is distributed in the hope that it will be useful,            *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of             *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
+ * GNU General Public License for more details.                               *
+ *                                                                            *
+ * You should have received a copy of the GNU General Public License          *
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.       *
+ *                                                                            *
+ ******************************************************************************/
+
 package io.nekohasekai.sagernet.database.preference
 
 import androidx.preference.PreferenceDataStore
-import java.util.*
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
 open class RoomPreferenceDataStore(private val kvPairDao: KeyValuePair.Dao) :
@@ -13,6 +33,7 @@ open class RoomPreferenceDataStore(private val kvPairDao: KeyValuePair.Dao) :
     fun getLong(key: String) = kvPairDao[key]?.long
     fun getString(key: String) = kvPairDao[key]?.string
     fun getStringSet(key: String) = kvPairDao[key]?.stringSet
+    fun reset() = kvPairDao.reset()
 
     override fun getBoolean(key: String, defValue: Boolean) = getBoolean(key) ?: defValue
     override fun getFloat(key: String, defValue: Float) = getFloat(key) ?: defValue
@@ -69,12 +90,22 @@ open class RoomPreferenceDataStore(private val kvPairDao: KeyValuePair.Dao) :
     }
 
     private val listeners = HashSet<OnPreferenceDataStoreChangeListener>()
-    private fun fireChangeListener(key: String) =
+    private fun fireChangeListener(key: String) {
+        val listeners = synchronized(listeners) {
+            listeners.toList()
+        }
         listeners.forEach { it.onPreferenceDataStoreChanged(this, key) }
+    }
 
-    fun registerChangeListener(listener: OnPreferenceDataStoreChangeListener) =
-        listeners.add(listener)
+    fun registerChangeListener(listener: OnPreferenceDataStoreChangeListener) {
+        synchronized(listeners) {
+            listeners.add(listener)
+        }
+    }
 
-    fun unregisterChangeListener(listener: OnPreferenceDataStoreChangeListener) =
-        listeners.remove(listener)
+    fun unregisterChangeListener(listener: OnPreferenceDataStoreChangeListener) {
+        synchronized(listeners) {
+            listeners.remove(listener)
+        }
+    }
 }

@@ -5,8 +5,10 @@
     android:id="@+id/content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:elevation="4dp">
+    android:layout_margin="4dp"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardElevation="2dp">
 
     <LinearLayout
         android:id="@+id/content_lin"
@@ -19,10 +21,10 @@
             android:id="@+id/selected_view"
             android:layout_width="4dp"
             android:layout_height="match_parent"
-            android:background="?colorPrimary"
+            android:background="?selectedColorPrimary"
+            android:orientation="horizontal"
             android:visibility="invisible"
-            tools:visibility="visible"
-            android:orientation="horizontal" />
+            tools:visibility="visible" />
 
         <LinearLayout
 
@@ -37,32 +39,25 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/profile_name"
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginLeft="12dp"
                     android:layout_weight="1"
-                    android:ellipsize="end"
                     android:gravity="center_vertical"
-                    android:maxLines="2"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textStyle="bold"
-                    tools:text="@string/profile_name" />
+                    android:paddingLeft="12dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp">
 
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/subscription"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="top"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/subscriptions"
-                    android:focusable="true"
-                    android:padding="12dp"
-                    android:visibility="gone"
-                    app:srcCompat="@drawable/ic_file_cloud_queue" />
+                    <TextView
+                        android:id="@+id/profile_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:textColor="?android:attr/textColorPrimary"
+                        android:textStyle="bold"
+                        tools:text="@string/profile_name" />
+                </LinearLayout>
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/edit"
@@ -75,7 +70,7 @@
                     android:padding="12dp"
                     app:srcCompat="@drawable/ic_image_edit" />
 
-                <androidx.appcompat.widget.AppCompatImageView
+                <LinearLayout
                     android:id="@+id/share"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -83,35 +78,59 @@
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="@string/share"
                     android:focusable="true"
-                    android:nextFocusLeft="@+id/container"
+                    android:nextFocusLeft="@+id/container">
+
+                    <LinearLayout
+                        android:id="@+id/share_layer"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="12dp">
+
+                        <androidx.appcompat.widget.AppCompatImageView
+                            android:id="@+id/shareIcon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:srcCompat="@drawable/ic_social_share" />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/remove"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/delete"
+                    android:focusable="true"
                     android:padding="12dp"
-                    app:srcCompat="@drawable/ic_social_share" />
+                    android:visibility="gone"
+                    app:srcCompat="@drawable/ic_action_delete" />
+
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingLeft="12dp"
-                android:paddingRight="8dp"
-                android:paddingBottom="8dp">
+                android:paddingStart="12dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="4dp"
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <TextView
-                    android:id="@+id/profile_type"
+                    android:id="@+id/profile_address"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/profile_type"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textColor="@color/color_primary_text" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="8dp"
-                    android:layout_weight="1"
-                    android:text="@string/profile_address"
+                    android:text="@string/server_address"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="?android:attr/textColorSecondary" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
 
                 <TextView
                     android:id="@+id/traffic_text"
@@ -120,6 +139,36 @@
                     android:text="@string/traffic"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textColor="?android:attr/textColorSecondary" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="12dp">
+
+                <TextView
+                    android:id="@+id/profile_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="?attr/accentOrTextSecondary" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/profile_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:textAppearance="?android:attr/textAppearanceSmall"
+                    android:textColor="?attr/accentOrTextSecondary" />
 
             </LinearLayout>
 
