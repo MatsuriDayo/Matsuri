@@ -73,11 +73,6 @@ type LocalResolver interface {
 }
 
 func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
-	if config.Debug { // TODO should move to LoadConfig
-		logrus.SetLevel(logrus.DebugLevel)
-	} else {
-		logrus.SetLevel(logrus.WarnLevel)
-	}
 	t := &Tun2ray{
 		router:              config.VLAN4Router,
 		v2ray:               config.V2Ray,

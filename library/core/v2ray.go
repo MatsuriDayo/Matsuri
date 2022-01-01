@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"io"
 	gonet "net"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/v2fly/v2ray-core/v4/features/dns/localdns"
 
 	core "github.com/v2fly/v2ray-core/v4"
 	"github.com/v2fly/v2ray-core/v4/app/observatory"
@@ -19,7 +18,9 @@ import (
 	udpProtocol "github.com/v2fly/v2ray-core/v4/common/protocol/udp"
 	"github.com/v2fly/v2ray-core/v4/common/signal"
 	"github.com/v2fly/v2ray-core/v4/features/dns"
+	dns_feature "github.com/v2fly/v2ray-core/v4/features/dns"
 	v2rayDns "github.com/v2fly/v2ray-core/v4/features/dns"
+	"github.com/v2fly/v2ray-core/v4/features/dns/localdns"
 	"github.com/v2fly/v2ray-core/v4/features/extension"
 	"github.com/v2fly/v2ray-core/v4/features/routing"
 	"github.com/v2fly/v2ray-core/v4/features/stats"
@@ -162,9 +163,10 @@ func (instance *V2RayInstance) dialUDP(ctx context.Context, destinationConn net.
 var _ packetConn = (*dispatcherConn)(nil)
 
 type dispatcherConn struct {
-	dest  net.Destination
-	link  *transport.Link
-	timer *signal.ActivityTimer
+	access sync.Mutex
+	dest   net.Destination
+	link   *transport.Link
+	timer  *signal.ActivityTimer
 
 	ctx    context.Context
 	cancel context.CancelFunc
@@ -256,6 +258,9 @@ func (c *dispatcherConn) LocalAddr() net.Addr {
 }
 
 func (c *dispatcherConn) Close() error {
+	c.access.Lock()
+	defer c.access.Unlock()
+
 	select {
 	case <-c.ctx.Done():
 		return nil
@@ -312,10 +317,17 @@ func (p *simpleSekaiWrapper) LookupIP(network, host string) (ret []net.IP, err e
 		if isSekai {
 			var str string
 			str, err = p.sekaiResolver.LookupIP(network, host)
+			// java -> go
 			if err != nil {
+				rcode, err2 := strconv.Atoi(err.Error())
+				if err2 == nil {
+					err = dns_feature.RCodeError(rcode)
+				}
+				return
+			} else if str == "" {
+				err = dns_feature.ErrEmptyResponse
 				return
 			}
-			// java -> go
 			ret = make([]net.IP, 0)
 			for _, ip := range strings.Split(str, ",") {
 				ret = append(ret, net.ParseIP(ip))

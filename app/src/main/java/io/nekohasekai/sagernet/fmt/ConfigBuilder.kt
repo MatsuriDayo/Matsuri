@@ -715,7 +715,7 @@ fun buildV2RayConfig(
 
                 // External proxy need a dokodemo-door inbound to forward the traffic
                 // For external proxy software, their traffic must goes to v2ray-core to use protected fd.
-                if (proxyEntity.needExternal()) {
+                if (bean.canMapping() && proxyEntity.needExternal()) {
                     val mappingPort = mkPort()
                     bean.finalAddress = LOCALHOST
                     bean.finalPort = mappingPort
@@ -767,8 +767,11 @@ fun buildV2RayConfig(
         val notVpn = DataStore.serviceMode != Key.MODE_VPN
 
         // apply user rules
-        var uidListDNSRemote = mutableListOf<Int>()
+        val uidListDNSRemote = mutableListOf<Int>()
         val uidListDNSDirect = mutableListOf<Int>()
+        val domainListDNSRemote = mutableListOf<String>()
+        val domainListDNSDirect = mutableListOf<String>()
+
         for (rule in extraRules) {
             val _uidList = rule.packages.map {
                 PackageCache[it]?.takeIf { uid -> uid >= 10000 } ?: 1000
@@ -788,8 +791,10 @@ fun buildV2RayConfig(
                     uidList = _uidList
                 }
 
+                var _domainList: List<String>? = null
                 if (rule.domains.isNotBlank()) {
                     domain = rule.domains.split("\n")
+                    _domainList = domain
                 }
                 if (rule.ip.isNotBlank()) {
                     ip = rule.ip.split("\n")
@@ -819,8 +824,10 @@ fun buildV2RayConfig(
                 // cannot use other outbound profile to lookup...
                 if (rule.outbound == -1L) {
                     uidListDNSDirect += _uidList
+                    if (_domainList != null) domainListDNSDirect += _domainList
                 } else if (rule.outbound == 0L) {
                     uidListDNSRemote += _uidList
+                    if (_domainList != null) domainListDNSRemote += _domainList
                 }
 
                 outboundTag = when (val outId = rule.outbound) {
@@ -983,6 +990,12 @@ fun buildV2RayConfig(
             }
         }
 
+        // dns object user rules
+        // Note: "geosite:cn" matches before user rule... v2ray-core
+        dns.servers[0].valueY?.uidList = uidListDNSRemote.toHashSet().toList()
+        dns.servers[0].valueY?.domains = domainListDNSRemote.toHashSet().toList()
+        directLookupDomain += domainListDNSDirect
+
         // add directDNS objects here
         dns.servers.addAll(directDNS.map {
             DnsObject.StringOrServerObject().apply {
@@ -1001,9 +1014,6 @@ fun buildV2RayConfig(
                 valueX = "fakedns"
             })
         }
-
-        // don't bypass
-        dns.servers[0].valueY?.uidList = uidListDNSRemote.toHashSet().toList()
 
         if (!forTest) routing.rules.add(0, RoutingObject.RuleObject().apply {
             type = "field"

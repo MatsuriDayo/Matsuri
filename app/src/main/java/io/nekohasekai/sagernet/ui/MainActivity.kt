@@ -333,7 +333,7 @@ class MainActivity : ThemedActivity(),
             R.id.nav_tools -> displayFragment(ToolsFragment())
             R.id.nav_logcat -> displayFragment(LogcatFragment())
             R.id.nav_faq -> {
-                launchCustomTab("https://sagernet.org/")
+                launchCustomTab("https://github.com/MatsuriDayo/Matsuri")
                 return false
             }
             R.id.nav_about -> displayFragment(AboutFragment())

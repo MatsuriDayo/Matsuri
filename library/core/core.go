@@ -57,6 +57,9 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 		processName = strings.Trim(string(b), "\x00")
 		isBgProcess = strings.HasSuffix(processName, ":bg")
 		f.Close()
+	} else {
+		processName = "(error)"
+		isBgProcess = true
 	}
 
 	// Set up log

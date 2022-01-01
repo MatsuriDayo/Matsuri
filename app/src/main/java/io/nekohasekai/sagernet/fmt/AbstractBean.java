@@ -79,7 +79,6 @@ public abstract class AbstractBean extends Serializable implements Cloneable<Abs
     }
 
     public boolean canMapping() {
-        // TODO wtf
         return true;
     }
 

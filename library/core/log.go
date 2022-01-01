@@ -181,6 +181,14 @@ func NekoLogGet() []byte {
 	return []byte{0}
 }
 
+func SetLogLevel(enableLog bool) {
+	if enableLog {
+		logrus.SetLevel(logrus.DebugLevel)
+	} else {
+		logrus.SetLevel(logrus.FatalLevel)
+	}
+}
+
 func setupLogger(path string) (err error) {
 	//init neko logger
 	logrus.SetFormatter(&logrusFormatter{})

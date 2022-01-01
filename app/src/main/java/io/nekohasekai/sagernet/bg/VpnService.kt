@@ -40,6 +40,7 @@ import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.database.StatsEntity
 import io.nekohasekai.sagernet.fmt.LOCALHOST
+import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.tryResume
 import io.nekohasekai.sagernet.ktx.tryResumeWithException
@@ -200,7 +201,9 @@ class VpnService : BaseVpnService(),
         var proxyApps = DataStore.proxyApps
         var bypass = DataStore.bypass
         var workaroundSYSTEM = DataStore.tunImplementation == TunImplementation.SYSTEM
-        var needBypassRootUid = workaroundSYSTEM || data.proxy!!.config.outboundTagsAll.values.any { it.ptBean != null }
+        var needBypassRootUid = workaroundSYSTEM || data.proxy!!.config.outboundTagsAll.values.any {
+            it.ptBean != null || it.hysteriaBean?.protocol == HysteriaBean.PROTOCOL_FAKETCP
+        }
 
         if (proxyApps || needBypassRootUid) {
             val individual = mutableSetOf<String>()
@@ -291,11 +294,22 @@ class VpnService : BaseVpnService(),
                     val callback = object : DnsResolver.Callback<Collection<InetAddress>> {
                         @Suppress("ThrowableNotThrown")
                         override fun onAnswer(answer: Collection<InetAddress>, rcode: Int) {
-                            if (answer.isNotEmpty()) {
-                                continuation.tryResume(answer.mapNotNull { it.hostAddress }
-                                    .joinToString(","))
-                            } else {
-                                continuation.tryResumeWithException(Exception("unknown host"))
+                            // library/core/v2ray.go
+                            when {
+                                answer.isNotEmpty() -> {
+                                    continuation.tryResume(answer.mapNotNull { it.hostAddress }
+                                        .joinToString(","))
+                                }
+                                rcode == 0 -> {
+                                    // fuck AAAA no record
+                                    // features/dns/client.go
+                                    continuation.tryResume("")
+                                }
+                                else -> {
+                                    // Need return rcode
+                                    // proxy/dns/dns.go
+                                    continuation.tryResumeWithException(Exception("$rcode"))
+                                }
                             }
                         }
 
