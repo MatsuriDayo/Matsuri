@@ -8,27 +8,31 @@
 
 [License: GPL-3.0](https://www.gnu.org/licenses/gpl-3.0)
 
+适用于 Android 的代理工具链，用 Kotlin 编写。
+
 A proxy toolchain for Android, written in Kotlin.
 
-# 中文
+## 喵 Nya
 
-## 与 SagerNet 的区别
+这是 SagerNet 的一个分支，改进了部分情况下的体验。相较于 SagerNet 本软件的功能更少。
 
-“错误修复和其他改进”
+This is a fork of SagerNet, which improves the experience in some cases. Compared with SagerNet, this software has fewer functions.
 
-相较于 SagerNet 本软件的功能更少。
+其他介绍和APP截图
 
-其他： https://nekoquq.github.io/posts/0009.html
+Other introductions and APP screenshots
 
-## Documents & Changelog
+https://nekoquq.github.io/posts/0009.html
+
+## 更改记录和发布频道 Changelog and Telegram channel
 
 https://t.me/Matsuridayo
 
-### Protocols
+## 文档 Documents
 
-The application is designed to support some of the proxy protocols bypassing the firewall.
+https://sagernet.org
 
-#### Proxy
+## 代理 Proxy
 
 * SOCKS (4/4a/5)
 * HTTP(S)
@@ -42,24 +46,14 @@ The application is designed to support some of the proxy protocols bypassing the
 * Hysteria ( hysteria-plugin )
 * WireGuard ( wireguard-plugin )
 
-##### ROOT required
+### ROOT required
 
 * Ping Tunnel ( pingtunnel-plugin )
+* Hysteria faketcp ( hysteria-plugin )
 
-#### Subscription
+### 订阅 Subscription
 
+* 原始：所有广泛使用的格式（base64 clash 或原始配置）
 * Raw: All widely used formats (base64, clash or origin configuration)
 * [Open Online Config](https://github.com/Shadowsocks-NET/OpenOnlineConfig)
 * [Shadowsocks SIP008](https://shadowsocks.org/en/wiki/SIP008-Online-Configuration-Delivery.html)
-
-#### Features
-
-* Full basic features
-* V2Ray WebSocket browser forwarding
-* Option to change the notification update interval
-* A Chinese apps scanner (based on dex classpath scanning, so it may be slower)
-* Proxy chain
-* Advanced routing with outbound profile selection
-* Reverse proxy
-* Custom config (V2Ray / Trojan-Go)
-* Traffic statistics support, including real-time display and cumulative statistics
