@@ -42,7 +42,6 @@
     <string name="port_transproxy">Transproxy Portu</string>
     <string name="port_http">HTTP Vekil Sunucu Portu</string>
     <string name="port_proxy">SOCKS5 Vekil Sunucu Portu</string>
-    <string name="service_mode_vpn">VPN</string>
     <string name="service_mode_proxy">Sadece vekil sunucu</string>
     <string name="service_mode">Servis Modu</string>
     <string name="group_duplicate">%s
@@ -144,11 +143,6 @@
     <string name="route_bypass">Atlat</string>
     <string name="route_need_fds">%s yönlendirme kuralı Önplan Algılayıcı Servisine bağlıdır ama servis etkinleştirilmemiş.</string>
     <string name="route_need_vpn">%s yönlendirme kuralı VPN\'in etkin olmasına bağlıdır ve bu nedenle görmezden gelindi.</string>
-    <string name="background">Arkaplan</string>
-    <string name="foreground">Önplan</string>
-    <string name="foreground_status">Önplan Durumu</string>
-    <string name="foreground_detector_summary">Bu servis uygulamaların önplan durumuna göre rota kuralları desteği sağlar. Eğer başlatılmadıysa sonuç her zaman arkaplandadır.</string>
-    <string name="foreground_detector">Önplan algılayıcısı</string>
     <string name="shadowsocks_plugin_v2ray">V2Ray (Shadowsocks Android Eklentisi)</string>
     <string name="shadowsocks_plugin_simple_obfs">Basit Şaşırtmaca (Shadowsocks Android Eklentisi)</string>
     <string name="hysteria_connection_receive_window">QUIC Bağlantı Alım Penceresi</string>
@@ -411,7 +405,6 @@
     <string name="tun_implementation">TUN Tanımlaması</string>
     <string name="generating">Oluşturuluyor…</string>
     <string name="warp_generate">Yapılandırma Oluştur</string>
-    <string name="cloudflare_wrap">Warp</string>
     <string name="profile_traffic_statistics_summary">Devre dışı bırakıldığında kullanılan trafik sayılmayacak</string>
     <string name="pcap_summary">Trafiği .pcap dosyasına kaydet</string>
     <string name="pcap_notice">Pcap dosyaları %s içine kaydedilecek</string>

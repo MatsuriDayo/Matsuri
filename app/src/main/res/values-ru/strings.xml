@@ -92,7 +92,6 @@
     <string name="connection_test_url">URL-адрес проверки подключения</string>
     <string name="port_transproxy">Транспрокси-порт</string>
     <string name="port_proxy">Порт прокси SOCKS5</string>
-    <string name="service_mode_vpn">VPN</string>
     <string name="app_version">Версия</string>
     <string name="oss_licenses">Лицензии с открытым исходным кодом</string>
     <string name="telegram">Канал обновления Telegram</string>
@@ -363,11 +362,6 @@
     <string name="experimental_settings">Экспериментальный</string>
     <string name="route_need_fds">Правило маршрутизации %s полагается на работу службы детектора переднего плана, но не включено.</string>
     <string name="route_need_vpn">Правило маршрутизации %s зависит от VPN, поэтому игнорируется.</string>
-    <string name="background">Фон</string>
-    <string name="foreground">Передний план</string>
-    <string name="foreground_status">Статус переднего плана</string>
-    <string name="foreground_detector_summary">Эта служба обеспечивает поддержку правил маршрутизации на основе состояния переднего плана приложений. Если он не запущен, результат всегда остается в фоновом режиме.</string>
-    <string name="foreground_detector">Детектор переднего плана</string>
     <string name="route_for">Правило для %s</string>
     <string name="app_no_launcher">У приложения нет интерфейса.</string>
     <string name="copy_failed">Не удалось скопировать.</string>
@@ -422,7 +416,6 @@
     <string name="destination_override_summary">Использовать перехваченный домен для переопределения адреса назначения, а не только для маршрутизации</string>
     <string name="pcap_notice">Pcap файлы будут сохранены в %s</string>
     <string name="route_play_store">Правило Play Store для %s</string>
-    <string name="probe_url">Пользовательский URL-адрес проверки подключения</string>
     <string name="route_opt_block_analysis">Блокировать аналитику</string>
     <string name="wireguard_public_key">Открытый ключ сервера</string>
     <string name="wireguard_psk">Пароль сервера</string>

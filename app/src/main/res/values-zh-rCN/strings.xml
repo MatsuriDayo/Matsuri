@@ -39,7 +39,6 @@
     <!-- misc -->
     <string name="service_mode">运行模式</string>
     <string name="service_mode_proxy">仅代理</string>
-    <string name="service_mode_vpn">VPN</string>
     <string name="port_proxy">SOCKS5 代理端口</string>
     <string name="port_http">HTTP 代理端口</string>
     <string name="port_local_dns">本地 DNS 端口</string>
@@ -398,11 +397,6 @@
     <string name="traffic_active">活动</string>
     <string name="route_need_fds">路由规则 %s 依赖前台检测服务以生效，但它未被启用。</string>
     <string name="route_need_vpn">路由规则 %s 依赖 VPN 以生效，所以其已被忽略。</string>
-    <string name="background">后台</string>
-    <string name="foreground">前台</string>
-    <string name="foreground_detector_summary">本服务用于支持基于前台状态的路由规则，如果未启用，则结果永远为后台。</string>
-    <string name="foreground_status">前台状态</string>
-    <string name="foreground_detector">前台检测器</string>
     <string name="no_statistics">暂无数据</string>
     <string name="traffic_statistics_summary">可能增加电量使用</string>
     <string name="ssh_private_key_passphrase">私钥密码句</string>
@@ -416,7 +410,6 @@
     <string name="wireguard_local_address">本地地址</string>
     <string name="wireguard_public_key">节点公钥</string>
     <string name="wireguard_psk">节点预共享密钥</string>
-    <string name="cloudflare_wrap">Warp</string>
     <string name="resolve_destination_summary">如果目标地址是一个域, 则根据 IPv6 策略传出.</string>
     <string name="resolve_destination">解析目标地址</string>
     <string name="destination_override_summary">使用探测的域来覆盖目标地址, 而不是仅用于路由</string>

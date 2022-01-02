@@ -161,7 +161,6 @@
     <string name="group_status_empty_subscription">Aún no está actualizado</string>
     <string name="group_status_empty">Grupo vacio</string>
     <string name="logcat_summary">Tan útil xd</string>
-    <string name="service_mode_vpn">VPN</string>
     <string name="clear_selections">Borrar selecciones</string>
     <string name="invert_selections">Invertir selecciones</string>
     <string name="search_apps">Buscar…</string>
@@ -284,10 +283,6 @@
     <string name="copy_failed">Error de copia.</string>
     <string name="app_no_launcher">La aplicación no tiene interfaz.</string>
     <string name="route_for">Regla para %s</string>
-    <string name="foreground_detector">Detector de primer plano</string>
-    <string name="foreground_status">Estado de primer plano</string>
-    <string name="foreground">Primer plano</string>
-    <string name="background">Fondo</string>
     <string name="route_need_vpn">La regla de enrutamiento %s depende de que la VPN esté en vigor, por lo que se ignora.</string>
     <string name="route_need_fds">La regla de enrutamiento %s depende de que el servicio de detector de primer plano esté en vigor, pero no está habilitado.</string>
     <string name="traffic_statistics_summary">Puede aumentar el consumo de energía</string>
@@ -303,7 +298,6 @@
     <string name="wireguard_local_address">Dirección local</string>
     <string name="wireguard_public_key">Clave pública del mismo nivel</string>
     <string name="wireguard_psk">Clave precompartida de pares</string>
-    <string name="foreground_detector_summary">Este servicio proporciona soporte para reglas de enrutamiento basadas en el estado de primer plano de las aplicaciones. Si no se inicia, el resultado siempre está en segundo plano.</string>
     <string name="copy_success">¡Copie el éxito!</string>
     <string name="traffic_holder">Abra VPN para registrar estadísticas de tráfico</string>
     <string name="udp_connections">%d conexiones UDP</string>

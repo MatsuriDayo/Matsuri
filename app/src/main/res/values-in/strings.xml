@@ -56,7 +56,6 @@
     <string name="allow_access">Izinkan koneksi dari LAN</string>
     <string name="cag_route">Pengaturan Rute</string>
     <string name="port_transproxy">Port Transproxy</string>
-    <string name="service_mode_vpn">VPN</string>
     <string name="service_mode_proxy">Hanya proxy</string>
     <string name="service_mode">Mode Layanan</string>
     <string name="group_duplicate">Duplikasi:

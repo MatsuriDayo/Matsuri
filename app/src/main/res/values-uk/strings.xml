@@ -132,5 +132,4 @@
     <string name="obfs">Obfs</string>
     <string name="speed">%s/s</string>
     <string name="menu_traffic">трафіку</string>
-    <string name="service_mode_vpn">VPN</string>
 </resources>

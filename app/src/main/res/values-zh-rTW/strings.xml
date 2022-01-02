@@ -38,7 +38,6 @@
     <!-- misc -->
     <string name="service_mode">執行模式</string>
     <string name="service_mode_proxy">代理</string>
-    <string name="service_mode_vpn">VPN</string>
     <string name="port_proxy">SOCKS5 代理連接埠</string>
     <string name="port_http">HTTP 代理連接埠</string>
     <string name="port_local_dns">本地 DNS 連接埠</string>
@@ -372,11 +371,6 @@
     <string name="traffic_statistics_summary">可能增加電量消耗</string>
     <string name="route_need_fds">路由規則 %s 需要前景模式偵測器以生效，但未被啟用。</string>
     <string name="route_need_vpn">路由規則 %s 需要 VPN 模式以生效，因此被忽略。</string>
-    <string name="background">背景</string>
-    <string name="foreground">前景</string>
-    <string name="foreground_status">前景狀態</string>
-    <string name="foreground_detector_summary">此服務為基於前景狀態的應用程式規則提供支援，如果它未被啟動，結果將永遠為背景。</string>
-    <string name="foreground_detector">前景偵測器</string>
     <string name="route_for">%s 的規則</string>
     <string name="app_no_launcher">此應用程式沒有介面。</string>
     <string name="copy_failed">複製失敗。</string>

@@ -70,7 +70,6 @@
     <string name="port_transproxy">Transproxy порт</string>
     <string name="port_http">Проксі -порт HTTP</string>
     <string name="port_proxy">Порт проксі -сервера SOCKS5</string>
-    <string name="service_mode_vpn">VPN</string>
     <string name="service_mode_proxy">Толькі проксі</string>
     <string name="service_mode">Рэжым абслугоўвання</string>
     <string name="group_duplicate">Дублікат:

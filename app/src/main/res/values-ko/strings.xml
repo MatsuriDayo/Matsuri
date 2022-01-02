@@ -16,5 +16,4 @@
     <string name="menu_about">대하여</string>
     <string name="menu_group">그룹</string>
     <string name="menu_configuration">구성</string>
-    <string name="service_mode_vpn">VPN</string>
 </resources>

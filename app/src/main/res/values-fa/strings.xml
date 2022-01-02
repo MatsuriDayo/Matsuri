@@ -15,7 +15,6 @@
     <string name="port_transproxy">پورت Transproxy</string>
     <string name="port_http">پورت پروکسی HTTP</string>
     <string name="port_proxy">پورت پروکسی SOCKS5</string>
-    <string name="service_mode_vpn">VPN</string>
     <string name="service_mode_proxy">فقط پروکسی</string>
     <string name="service_mode">حالت سرویس</string>
     <string name="group_duplicate">کپی:
@@ -361,11 +360,6 @@
     <string name="experimental_settings">آزمایشی</string>
     <string name="route_need_fds">قانون مسیریابی %s متکی به فعال بودن سرویس تشخیص پیش زمینه است، اما فعال نیست.</string>
     <string name="route_need_vpn">قانون مسیریابی %s متکی به در دسترس بودن VPN است، بنابراین نادیده گرفته می شود.</string>
-    <string name="background">پس‌زمینه</string>
-    <string name="foreground">پیش زمینه</string>
-    <string name="foreground_status">وضعیت پیش زمینه</string>
-    <string name="foreground_detector_summary">این سرویس از قوانین مسیریابی بر اساس وضعیت پیش زمینه برنامه ها پشتیبانی می کند. اگر شروع نشده باشد، نتیجه همیشه در پس زمینه است.</string>
-    <string name="foreground_detector">آشکارساز پیش زمینه</string>
     <string name="route_for">قانون برای %s</string>
     <string name="app_no_launcher">برنامه فاقد رابط کاربری است.</string>
     <string name="copy_failed">کپی نشد.</string>

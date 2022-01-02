@@ -54,7 +54,6 @@
     <string name="speed">%s/s</string>
     <string name="traffic">%1$s↑ %2$s↓</string>
     <string name="general_settings">アブリ設定</string>
-    <string name="service_mode_vpn">VPN</string>
     <string name="menu_route">ルート</string>
     <string name="uuid">ユーザーID</string>
     <string name="obfs_param">Obfsパラメータ</string>
