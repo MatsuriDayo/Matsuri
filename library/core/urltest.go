@@ -3,12 +3,13 @@ package libcore
 import (
 	"context"
 	"fmt"
-	core "github.com/v2fly/v2ray-core/v5"
-	v2rayNet "github.com/v2fly/v2ray-core/v5/common/net"
-	"github.com/v2fly/v2ray-core/v5/common/session"
 	"net"
 	"net/http"
 	"time"
+
+	core "github.com/v2fly/v2ray-core/v5"
+	v2rayNet "github.com/v2fly/v2ray-core/v5/common/net"
+	"github.com/v2fly/v2ray-core/v5/common/session"
 )
 
 func urlTest(dialContext func(ctx context.Context, network, addr string) (net.Conn, error), link string, timeout int32) (int32, error) {
@@ -49,13 +50,13 @@ func UrlTestV2ray(instance *V2RayInstance, inbound string, link string, timeout 
 	}, link, timeout)
 }
 
-func UrlTestClashBased(instance *ClashBasedInstance, link string, timeout int32) (int32, error) {
-	return urlTest(func(ctx context.Context, network, addr string) (net.Conn, error) {
-		dest, err := addrToMetadata(addr)
-		if err != nil {
-			return nil, err
-		}
-		dest.NetWork = networkForClash(network)
-		return instance.out.DialContext(ctx, dest)
-	}, link, timeout)
-}
+// func UrlTestClashBased(instance *ClashBasedInstance, link string, timeout int32) (int32, error) {
+// 	return urlTest(func(ctx context.Context, network, addr string) (net.Conn, error) {
+// 		dest, err := addrToMetadata(addr)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		dest.NetWork = networkForClash(network)
+// 		return instance.out.DialContext(ctx, dest)
+// 	}, link, timeout)
+// }
