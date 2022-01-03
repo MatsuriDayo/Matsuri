@@ -23,6 +23,8 @@ import android.os.Build
 import cn.hutool.core.util.NumberUtil
 import cn.hutool.json.JSONArray
 import cn.hutool.json.JSONObject
+import com.github.shadowsocks.plugin.PluginConfiguration
+import com.github.shadowsocks.plugin.PluginManager
 import com.google.gson.JsonSyntaxException
 import io.nekohasekai.sagernet.IPv6Mode
 import io.nekohasekai.sagernet.Key
@@ -35,12 +37,15 @@ import io.nekohasekai.sagernet.fmt.gson.gson
 import io.nekohasekai.sagernet.fmt.http.HttpBean
 import io.nekohasekai.sagernet.fmt.internal.ChainBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean
+import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
+import io.nekohasekai.sagernet.fmt.ssh.SSHBean
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
 import io.nekohasekai.sagernet.fmt.v2ray.V2RayConfig
 import io.nekohasekai.sagernet.fmt.v2ray.V2RayConfig.*
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
+import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
 import io.nekohasekai.sagernet.ktx.isIpAddress
 import io.nekohasekai.sagernet.ktx.mkPort
 import io.nekohasekai.sagernet.utils.PackageCache
@@ -629,7 +634,7 @@ fun buildV2RayConfig(
                                 }
 
                             }
-                        } else if (bean is ShadowsocksBean) {
+                        } else if (bean is ShadowsocksBean || bean is ShadowsocksRBean) {
                             protocol = "shadowsocks"
                             settings = LazyOutboundConfigurationObject(
                                 this,
@@ -638,13 +643,47 @@ fun buildV2RayConfig(
                                         .apply {
                                             address = bean.serverAddress
                                             port = bean.serverPort
-                                            method = bean.method
-                                            password = bean.password
+                                            when (bean) {
+                                                is ShadowsocksBean -> {
+                                                    method = bean.method
+                                                    password = bean.password
+                                                }
+                                                is ShadowsocksRBean -> {
+                                                    method = bean.method
+                                                    password = bean.password
+                                                }
+                                            }
                                         })
                                     if (needKeepAliveInterval) {
                                         streamSettings = StreamSettingsObject().apply {
                                             sockopt = StreamSettingsObject.SockoptObject().apply {
                                                 tcpKeepAliveInterval = keepAliveInterval
+                                            }
+                                        }
+                                    }
+                                    if (bean is ShadowsocksRBean) {
+                                        plugin = "shadowsocksr"
+                                        pluginArgs = listOf(
+                                            "--obfs=${bean.obfs}",
+                                            "--obfs-param=${bean.obfsParam}",
+                                            "--protocol=${bean.protocol}",
+                                            "--protocol-param=${bean.protocolParam}"
+                                        )
+                                    } else if (bean is ShadowsocksBean && bean.plugin.isNotBlank()) {
+                                        val pluginConfiguration = PluginConfiguration(bean.plugin)
+                                        try {
+                                            PluginManager.init(pluginConfiguration)
+                                                ?.let { (path, opts, _) ->
+                                                    plugin = path
+                                                    pluginOpts = opts.toString()
+                                                }
+                                        } catch (e: PluginManager.PluginNotFoundException) {
+                                            if (e.plugin in arrayOf("v2ray-plugin", "obfs-local")) {
+                                                plugin = e.plugin
+                                                pluginOpts = pluginConfiguration.getOptions()
+                                                    .toString()
+                                            } else {
+                                                throw e
                                             }
                                         }
                                     }
@@ -681,6 +720,52 @@ fun buildV2RayConfig(
                                 if (bean.allowInsecure) {
                                     tlsSettings = tlsSettings ?: TLSObject()
                                     tlsSettings.allowInsecure = true
+                                }
+                            }
+                        } else if (bean is WireGuardBean) {
+                            protocol = "wireguard"
+                            settings = LazyOutboundConfigurationObject(
+                                this,
+                                WireGuardOutbounzConfigurationObject().apply {
+                                    address = bean.finalAddress
+                                    port = bean.finalPort
+                                    network = "udp"
+                                    localAddresses = bean.localAddress.split("\n")
+                                    privateKey = bean.privateKey
+                                    peerPublicKey = bean.peerPublicKey
+                                    preSharedKey = bean.peerPreSharedKey
+                                })
+                            streamSettings = StreamSettingsObject().apply {
+                                if (needKeepAliveInterval) {
+                                    sockopt = StreamSettingsObject.SockoptObject().apply {
+                                        tcpKeepAliveInterval = keepAliveInterval
+                                    }
+                                }
+                            }
+                        } else if (bean is SSHBean) {
+                            protocol = "ssh"
+                            settings = LazyOutboundConfigurationObject(
+                                this,
+                                SSHOutbountConfigurationObject().apply {
+                                    address = bean.finalAddress
+                                    port = bean.finalPort
+                                    user = bean.username
+                                    when (bean.authType) {
+                                        SSHBean.AUTH_TYPE_PRIVATE_KEY -> {
+                                            privateKey = bean.privateKey
+                                            password = bean.privateKeyPassphrase
+                                        }
+                                        else -> {
+                                            password = bean.password
+                                        }
+                                    }
+                                    publicKey = bean.publicKey
+                                })
+                            streamSettings = StreamSettingsObject().apply {
+                                if (needKeepAliveInterval) {
+                                    sockopt = StreamSettingsObject.SockoptObject().apply {
+                                        tcpKeepAliveInterval = keepAliveInterval
+                                    }
                                 }
                             }
                         }

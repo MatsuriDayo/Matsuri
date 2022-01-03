@@ -21,7 +21,6 @@ package io.nekohasekai.sagernet.database
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Parcel
 import android.os.Parcelable
 import androidx.room.*
@@ -47,7 +46,6 @@ import io.nekohasekai.sagernet.fmt.pingtunnel.PingTunnelBean
 import io.nekohasekai.sagernet.fmt.pingtunnel.toUri
 import io.nekohasekai.sagernet.fmt.shadowsocks.*
 import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
-import io.nekohasekai.sagernet.fmt.shadowsocksr.buildShadowsocksRConfig
 import io.nekohasekai.sagernet.fmt.shadowsocksr.toUri
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
 import io.nekohasekai.sagernet.fmt.socks.toUri
@@ -286,15 +284,6 @@ data class ProxyEntity(
                     chain.entries.forEachIndexed { index, (port, profile) ->
                         val needMux = enableMux && (index == chain.size - 1)
                         when (val bean = profile.requireBean()) {
-                            is ShadowsocksBean -> {
-                                append("\n\n")
-                                append(bean.buildShadowsocksConfig(port))
-
-                            }
-                            is ShadowsocksRBean -> {
-                                append("\n\n")
-                                append(bean.buildShadowsocksRConfig())
-                            }
                             is TrojanGoBean -> {
                                 append("\n\n")
                                 append(bean.buildTrojanGoConfig(port, needMux))
@@ -316,21 +305,12 @@ data class ProxyEntity(
 
     fun needExternal(): Boolean {
         return when (type) {
-            TYPE_SOCKS -> false
-            TYPE_HTTP -> false
-            TYPE_SS -> pickShadowsocksProvider() != ShadowsocksProvider.V2RAY
-            TYPE_VMESS -> false
             TYPE_TROJAN -> DataStore.providerTrojan != TrojanProvider.V2RAY
-            TYPE_CHAIN -> false
-            else -> true
-        }
-    }
-
-    fun useClashBased(): Boolean {
-        if (!needExternal()) return false
-        return when (type) {
-            TYPE_SS -> pickShadowsocksProvider() == ShadowsocksProvider.CLASH
-            TYPE_SSR -> true
+            TYPE_TROJAN_GO -> true
+            TYPE_NAIVE -> true
+            TYPE_PING_TUNNEL -> true
+            TYPE_HYSTERIA -> true
+            TYPE_CONFIG -> true
             else -> false
         }
     }

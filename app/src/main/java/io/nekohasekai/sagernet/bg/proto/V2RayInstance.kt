@@ -27,10 +27,8 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import io.nekohasekai.sagernet.SagerNet
-import io.nekohasekai.sagernet.ShadowsocksProvider
 import io.nekohasekai.sagernet.TrojanProvider
 import io.nekohasekai.sagernet.bg.AbstractInstance
-import io.nekohasekai.sagernet.bg.Executable
 import io.nekohasekai.sagernet.bg.ExternalInstance
 import io.nekohasekai.sagernet.bg.GuardedProcessPool
 import io.nekohasekai.sagernet.database.DataStore
@@ -44,17 +42,12 @@ import io.nekohasekai.sagernet.fmt.internal.ConfigBean
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean
 import io.nekohasekai.sagernet.fmt.naive.buildNaiveConfig
 import io.nekohasekai.sagernet.fmt.pingtunnel.PingTunnelBean
-import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean
-import io.nekohasekai.sagernet.fmt.shadowsocks.buildShadowsocksConfig
-import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
-import io.nekohasekai.sagernet.fmt.ssh.SSHBean
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.fmt.trojan.buildTrojanConfig
 import io.nekohasekai.sagernet.fmt.trojan.buildTrojanGoConfig
 import io.nekohasekai.sagernet.fmt.trojan_go.TrojanGoBean
 import io.nekohasekai.sagernet.fmt.trojan_go.buildCustomTrojanConfig
 import io.nekohasekai.sagernet.fmt.trojan_go.buildTrojanGoConfig
-import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
 import io.nekohasekai.sagernet.fmt.wireguard.buildWireGuardUapiConf
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.plugin.PluginManager
@@ -106,19 +99,6 @@ abstract class V2RayInstance(
                 val needMux = enableMux && (index == chain.size - 1)
 
                 when (val bean = profile.requireBean()) {
-                    is ShadowsocksBean -> when (val provider = profile.pickShadowsocksProvider()) {
-                        ShadowsocksProvider.CLASH -> {
-                            externalInstances[port] = ShadowsocksInstance(bean, port)
-                        }
-                        else -> {
-                            pluginConfigs[port] = provider to bean.buildShadowsocksConfig(
-                                port
-                            )
-                        }
-                    }
-                    is ShadowsocksRBean -> {
-                        externalInstances[port] = ShadowsocksRInstance(bean, port)
-                    }
                     is TrojanBean -> {
                         when (DataStore.providerTrojan) {
                             TrojanProvider.TROJAN -> {
@@ -161,10 +141,6 @@ abstract class V2RayInstance(
                             }
                         }
                     }
-                    is WireGuardBean -> {
-                        initPlugin("wireguard-plugin")
-                        pluginConfigs[port] = profile.type to bean.buildWireGuardUapiConf()
-                    }
                     is ConfigBean -> {
                         when (bean.type) {
                             "trojan-go" -> {
@@ -181,9 +157,6 @@ abstract class V2RayInstance(
                                 }
                             }
                         }
-                    }
-                    is SSHBean -> {
-                        externalInstances[port] = SSHInstance(bean, port)
                     }
                 }
             }
@@ -317,30 +290,6 @@ abstract class V2RayInstance(
                         if (bean.protocol == HysteriaBean.PROTOCOL_FAKETCP) {
                             commands.addAll(0, listOf("su", "-c"))
                         }
-
-                        processes.start(commands)
-                    }
-                    bean is WireGuardBean -> {
-                        val configFile = File(
-                            context.noBackupFilesDir,
-                            "wg_" + SystemClock.elapsedRealtime() + ".conf"
-                        )
-
-                        configFile.parentFile?.mkdirs()
-                        configFile.writeText(config)
-                        cacheFiles.add(configFile)
-
-                        val commands = mutableListOf(
-                            initPlugin("wireguard-plugin").path,
-                            "-a",
-                            bean.localAddress.split("\n").joinToString(","),
-                            "-b",
-                            "127.0.0.1:$port",
-                            "-c",
-                            configFile.absolutePath,
-                            "-d",
-                            "127.0.0.1:${DataStore.localDNSPort}"
-                        )
 
                         processes.start(commands)
                     }
