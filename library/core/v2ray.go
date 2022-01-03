@@ -18,7 +18,7 @@ import (
 	"github.com/v2fly/v2ray-core/v5/common"
 	"github.com/v2fly/v2ray-core/v5/common/buf"
 	"github.com/v2fly/v2ray-core/v5/common/net"
-	udpProtocol "github.com/v2fly/v2ray-core/v5/common/protocol/udp"
+	"github.com/v2fly/v2ray-core/v5/common/protocol/udp"
 	"github.com/v2fly/v2ray-core/v5/common/signal"
 	"github.com/v2fly/v2ray-core/v5/features/dns"
 	dns_feature "github.com/v2fly/v2ray-core/v5/features/dns"
@@ -153,7 +153,7 @@ func (instance *V2RayInstance) dialUDP(ctx context.Context, destinationConn net.
 		link:   link,
 		ctx:    ctx,
 		cancel: cancel,
-		cache:  make(chan *udpProtocol.Packet, 16),
+		cache:  make(chan *udp.Packet, 16),
 	}
 	c.timer = signal.CancelAfterInactivity(ctx, func() {
 		closeIgnore(c)
@@ -173,7 +173,7 @@ type dispatcherConn struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 
-	cache chan *udpProtocol.Packet
+	cache chan *udp.Packet
 }
 
 func (c *dispatcherConn) handleInput() {
@@ -192,7 +192,10 @@ func (c *dispatcherConn) handleInput() {
 		}
 		c.timer.Update()
 		for _, buffer := range mb {
-			packet := udpProtocol.Packet{
+			if buffer.Len() <= 0 {
+				continue
+			}
+			packet := udp.Packet{
 				Payload: buffer,
 			}
 			if buffer.Endpoint == nil {
@@ -237,14 +240,9 @@ func (c *dispatcherConn) readFrom() (p []byte, addr net.Addr, err error) {
 }
 
 func (c *dispatcherConn) WriteTo(p []byte, addr net.Addr) (n int, err error) {
-	buffer := buf.New()
-	raw := buffer.Extend(buf.Size)
-	n = copy(raw, p)
-	buffer.Resize(0, int32(n))
-
+	buffer := buf.FromBytes(p)
 	endpoint := net.DestinationFromAddr(addr)
 	buffer.Endpoint = &endpoint
-
 	err = c.link.Writer.WriteMultiBuffer(buf.MultiBuffer{buffer})
 	if err == nil {
 		c.timer.Update()
