@@ -353,10 +353,6 @@ func (v2ray *V2RayInstance) setupDialer(fakedns bool) {
 	// All lookup except dnsClient -> dc.LookupIP()
 	// and also set protectedDialer
 	if c, ok := dc.(v2rayDns.ClientWithIPOption); ok {
-		if fakedns {
-			c.SetFakeDNSOption(true)
-			_, _ = dc.LookupIP("placeholder")
-		}
 		internet.UseAlternativeSystemDialer(&protectedDialer{
 			resolver: func(domain string) ([]net.IP, error) {
 				c.SetFakeDNSOption(false) // Skip FakeDNS
