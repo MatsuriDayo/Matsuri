@@ -10,24 +10,26 @@ import (
 	"sync"
 	"time"
 
-	core "github.com/v2fly/v2ray-core/v4"
-	"github.com/v2fly/v2ray-core/v4/app/observatory"
-	"github.com/v2fly/v2ray-core/v4/common"
-	"github.com/v2fly/v2ray-core/v4/common/buf"
-	"github.com/v2fly/v2ray-core/v4/common/net"
-	udpProtocol "github.com/v2fly/v2ray-core/v4/common/protocol/udp"
-	"github.com/v2fly/v2ray-core/v4/common/signal"
-	"github.com/v2fly/v2ray-core/v4/features/dns"
-	dns_feature "github.com/v2fly/v2ray-core/v4/features/dns"
-	v2rayDns "github.com/v2fly/v2ray-core/v4/features/dns"
-	"github.com/v2fly/v2ray-core/v4/features/dns/localdns"
-	"github.com/v2fly/v2ray-core/v4/features/extension"
-	"github.com/v2fly/v2ray-core/v4/features/routing"
-	"github.com/v2fly/v2ray-core/v4/features/stats"
-	"github.com/v2fly/v2ray-core/v4/infra/conf/serial"
-	_ "github.com/v2fly/v2ray-core/v4/main/distro/all"
-	"github.com/v2fly/v2ray-core/v4/transport"
-	"github.com/v2fly/v2ray-core/v4/transport/internet"
+	"github.com/v2fly/v2ray-core/v5/app/dispatcher"
+
+	core "github.com/v2fly/v2ray-core/v5"
+	"github.com/v2fly/v2ray-core/v5/app/observatory"
+	"github.com/v2fly/v2ray-core/v5/common"
+	"github.com/v2fly/v2ray-core/v5/common/buf"
+	"github.com/v2fly/v2ray-core/v5/common/net"
+	udpProtocol "github.com/v2fly/v2ray-core/v5/common/protocol/udp"
+	"github.com/v2fly/v2ray-core/v5/common/signal"
+	"github.com/v2fly/v2ray-core/v5/features/dns"
+	dns_feature "github.com/v2fly/v2ray-core/v5/features/dns"
+	v2rayDns "github.com/v2fly/v2ray-core/v5/features/dns"
+	"github.com/v2fly/v2ray-core/v5/features/dns/localdns"
+	"github.com/v2fly/v2ray-core/v5/features/extension"
+	"github.com/v2fly/v2ray-core/v5/features/routing"
+	"github.com/v2fly/v2ray-core/v5/features/stats"
+	"github.com/v2fly/v2ray-core/v5/infra/conf/serial"
+	_ "github.com/v2fly/v2ray-core/v5/main/distro/all"
+	"github.com/v2fly/v2ray-core/v5/transport"
+	"github.com/v2fly/v2ray-core/v5/transport/internet"
 )
 
 func GetV2RayVersion() string {
@@ -40,7 +42,7 @@ type V2RayInstance struct {
 	core         *core.Instance
 	statsManager stats.Manager
 	observatory  *observatory.Observer
-	dispatcher   routing.Dispatcher
+	dispatcher   *dispatcher.DefaultDispatcher
 	dnsClient    dns.Client
 }
 
@@ -76,7 +78,7 @@ func (instance *V2RayInstance) LoadConfig(content string) error {
 	}
 	instance.core = c
 	instance.statsManager = c.GetFeature(stats.ManagerType()).(stats.Manager)
-	instance.dispatcher = c.GetFeature(routing.DispatcherType()).(routing.Dispatcher)
+	instance.dispatcher = c.GetFeature(routing.DispatcherType()).(routing.Dispatcher).(*dispatcher.DefaultDispatcher)
 	instance.dnsClient = c.GetFeature(dns.ClientType()).(dns.Client)
 	instance.setupDialer(false)
 

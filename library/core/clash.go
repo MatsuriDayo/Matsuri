@@ -12,7 +12,7 @@ import (
 	clashC "github.com/Dreamacro/clash/constant"
 	"github.com/Dreamacro/clash/listener/socks"
 	"github.com/sirupsen/logrus"
-	"github.com/v2fly/v2ray-core/v4/common/task"
+	"github.com/v2fly/v2ray-core/v5/common/task"
 	"io"
 	"net"
 	"sync"

@@ -3,7 +3,7 @@ package gvisor
 import (
 	"fmt"
 	"github.com/sirupsen/logrus"
-	v2rayNet "github.com/v2fly/v2ray-core/v4/common/net"
+	v2rayNet "github.com/v2fly/v2ray-core/v5/common/net"
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/buffer"
 	"gvisor.dev/gvisor/pkg/tcpip/header"

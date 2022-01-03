@@ -10,7 +10,7 @@ import (
 
 	"github.com/sagernet/gomobile/asset"
 	"github.com/sirupsen/logrus"
-	"github.com/v2fly/v2ray-core/v4/common/platform/filesystem"
+	"github.com/v2fly/v2ray-core/v5/common/platform/filesystem"
 )
 
 const (

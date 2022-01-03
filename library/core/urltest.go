@@ -3,9 +3,9 @@ package libcore
 import (
 	"context"
 	"fmt"
-	core "github.com/v2fly/v2ray-core/v4"
-	v2rayNet "github.com/v2fly/v2ray-core/v4/common/net"
-	"github.com/v2fly/v2ray-core/v4/common/session"
+	core "github.com/v2fly/v2ray-core/v5"
+	v2rayNet "github.com/v2fly/v2ray-core/v5/common/net"
+	"github.com/v2fly/v2ray-core/v5/common/session"
 	"net"
 	"net/http"
 	"time"

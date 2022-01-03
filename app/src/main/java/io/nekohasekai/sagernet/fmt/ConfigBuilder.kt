@@ -155,7 +155,6 @@ fun buildV2RayConfig(
                 DnsObject.StringOrServerObject().apply {
                     valueY = DnsObject.ServerObject().apply {
                         address = it
-                        concurrent = false
                     }
                 }
             })
@@ -1003,7 +1002,6 @@ fun buildV2RayConfig(
                     address = it
                     domains = directLookupDomain.toList()
                     skipFallback = true
-                    concurrent = false
                     uidList = uidListDNSDirect.toHashSet().toList()
                 }
             }

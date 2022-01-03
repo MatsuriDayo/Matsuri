@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/Dreamacro/clash/common/cache"
-	v2rayNet "github.com/v2fly/v2ray-core/v4/common/net"
+	v2rayNet "github.com/v2fly/v2ray-core/v5/common/net"
 	"gvisor.dev/gvisor/pkg/tcpip"
 )
 
