@@ -85,8 +85,7 @@ class SagerNet : Application(),
         }, cacheDir.absolutePath, {
             Toast.makeText(this, it, Toast.LENGTH_LONG).show()
         })
-        Libcore.setLogLevel(DataStore.enableLog)
-        Libcore.setenv("v2ray.conf.geoloader", "memconservative")
+        Libcore.setEnableLog(DataStore.enableLog)
         Libcore.setUidDumper(UidDumper)
 
         runOnDefaultDispatcher {

@@ -44,6 +44,9 @@ func (w *v2rayLogWriter) Write(s string) error {
 	} else if strings.Contains(s, "[Warn]") {
 		s = strings.Replace(s, "[Warn]", "", 1)
 		priority = logrus.WarnLevel
+	} else if strings.Contains(s, "[Warning]") {
+		s = strings.Replace(s, "[Warning]", "", 1)
+		priority = logrus.WarnLevel
 	} else if strings.Contains(s, "[Error]") {
 		s = strings.Replace(s, "[Error]", "", 1)
 		priority = logrus.ErrorLevel
@@ -51,7 +54,7 @@ func (w *v2rayLogWriter) Write(s string) error {
 		priority = logrus.DebugLevel
 	}
 
-	NekoLogWrite(int32(priority), "v2ray-core", s)
+	NekoLogWrite2(int32(priority), strings.Trim(s, " "))
 	return nil
 }
 
@@ -62,7 +65,7 @@ func (w *v2rayLogWriter) Close() error {
 type stdLogWriter struct{}
 
 func (stdLogWriter) Write(p []byte) (n int, err error) {
-	NekoLogWrite(int32(logrus.InfoLevel), "stdLogWriter", string(p))
+	NekoLogWrite(int32(logrus.InfoLevel), "std", string(p))
 	return len(p), nil
 }
 
@@ -168,6 +171,10 @@ func NekoLogWrite(level int32, tag, str string) {
 	logrus.StandardLogger().WithField("tag", tag).Log(logrus.Level(level), strings.Trim(str, "\n"))
 }
 
+func NekoLogWrite2(level int32, str string) {
+	logrus.StandardLogger().Log(logrus.Level(level), strings.Trim(str, "\n"))
+}
+
 func NekoLogClear() {
 	if _logfile != nil {
 		_logfile.Clear()
@@ -181,7 +188,7 @@ func NekoLogGet() []byte {
 	return []byte{0}
 }
 
-func SetLogLevel(enableLog bool) {
+func SetEnableLog(enableLog bool) {
 	if enableLog {
 		logrus.SetLevel(logrus.DebugLevel)
 	} else {

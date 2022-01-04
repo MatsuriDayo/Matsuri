@@ -8,9 +8,8 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/sagernet/libping"
+	"github.com/sirupsen/logrus"
 	"github.com/v2fly/v2ray-core/v5/common"
 )
 
@@ -38,7 +37,7 @@ func closeIgnore(closer ...interface{}) {
 
 func InitCore(internalAssets string, externalAssets string, prefix string, useOfficial BoolFunc,
 	cachePath string, errorHandler ErrorHandler,
-) error {
+) {
 	defer func() { // TODO receive core panic log (other goroutine)
 		if r := recover(); r != nil {
 			if errorHandler != nil {
@@ -49,6 +48,7 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 		}
 	}()
 
+	// Is background process
 	var processName string
 	var isBgProcess bool
 	f, _ := os.Open("/proc/self/cmdline")
@@ -75,9 +75,15 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 	setupResolvers()
 
 	// nekomura end
+
+	Setenv("v2ray.conf.geoloader", "memconservative")
+
 	if !isBgProcess {
-		return nil
+		return
 	}
 
-	return extractV2RayAssets(internalAssets, externalAssets, prefix, useOfficial)
+	err = extractV2RayAssets(internalAssets, externalAssets, prefix, useOfficial)
+	if err != nil {
+		errorHandler.HandleError(err.Error())
+	}
 }

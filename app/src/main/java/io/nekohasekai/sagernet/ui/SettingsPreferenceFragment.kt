@@ -39,6 +39,7 @@ import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.utils.Theme
 import io.nekohasekai.sagernet.widget.ColorPickerPreference
+import libcore.Libcore
 import java.io.File
 
 class SettingsPreferenceFragment : PreferenceFragmentCompat() {
@@ -166,6 +167,12 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         val transproxyMode = findPreference<SimpleMenuPreference>(Key.TRANSPROXY_MODE)!!
         val enableLog = findPreference<SwitchPreference>(Key.ENABLE_LOG)!!
 
+        enableLog.setOnPreferenceChangeListener { _, newValue ->
+            Libcore.setEnableLog(newValue as Boolean)
+            needReload()
+            true
+        }
+
         transproxyPort.isEnabled = requireTransproxy.isChecked
         transproxyMode.isEnabled = requireTransproxy.isChecked
 
@@ -246,8 +253,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
 
         transproxyPort.onPreferenceChangeListener = reloadListener
         transproxyMode.onPreferenceChangeListener = reloadListener
-
-        enableLog.onPreferenceChangeListener = reloadListener
 
         providerTrojan.onPreferenceChangeListener = reloadListener
         providerShadowsocksAEAD.onPreferenceChangeListener = reloadListener

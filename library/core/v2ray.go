@@ -33,7 +33,7 @@ import (
 )
 
 func GetV2RayVersion() string {
-	return core.Version() + "-matsuri-1"
+	return core.Version() + "-喵"
 }
 
 type V2RayInstance struct {

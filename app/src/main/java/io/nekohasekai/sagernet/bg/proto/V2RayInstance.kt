@@ -85,7 +85,7 @@ abstract class V2RayInstance(
     }
 
     protected open fun loadConfig() {
-        Libcore.setLogLevel(DataStore.enableLog)
+        Libcore.setEnableLog(DataStore.enableLog)
         v2rayPoint.loadConfig(config.config)
     }
 
