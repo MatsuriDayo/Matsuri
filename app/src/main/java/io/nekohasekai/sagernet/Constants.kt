@@ -30,6 +30,7 @@ object Key {
     const val PERSIST_ACROSS_REBOOT = "isAutoConnect"
     const val DIRECT_BOOT_AWARE = "directBootAware"
 
+    const val APP_EXPERT = "isExpert"
     const val APP_THEME = "appTheme"
     const val NIGHT_THEME = "nightTheme"
     const val SERVICE_MODE = "serviceMode"

@@ -51,6 +51,7 @@ import cn.hutool.core.util.CharsetUtil
 import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
+import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.ui.MainActivity
 import io.nekohasekai.sagernet.ui.ThemedActivity
 import kotlinx.coroutines.Dispatchers
@@ -299,8 +300,9 @@ fun Context.getColorAttr(@AttrRes resId: Int): Int {
     }.resourceId)
 }
 
-const val isDefaultFlavor = BuildConfig.FLAVOR == "oss"
-const val isExpert = BuildConfig.FLAVOR == "expert"
+var isExpert: Boolean
+    get() = DataStore.isExpert
+    set(value) = TODO()
 
 val LAUNCH_DELAY = System.currentTimeMillis() - SystemClock.elapsedRealtime()
 

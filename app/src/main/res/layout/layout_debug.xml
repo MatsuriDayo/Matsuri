@@ -10,7 +10,15 @@
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Crash"
+        android:text="Crash From Kt"
+        android:textColor="?whiteOrTextPrimary" />
+
+    <Button
+        android:id="@+id/reset_settings"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Reset Settings"
         android:textColor="?whiteOrTextPrimary" />
 
 </LinearLayout>

@@ -85,9 +85,6 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
         override fun getMaterialAboutList(activityContext: Context): MaterialAboutList {
 
             var versionName = BuildConfig.VERSION_NAME
-            if (isExpert) {
-                versionName += "-${BuildConfig.FLAVOR}"
-            }
 
             return MaterialAboutList.Builder()
                 .addCard(MaterialAboutCard.Builder()

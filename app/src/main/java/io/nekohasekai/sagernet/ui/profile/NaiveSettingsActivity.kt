@@ -74,4 +74,13 @@ class NaiveSettingsActivity : ProfileSettingsActivity<NaiveBean>() {
         }
     }
 
+    override fun finish() {
+        if (DataStore.profileName == "喵要打开隐藏功能") {
+            DataStore.isExpert = true
+        } else if (DataStore.profileName == "喵要关闭隐藏功能") {
+            DataStore.isExpert = false
+        }
+        super.finish()
+    }
+
 }
