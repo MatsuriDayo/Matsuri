@@ -279,7 +279,6 @@
     <string name="subscription">الاشتراك</string>
     <string name="group_settings">إعدادات المجموعة</string>
     <string name="group_basic">أساسي</string>
-    <string name="ss_aead_provider">مزود Shadowsocks AEAD</string>
     <string name="trojan_provider">Trojan مزود</string>
     <string name="protocol_settings">إعدادات البروتوكول</string>
     <string name="bypass_lan_in_core_only_sum">إذا لم يعمل Lineage\'s السماح لعملاء نقطة الاتصال باستخدام شبكات VPN، فجرّب ذلك.</string>
@@ -393,7 +392,6 @@
     <string name="hysteria_disable_mtu_discovery">تعطيل اكتشاف MTU للمسار</string>
     <string name="hysteria_connection_receive_window">نافذة تلقي اتصال QUIC</string>
     <string name="hysteria_stream_receive_window">نافذة تلقي دفق QUIC</string>
-    <string name="ss_stream_provider">مزود تيار شادوسوكس</string>
     <string name="menu_traffic">مرور</string>
     <string name="no_statistics">لا توجد إحصاءات حتى الآن</string>
     <string name="traffic_statistics_summary">قد يزيد من استهلاك الطاقة</string>

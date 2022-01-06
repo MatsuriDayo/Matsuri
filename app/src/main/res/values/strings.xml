@@ -330,8 +330,6 @@
     <string name="bypass_lan_in_core_only_sum">If Lineage\'s "Allow hotspot clients to use VPNs" does not work, try this.</string>
     <string name="protocol_settings">Protocol Settings</string>
     <string name="trojan_provider">Trojan Provider</string>
-    <string name="ss_aead_provider">Shadowsocks AEAD Provider</string>
-    <string name="ss_stream_provider">Shadowsocks Stream Provider</string>
     <string name="group_basic">Basic</string>
     <string name="group_settings">Group Settings</string>
     <string name="subscription">Subscription</string>
@@ -452,7 +450,7 @@
     <string name="wireguard_psk">Peer Pre-Shared Key</string>
 
     <string name="cloudflare_wrap" translatable="false">Cloudflare Warp</string>
-    <string name="warp_license">[CloudFlare Wrap](https://blog.cloudflare.com/1111-warp-better-vpn/) is a free WireGuard VPN provider. By using it, you agree to the [TOS](https://www.cloudflare.com/application/terms/).</string>
+    <string name="warp_license">CloudFlare Warp is a free WireGuard VPN provider. By using it, you agree to the TOS.</string>
     <string name="warp_generate">Generate Configuration</string>
     <string name="generating">Generating…</string>
     <string name="tun_implementation">TUN Implementation</string>
@@ -470,7 +468,6 @@
     <string name="stun_test">NAT behaviour discovery</string>
     <string name="stun_test_summary">Determine the client\'s NAT mapping behaviour and the NAT filtering behaviour defined in RFC 3478 using STUN.</string>
     <string name="start">Start</string>
-    <string name="check">Check</string>
     <string name="stun_attest_loading">This may take a few minutes…</string>
     <string name="nat_stun_server_hint">Stun server</string>
     <string name="nat_result_hint">NAT check result</string>

@@ -161,7 +161,6 @@
     <string name="subscription">Подписка</string>
     <string name="group_settings">Настройки группы</string>
     <string name="group_basic">Базовый</string>
-    <string name="ss_aead_provider">Провайдер Shadowsocks AEAD</string>
     <string name="trojan_provider">Троянский провайдер</string>
     <string name="protocol_settings">Настройки протокола</string>
     <string name="bypass_lan_in_core_only_sum">Если Lineage Разрешить клиентам точки доступа использовать VPN не работает, попробуйте это.</string>
@@ -387,7 +386,6 @@
     <string name="hysteria_disable_mtu_discovery">Отключить обнаружение MTU пути</string>
     <string name="hysteria_connection_receive_window">Окно получения соединения QUIC</string>
     <string name="hysteria_stream_receive_window">Окно приема потока QUIC</string>
-    <string name="ss_stream_provider">Провайдер потока Shadowsocks</string>
     <string name="menu_traffic">Движение</string>
     <string name="no_statistics">Статистики пока нет</string>
     <string name="traffic_statistics_summary">Может увеличить потребление энергии</string>

@@ -305,7 +305,6 @@
     <string name="append_http_proxy_sum">HTTP 代理將直接被支援的瀏覽器/應用程式使用，而無需經過虛擬網路卡（Android 10+）</string>
     <string name="bypass_lan_in_core_only">僅在 Core 中繞過區域網路</string>
     <string name="bypass_lan_in_core_only_sum">如果 LineageOS 的“允許熱點客戶端使用此裝置的 VPN”無法使用，嘗試啟用此選項。</string>
-    <string name="ss_aead_provider">Shadowsocks AEAD 提供程式</string>
     <string name="trojan_provider">Trojan 提供程式</string>
     <string name="protocol_settings">協議設定</string>
     <string name="group_basic">基本</string>
@@ -401,7 +400,6 @@
     <string name="hysteria_auth_payload">認證承載</string>
     <string name="hysteria_auth_type">認證類型</string>
     <string name="hysteria_obfs">混淆密碼</string>
-    <string name="ss_stream_provider">Shadowsocks 串流加密提供者</string>
     <string name="menu_tools">工具</string>
     <string name="translate_platform">翻譯平台</string>
     <string name="menu_log">記錄檔</string>
@@ -414,7 +412,7 @@
     <string name="wireguard_local_address">本機位址</string>
     <string name="wireguard_public_key">節點公開金鑰</string>
     <string name="wireguard_psk">節點預先共用金鑰</string>
-    <string name="warp_license">[CloudFlare Wrap](https://blog.cloudflare.com/1111-warp-better-vpn/) 是一個免費的 WireGuard VPN 提供者。使用此服務表示您同意其 [服務條款](https://www.cloudflare.com/application/terms/)。</string>
+    <string name="warp_license">CloudFlare Warp 是一個免費的 WireGuard VPN 提供者。使用此服務表示您同意其服務條款。</string>
     <string name="warp_generate">產生設定檔</string>
     <string name="generating">正在產生……</string>
     <string name="enable_pcap">啟用 Pcap</string>

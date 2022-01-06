@@ -137,7 +137,6 @@
     <string name="subscription">اشتراک‌ها</string>
     <string name="group_settings">تنظیمات گروه</string>
     <string name="group_basic">پایه</string>
-    <string name="ss_aead_provider">ارائه دهنده Shadowsocks AEAD</string>
     <string name="trojan_provider">ارائه دهنده Trojan</string>
     <string name="protocol_settings">تنظیمات پروتکل</string>
     <string name="bypass_lan_in_core_only_sum">اگر لاین هات‌اسپات برای استفاده کاربرها از VPN کار نمی کند، این را امتحان کنید.</string>
@@ -384,7 +383,6 @@
     <string name="hysteria_disable_mtu_discovery">غیر فعال کردن مسیر کشف MTU</string>
     <string name="hysteria_connection_receive_window">پنجره دریافت اتصال سریع</string>
     <string name="hysteria_stream_receive_window">پنجره دریافت جریان QUIC</string>
-    <string name="ss_stream_provider">ارائه دهنده جریان شادوساکس</string>
     <string name="menu_traffic">ترافیک</string>
     <string name="no_statistics">هنوز آماری در دسترس نیست</string>
     <string name="traffic_statistics_summary">ممکن است مصرف باتری را افزایش دهد</string>

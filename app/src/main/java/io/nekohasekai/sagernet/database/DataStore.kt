@@ -200,7 +200,6 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     // protocol
 
     var providerTrojan by configurationStore.stringToInt(Key.PROVIDER_TROJAN)
-    var providerShadowsocksAEAD by configurationStore.stringToInt(Key.PROVIDER_SS_AEAD)
 
     // cache
 

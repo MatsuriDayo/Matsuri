@@ -21,22 +21,13 @@ package io.nekohasekai.sagernet.database
 
 import android.content.Context
 import android.content.Intent
-import android.os.Parcel
-import android.os.Parcelable
 import androidx.room.*
-import com.github.shadowsocks.plugin.PluginConfiguration
-import com.github.shadowsocks.plugin.PluginManager
-import com.esotericsoftware.kryo.Kryo
 import com.esotericsoftware.kryo.io.ByteBufferInput
 import com.esotericsoftware.kryo.io.ByteBufferOutput
 import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.ShadowsocksProvider
 import io.nekohasekai.sagernet.TrojanProvider
 import io.nekohasekai.sagernet.aidl.TrafficStats
-import io.nekohasekai.sagernet.fmt.AbstractBean
-import io.nekohasekai.sagernet.fmt.KryoConverters
-import io.nekohasekai.sagernet.fmt.Serializable
-import io.nekohasekai.sagernet.fmt.buildV2RayConfig
+import io.nekohasekai.sagernet.fmt.*
 import io.nekohasekai.sagernet.fmt.http.HttpBean
 import io.nekohasekai.sagernet.fmt.http.toUri
 import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
@@ -54,7 +45,6 @@ import io.nekohasekai.sagernet.fmt.shadowsocksr.toUri
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
 import io.nekohasekai.sagernet.fmt.socks.toUri
 import io.nekohasekai.sagernet.fmt.ssh.SSHBean
-import io.nekohasekai.sagernet.fmt.toUniversalLink
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.fmt.trojan.toUri
 import io.nekohasekai.sagernet.fmt.trojan_go.TrojanGoBean
@@ -67,7 +57,6 @@ import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
 import io.nekohasekai.sagernet.ktx.isTLS
-import io.nekohasekai.sagernet.ktx.ssSecureList
 import io.nekohasekai.sagernet.ui.profile.*
 
 @Entity(
@@ -351,56 +340,6 @@ data class ProxyEntity(
             TYPE_TROJAN_GO -> false
             else -> enableMuxForAll
         }
-    }
-
-    fun pickShadowsocksProvider(): Int {
-        val bean = ssBean ?: return -1
-        if (bean.method.contains(ssSecureList)) {
-            //AEAD
-            val prefer = DataStore.providerShadowsocksAEAD
-            when {
-                prefer == ShadowsocksProvider.V2RAY && bean.method in methodsV2fly && bean.plugin.isBlank() -> {
-                    return ShadowsocksProvider.V2RAY
-                }
-                prefer == ShadowsocksProvider.CLASH && bean.method in methodsClash && ssPluginSupportedByClash(
-                    true
-                ) -> {
-                    return ShadowsocksProvider.CLASH
-                }
-            }
-            return if (ssPreferClash()) {
-                ShadowsocksProvider.CLASH
-            } else {
-                ShadowsocksProvider.V2RAY
-            }
-        } else {
-            // Stream
-            return ShadowsocksProvider.CLASH
-        }
-    }
-
-    fun ssPluginSupportedByClash(prefer: Boolean): Boolean {
-        val bean = ssBean ?: return false
-        if (bean.plugin.isNotBlank()) {
-            val plugin = PluginConfiguration(bean.plugin)
-            if (plugin.selected !in arrayOf("obfs-local", "v2ray-plugin")) return false
-            if (plugin.selected == "v2ray-plugin") {
-                if (plugin.getOptions()["mode"] != "websocket") return false
-            }
-            try {
-                PluginManager.init(plugin)
-                return prefer
-            } catch (e: Exception) {
-            }
-            return true
-        }
-        return prefer
-    }
-
-    fun ssPreferClash(): Boolean {
-        val bean = ssBean ?: return false
-        val onlyClash = bean.method !in methodsV2fly && bean.method !in methodsSsRust && bean.method !in methodsSsLibev
-        return onlyClash || ssPluginSupportedByClash(false)
     }
 
     fun putBean(bean: AbstractBean): ProxyEntity {

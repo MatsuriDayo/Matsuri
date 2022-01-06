@@ -146,7 +146,6 @@
     <string name="subscription">Abonnement</string>
     <string name="group_settings">Gruppeinnstillinger</string>
     <string name="group_basic">Grunnleggende</string>
-    <string name="ss_aead_provider">Skjønnsokker AEAD- tilbygger</string>
     <string name="trojan_provider">Trojansk leverandør</string>
     <string name="protocol_settings">Protokollinnstillinger</string>
     <string name="bypass_lan_in_core_only_sum">Hvis Lineage\'s Tillat hotspot -klienter å bruke VPN -er ikke fungerer, kan du prøve dette.</string>
@@ -355,7 +354,6 @@
     <string name="hysteria_download_mbps">Maks. nedlastingshastighet (i Mbps)</string>
     <string name="hysteria_upload_mbps">Maks. opplastingshastighet (i Mbps)</string>
     <string name="hysteria_auth_type">Identitetbekreftelsestype</string>
-    <string name="ss_stream_provider">Shadowsocks Stream Provider</string>
     <string name="menu_traffic">Trafikk</string>
     <string name="experimental_no_termination_signal">Ikke send tilkoblingtermineringssignal som enkel dupleks for TCP-tilkobling når overført over VMess. Dette ødelegger for noen programmer.</string>
     <string name="hysteria_connection_receive_window">Mottaksvindu for QUIC-tilkobling</string>
