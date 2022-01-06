@@ -118,7 +118,11 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
     override val coroutineContext = Dispatchers.Main.immediate + Job()
 
     @MainThread
-    fun start(cmd: List<String>,env: Map<String,String> = mapOf(), onRestartCallback: (suspend () -> Unit)? = null) {
+    fun start(cmd: List<String>,env: MutableMap<String,String> = mutableMapOf(), onRestartCallback: (suspend () -> Unit)? = null) {
+        if (!env.containsKey("SSL_CERT_FILE")) {
+            env["SSL_CERT_FILE"] = SagerNet.application.filesDir.absolutePath + "/ca.pem"
+            env["SSL_CERT_DIR"] = "/dev/null"
+        }
         Logs.i("start process: ${Commandline.toString(cmd)}")
         Guard(cmd, env).apply {
             start() // if start fails, IOException will be thrown directly

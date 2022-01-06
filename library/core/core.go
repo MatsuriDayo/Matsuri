@@ -1,17 +1,22 @@
 package libcore
 
 import (
+	"crypto/x509"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime/debug"
 	"strings"
+	_ "unsafe"
 
 	"github.com/sagernet/libping"
 	"github.com/sirupsen/logrus"
 	"github.com/v2fly/v2ray-core/v5/common"
 )
+
+//go:linkname systemRoots crypto/x509.systemRoots
+var systemRoots *x509.CertPool
 
 func Setenv(key, value string) error {
 	return os.Setenv(key, value)
@@ -74,14 +79,28 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 	// Set up some go component
 	setupResolvers()
 
-	// nekomura end
-
-	Setenv("v2ray.conf.geoloader", "memconservative")
-
 	if !isBgProcess {
 		return
 	}
 
+	Setenv("v2ray.conf.geoloader", "memconservative")
+
+	// Set up CA for the bg process
+	x509.SystemCertPool()
+	roots := x509.NewCertPool()
+	roots.AppendCertsFromPEM([]byte(mozillaCA))
+	systemRoots = roots
+
+	// CA for other programs
+	f, err = os.OpenFile(filepath.Join(internalAssets, "ca.pem"), os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
+	if err != nil {
+		errorHandler.HandleError(err.Error())
+	} else {
+		f.Write([]byte(mozillaCA))
+		f.Close()
+	}
+
+	// nekomura end
 	err = extractV2RayAssets(internalAssets, externalAssets, prefix, useOfficial)
 	if err != nil {
 		errorHandler.HandleError(err.Error())
