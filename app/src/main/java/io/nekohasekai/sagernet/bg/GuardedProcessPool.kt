@@ -55,7 +55,7 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
         }    // ignore
 
         fun start() {
-            process = ProcessBuilder(cmd).directory(SagerNet.deviceStorage.noBackupFilesDir).apply {
+            process = ProcessBuilder(cmd).directory(SagerNet.deviceStorage.cacheDir).apply {
                 environment().putAll(env)
             }.start()
         }

@@ -133,7 +133,7 @@ abstract class V2RayInstance(
                         initPlugin("hysteria-plugin")
                         pluginConfigs[port] = profile.type to bean.buildHysteriaConfig(port) {
                             File(
-                                app.noBackupFilesDir,
+                                app.cacheDir,
                                 "hysteria_" + SystemClock.elapsedRealtime() + ".ca"
                             ).apply {
                                 parentFile?.mkdirs()
@@ -167,6 +167,8 @@ abstract class V2RayInstance(
     @SuppressLint("SetJavaScriptEnabled")
     override fun launch() {
         val context = if (Build.VERSION.SDK_INT < 24 || SagerNet.user.isUserUnlocked) SagerNet.application else SagerNet.deviceStorage
+        val cache = File(context.cacheDir,"tmpcfg")
+        cache.mkdirs()
 
         for ((chain) in config.index) {
             chain.entries.forEachIndexed { index, (port, profile) ->
@@ -180,7 +182,7 @@ abstract class V2RayInstance(
                     }
                     bean is TrojanBean -> {
                         val configFile = File(
-                            context.noBackupFilesDir,
+                            cache,
                             "trojan_" + SystemClock.elapsedRealtime() + ".json"
                         )
 
@@ -199,7 +201,7 @@ abstract class V2RayInstance(
                     }
                     bean is TrojanGoBean || bean is ConfigBean && bean.type == "trojan-go" -> {
                         val configFile = File(
-                            context.noBackupFilesDir,
+                            cache,
                             "trojan_go_" + SystemClock.elapsedRealtime() + ".json"
                         )
                         configFile.parentFile?.mkdirs()
@@ -214,7 +216,7 @@ abstract class V2RayInstance(
                     }
                     bean is NaiveBean -> {
                         val configFile = File(
-                            context.noBackupFilesDir,
+                            cache,
                             "naive_" + SystemClock.elapsedRealtime() + ".json"
                         )
 
@@ -226,7 +228,7 @@ abstract class V2RayInstance(
 
                         if (bean.certificates.isNotBlank()) {
                             val certFile = File(
-                                context.noBackupFilesDir,
+                                cache,
                                 "naive_" + SystemClock.elapsedRealtime() + ".crt"
                             )
 
@@ -269,7 +271,7 @@ abstract class V2RayInstance(
                     }
                     bean is HysteriaBean -> {
                         val configFile = File(
-                            context.noBackupFilesDir,
+                            cache,
                             "hysteria_" + SystemClock.elapsedRealtime() + ".json"
                         )
 
