@@ -136,7 +136,7 @@ fun buildV2RayConfig(
     val destinationOverride = DataStore.destinationOverride
     val trafficStatistics = !forTest && DataStore.profileTrafficStatistics
 
-    val outboundDomainStrategy = when {
+    var currentDomainStrategy = when {
         !resolveDestination -> "AsIs"
         ipv6Mode == IPv6Mode.DISABLE -> "UseIPv4"
         ipv6Mode == IPv6Mode.PREFER -> "PreferIPv6"
@@ -410,8 +410,7 @@ fun buildV2RayConfig(
                     currentOutbound.apply {
                         protocol = "socks"
                         settings = LazyOutboundConfigurationObject(
-                            this,
-                            SocksOutboundConfigurationObject().apply {
+                            this, SocksOutboundConfigurationObject().apply {
                                 servers = listOf(
                                     SocksOutboundConfigurationObject.ServerObject()
                                         .apply {
@@ -486,7 +485,16 @@ fun buildV2RayConfig(
                                                                 }
                                                                 if (experimental.isBlank()) experimental = null
                                                             })
-                                                    })
+                                                    when (bean.packetEncoding) {
+                                                        1 -> {
+                                                            packetEncoding = "packet"
+                                                            if (currentDomainStrategy == "AsIs") {
+                                                                currentDomainStrategy = "UseIP"
+                                                            }
+                                                        }
+                                                        2 -> packetEncoding = "xudp"
+                                                    }
+                                                })
                                         })
                                 }
                             }
@@ -773,13 +781,23 @@ fun buildV2RayConfig(
                             mux = OutboundObject.MuxObject().apply {
                                 enabled = true
                                 concurrency = DataStore.muxConcurrency
+                                if (bean is StandardV2RayBean) {
+                                    when (bean.packetEncoding) {
+                                        1 -> {
+                                            packetEncoding = "packet"
+                                        }
+                                        2 -> {
+                                            packetEncoding = "xudp"
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
 
                 currentOutbound.tag = tagOut
-                currentOutbound.domainStrategy = outboundDomainStrategy
+                currentOutbound.domainStrategy = currentDomainStrategy
 
                 // chain rules
                 if (index > 0) {
@@ -1175,8 +1193,7 @@ fun buildCustomConfig(proxy: ProxyEntity, port: Int): V2rayBuildResult {
             listen = bind
             this.port = port
             protocol = "socks"
-            settings = LazyInboundConfigurationObject(
-                this,
+            settings = LazyInboundConfigurationObject(this,
                 SocksInboundConfigurationObject().apply {
                     auth = "noauth"
                     udp = true

@@ -69,6 +69,7 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
 
         DataStore.serverWsBrowserForwarding = wsUseBrowserForwarder
         DataStore.serverAllowInsecure = allowInsecure
+        DataStore.serverPacketEncoding = packetEncoding
 
     }
 
@@ -101,6 +102,7 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
 
         wsUseBrowserForwarder = DataStore.serverWsBrowserForwarding
         allowInsecure = DataStore.serverAllowInsecure
+        packetEncoding = DataStore.serverPacketEncoding
     }
 
     lateinit var encryption: SimpleMenuPreference

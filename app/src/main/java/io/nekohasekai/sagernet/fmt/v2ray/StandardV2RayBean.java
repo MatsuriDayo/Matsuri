@@ -158,6 +158,7 @@ public abstract class StandardV2RayBean extends AbstractBean {
 
     public Boolean wsUseBrowserForwarder;
     public Boolean allowInsecure;
+    public Integer packetEncoding; // 1:packet 2:xudp
 
     @Override
     public void initializeDefaultValues() {
@@ -186,12 +187,13 @@ public abstract class StandardV2RayBean extends AbstractBean {
         if (pinnedPeerCertificateChainSha256 == null) pinnedPeerCertificateChainSha256 = "";
         if (earlyDataHeaderName == null) earlyDataHeaderName = "";
         if (allowInsecure == null) allowInsecure = false;
+        if (packetEncoding == null) packetEncoding = 0;
 
     }
 
     @Override
     public void serialize(ByteBufferOutput output) {
-        output.writeInt(5);
+        output.writeInt(7);
         super.serialize(output);
 
         output.writeString(uuid);
@@ -251,6 +253,8 @@ public abstract class StandardV2RayBean extends AbstractBean {
             output.writeBoolean(((VMessBean) this).experimentalAuthenticatedLength);
             output.writeBoolean(((VMessBean) this).experimentalNoTerminationSignal);
         }
+
+        output.writeInt(packetEncoding);
     }
 
     @Override
@@ -319,6 +323,9 @@ public abstract class StandardV2RayBean extends AbstractBean {
         if (this instanceof VMessBean && version >= 4) {
             ((VMessBean) this).experimentalAuthenticatedLength = input.readBoolean();
             ((VMessBean) this).experimentalNoTerminationSignal = input.readBoolean();
+        }
+        if (version >= 7) {
+            packetEncoding = input.readInt();
         }
     }
 

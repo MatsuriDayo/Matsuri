@@ -189,6 +189,14 @@ fun parseV2Ray(link: String): StandardV2RayBean {
                 }
             }
         }
+
+        url.queryParameter("packetEncoding")?.let {
+            when (it) {
+                "packet" -> bean.packetEncoding = 1
+                "xudp" -> bean.packetEncoding = 2
+            }
+        }
+
     }
 
     Logs.d(formatObject(bean))
@@ -426,6 +434,15 @@ fun StandardV2RayBean.toUri(standard: Boolean = true): String {
                     builder.addQueryParameter("chain", pinnedPeerCertificateChainSha256)
                 }
             }
+        }
+    }
+
+    when (packetEncoding) {
+        1 -> {
+            builder.addQueryParameter("packetEncoding", "packet")
+        }
+        2 -> {
+            builder.addQueryParameter("packetEncoding", "xudp")
         }
     }
 

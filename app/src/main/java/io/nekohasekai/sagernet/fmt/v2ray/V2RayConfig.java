@@ -409,6 +409,7 @@ public class V2RayConfig {
 
             public Boolean enabled;
             public Integer concurrency;
+            public String packetEncoding;
 
         }
 
@@ -538,6 +539,7 @@ public class V2RayConfig {
     public static class VMessOutboundConfigurationObject implements OutboundConfigurationObject {
 
         public List<ServerObject> vnext;
+        public String packetEncoding;
 
         public static class ServerObject {
 
@@ -583,6 +585,7 @@ public class V2RayConfig {
     public static class VLESSOutboundConfigurationObject implements OutboundConfigurationObject {
 
         public List<ServerObject> vnext;
+        public String packetEncoding;
 
         public static class ServerObject {
 

@@ -673,4 +673,10 @@
         <item>WeChat Video</item>
     </string-array>
 
+    <string-array name="packet_encoding_entry">
+        <item>None</item>
+        <item>Packet</item>
+        <item>XUDP</item>
+    </string-array>
+
 </resources>
