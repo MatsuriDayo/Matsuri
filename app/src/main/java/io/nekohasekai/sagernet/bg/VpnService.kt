@@ -294,7 +294,7 @@ class VpnService : BaseVpnService(),
                     val callback = object : DnsResolver.Callback<Collection<InetAddress>> {
                         @Suppress("ThrowableNotThrown")
                         override fun onAnswer(answer: Collection<InetAddress>, rcode: Int) {
-                            // library/core/v2ray.go
+                            // libcore/v2ray.go
                             when {
                                 answer.isNotEmpty() -> {
                                     continuation.tryResume(answer.mapNotNull { it.hostAddress }

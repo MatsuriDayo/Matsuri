@@ -20,7 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Fetch Status
-        run: git ls-files library/core | xargs cat | sha1sum > libcore_status
+        run: git ls-files libcore | xargs cat | sha1sum > libcore_status
       - name: LibCore Cache
         id: cache
         uses: actions/cache@v2
@@ -46,7 +46,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Fetch Status
-        run: git ls-files library/core | xargs cat | sha1sum > libcore_status
+        run: git ls-files libcore | xargs cat | sha1sum > libcore_status
       - name: LibCore Cache
         uses: actions/cache@v2
         with:

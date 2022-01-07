@@ -1,4 +1,4 @@
-COMMIT=$(cat library/core/core_commit.txt)
+COMMIT=$(cat libcore/core_commit.txt)
 
 cd ..
 [ -d v2ray-core ] && exit 0
