@@ -3,6 +3,7 @@
 
     <integer-array name="material_colors">
         <item>@color/material_red_500</item>
+        <item>@color/color_pink_ssr</item>
         <item>@color/material_pink_500</item>
         <item>@color/material_purple_500</item>
         <item>@color/material_deep_purple_500</item>
@@ -24,8 +25,6 @@
         <item>@color/material_grey_500</item>
         <item>@color/material_blue_grey_500</item>
         <item>@color/material_light_black</item>
-
-        <item>@color/color_pink_ssr</item>
     </integer-array>
 
     <color name="material_amber_100">#FFECB3</color>

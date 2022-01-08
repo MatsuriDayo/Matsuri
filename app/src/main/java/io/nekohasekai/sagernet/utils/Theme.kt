@@ -29,28 +29,26 @@ import io.nekohasekai.sagernet.ktx.app
 object Theme {
 
     const val RED = 1
-    const val PINK = 2
-    const val PURPLE = 3
-    const val DEEP_PURPLE = 4
-    const val INDIGO = 5
-    const val BLUE = 6
-    const val LIGHT_BLUE = 7
-    const val CYAN = 8
-    const val TEAL = 9
-    const val GREEN = 10
-    const val LIGHT_GREEN = 11
-    const val LIME = 12
-    const val YELLOW = 13
-    const val AMBER = 14
-    const val ORANGE = 15
-    const val DEEP_ORANGE = 16
-
-    const val BROWN = 17
-    const val GREY = 18
-    const val BLUE_GREY = 19
-    const val BLACK = 20
-
-    const val PINK_SSR = 21
+    const val PINK_SSR = 2 // 2 is default
+    const val PINK = 3
+    const val PURPLE = 4
+    const val DEEP_PURPLE = 5
+    const val INDIGO = 6
+    const val BLUE = 7
+    const val LIGHT_BLUE = 8
+    const val CYAN = 9
+    const val TEAL = 10
+    const val GREEN = 11
+    const val LIGHT_GREEN = 12
+    const val LIME = 13
+    const val YELLOW = 14
+    const val AMBER = 15
+    const val ORANGE = 16
+    const val DEEP_ORANGE = 17
+    const val BROWN = 18
+    const val GREY = 19
+    const val BLUE_GREY = 20
+    const val BLACK = 21
 
     private fun defaultTheme() = PINK_SSR
 

@@ -89,7 +89,19 @@ class ConfigurationFragment @JvmOverloads constructor(
     lateinit var adapter: GroupPagerAdapter
     lateinit var tabLayout: TabLayout
     lateinit var groupPager: ViewPager2
-    val selectedGroup get() = if (tabLayout.isGone) adapter.groupList[0] else adapter.groupList[tabLayout.selectedTabPosition]
+
+    // TODO crash
+    val selectedGroup: ProxyGroup
+        get() = try {
+            if (tabLayout.isGone) {
+                adapter.groupList[0]
+            } else {
+                adapter.groupList[tabLayout.selectedTabPosition]
+            }
+        } catch (e: Exception) {
+            ProxyGroup(0)
+        }
+
     val alwaysShowAddress by lazy { DataStore.alwaysShowAddress }
     val securityAdvisory by lazy { DataStore.securityAdvisory }
 

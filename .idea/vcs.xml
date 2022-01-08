@@ -7,6 +7,5 @@
   </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/build/v2ray-core" vcs="Git" />
   </component>
 </project>
