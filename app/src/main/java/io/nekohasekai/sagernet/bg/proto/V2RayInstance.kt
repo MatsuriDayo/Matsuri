@@ -29,7 +29,6 @@ import android.webkit.WebViewClient
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.TrojanProvider
 import io.nekohasekai.sagernet.bg.AbstractInstance
-import io.nekohasekai.sagernet.bg.ExternalInstance
 import io.nekohasekai.sagernet.bg.GuardedProcessPool
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProxyEntity
@@ -38,7 +37,6 @@ import io.nekohasekai.sagernet.fmt.V2rayBuildResult
 import io.nekohasekai.sagernet.fmt.buildV2RayConfig
 import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
 import io.nekohasekai.sagernet.fmt.hysteria.buildHysteriaConfig
-import io.nekohasekai.sagernet.fmt.internal.ConfigBean
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean
 import io.nekohasekai.sagernet.fmt.naive.buildNaiveConfig
 import io.nekohasekai.sagernet.fmt.pingtunnel.PingTunnelBean
@@ -46,9 +44,7 @@ import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.fmt.trojan.buildTrojanConfig
 import io.nekohasekai.sagernet.fmt.trojan.buildTrojanGoConfig
 import io.nekohasekai.sagernet.fmt.trojan_go.TrojanGoBean
-import io.nekohasekai.sagernet.fmt.trojan_go.buildCustomTrojanConfig
 import io.nekohasekai.sagernet.fmt.trojan_go.buildTrojanGoConfig
-import io.nekohasekai.sagernet.fmt.wireguard.buildWireGuardUapiConf
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.plugin.PluginManager
 import kotlinx.coroutines.*
@@ -141,23 +137,6 @@ abstract class V2RayInstance(
                             }
                         }
                     }
-                    is ConfigBean -> {
-                        when (bean.type) {
-                            "trojan-go" -> {
-                                initPlugin("trojan-go-plugin")
-                                pluginConfigs[port] = profile.type to buildCustomTrojanConfig(
-                                    bean.content, port
-                                )
-                            }
-                            else -> {
-                                externalInstances[port] = ExternalInstance(
-                                    profile, port
-                                ).apply {
-                                    init()
-                                }
-                            }
-                        }
-                    }
                 }
             }
         }
@@ -199,7 +178,7 @@ abstract class V2RayInstance(
 
                         processes.start(commands)
                     }
-                    bean is TrojanGoBean || bean is ConfigBean && bean.type == "trojan-go" -> {
+                    bean is TrojanGoBean -> {
                         val configFile = File(
                             cache,
                             "trojan_go_" + SystemClock.elapsedRealtime() + ".json"

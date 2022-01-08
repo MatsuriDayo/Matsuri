@@ -24,7 +24,6 @@ package com.github.shadowsocks.plugin
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import io.nekohasekai.sagernet.ui.ThemedActivity
 
 /**

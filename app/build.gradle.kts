@@ -88,10 +88,6 @@ dependencies {
     implementation("com.github.MatrixDev.Roomigrant:RoomigrantLib:0.3.4")
     kapt("com.github.MatrixDev.Roomigrant:RoomigrantCompiler:0.3.4")
 
-    implementation("editorkit:editorkit:2.0.0")
-    implementation("editorkit:feature-editor:2.0.0")
-    implementation("editorkit:language-json:2.0.0")
-
     implementation(project(":library:proto-stub"))
 //    implementation("io.grpc:grpc-okhttp:1.40.1")
 

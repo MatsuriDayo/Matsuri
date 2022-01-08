@@ -448,4 +448,6 @@
     <string name="invalid_backup_file">无效的备份文件</string>
     <string name="backup_import_summary">导入将覆盖现有的数据。</string>
     <string name="backup_importing">正导入…</string>
+    <string name="action_copy">复制</string>
+    <string name="action_open">打开</string>
 </resources>

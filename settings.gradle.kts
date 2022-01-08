@@ -11,14 +11,5 @@ include(":external:preferencex:flexbox")
 include(":external:preferencex:colorpicker")
 include(":external:preferencex:preferencex-colorpicker")
 
-includeBuild("external/editorkit") {
-    name = "editorkit"
-    dependencySubstitution {
-        substitute(module("editorkit:editorkit:2.0.0")).using(project(":editorkit"))
-        substitute(module("editorkit:feature-editor:2.0.0")).using(project(":features:feature-editor"))
-        substitute(module("editorkit:language-json:2.0.0")).using(project(":languages:language-json"))
-    }
-}
-
 include(":app")
 rootProject.name = "SagerNet"

@@ -22,19 +22,16 @@ package io.nekohasekai.sagernet.ktx
 import androidx.annotation.RawRes
 import cn.hutool.core.lang.Validator
 import cn.hutool.core.net.NetUtil.isInnerIP
-import cn.hutool.json.JSONObject
 import com.github.shadowsocks.plugin.PluginConfiguration
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.fmt.AbstractBean
 import io.nekohasekai.sagernet.fmt.http.HttpBean
 import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
-import io.nekohasekai.sagernet.fmt.internal.ConfigBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean
 import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
 import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
-import io.nekohasekai.sagernet.group.RawUpdater
 
 interface ValidateResult
 object ResultSecure : ValidateResult
@@ -74,16 +71,6 @@ fun AbstractBean.isInsecure(): ValidateResult {
         }
         if (allowInsecure) return ResultInsecure(R.raw.insecure)
         if (alterId > 0) return ResultDeprecated(R.raw.vmess_md5_auth)
-    } else if (this is ConfigBean) {
-        try {
-            val profiles = RawUpdater.parseJSON(JSONObject(content))
-            val results = profiles.map { it.isInsecure() }
-            (results.find { it is ResultInsecure } ?: results.find { it is ResultDeprecated }
-            ?: results.find { it is ResultLocal })?.also {
-                return it
-            }
-        } catch (ignored: Exception) {
-        }
     } else if (this is HysteriaBean) {
         if (allowInsecure) return ResultInsecure(R.raw.insecure)
     }

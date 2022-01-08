@@ -21,11 +21,8 @@ package io.nekohasekai.sagernet.fmt
 
 import android.os.Build
 import cn.hutool.core.util.NumberUtil
-import cn.hutool.json.JSONArray
-import cn.hutool.json.JSONObject
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginManager
-import com.google.gson.JsonSyntaxException
 import io.nekohasekai.sagernet.IPv6Mode
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.bg.VpnService
@@ -101,9 +98,6 @@ fun buildV2RayConfig(
             val beanList = ArrayList<ProxyEntity>()
             for (proxyId in bean.proxies) {
                 val item = beansMap[proxyId] ?: continue
-                when (item.type) {
-                    ProxyEntity.TYPE_CONFIG -> error("Custom config is incompatible with chain")
-                }
                 beanList.addAll(item.resolveChain())
             }
             return beanList.asReversed()
@@ -1147,140 +1141,5 @@ fun buildV2RayConfig(
             alerts
         )
     }
-
-}
-
-fun buildCustomConfig(proxy: ProxyEntity, port: Int): V2rayBuildResult {
-
-    val bind = LOCALHOST
-    val trafficSniffing = DataStore.trafficSniffing
-
-    val bean = proxy.configBean!!
-    val config = JSONObject(bean.content)
-    val inbounds = config.getJSONArray("inbounds")
-        ?.filterIsInstance<JSONObject>()
-        ?.map { gson.fromJson(it.toString(), InboundObject::class.java) }
-        ?.toMutableList() ?: ArrayList()
-
-    val dnsArr = config.getJSONObject("dns")?.getJSONArray("servers")?.map {
-        if (it is String) DnsObject.StringOrServerObject().apply {
-            valueX = it
-        } else DnsObject.StringOrServerObject().apply {
-            valueY = gson.fromJson(it.toString(), DnsObject.ServerObject::class.java)
-        }
-    }
-    val ipv6Mode = DataStore.ipv6Mode
-
-    var socksInbound = inbounds.find { it.tag == TAG_SOCKS }?.apply {
-        if (protocol != "socks") error("Inbound $tag with type $protocol, excepted socks.")
-    }
-
-    if (socksInbound == null) {
-        val socksInbounds = inbounds.filter { it.protocol == "socks" }
-        if (socksInbounds.size == 1) {
-            socksInbound = socksInbounds[0]
-        }
-    }
-
-    if (socksInbound != null) {
-        socksInbound.apply {
-            listen = bind
-            this.port = port
-        }
-    } else {
-        inbounds.add(InboundObject().apply {
-            tag = TAG_SOCKS
-            listen = bind
-            this.port = port
-            protocol = "socks"
-            settings = LazyInboundConfigurationObject(this,
-                SocksInboundConfigurationObject().apply {
-                    auth = "noauth"
-                    udp = true
-                })
-            if (trafficSniffing) {
-                sniffing = InboundObject.SniffingObject().apply {
-                    enabled = true
-                    destOverride = listOf("http", "tls")
-                    metadataOnly = false
-                }
-            }
-        })
-    }
-
-    var requireWs = false
-    var wsPort = 0
-    if (config.contains("browserForwarder")) {
-        config["browserForwarder"] = JSONObject(gson.toJson(BrowserForwarderObject().apply {
-            requireWs = true
-            listenAddr = LOCALHOST
-            listenPort = mkPort()
-            wsPort = listenPort
-        }))
-    }
-
-    val outbounds = try {
-        config.getJSONArray("outbounds")?.filterIsInstance<JSONObject>()?.map {
-            gson.fromJson(it.toString().takeIf { it.isNotBlank() } ?: "{}",
-                OutboundObject::class.java)
-        }?.toMutableList()
-    } catch (e: JsonSyntaxException) {
-        null
-    }
-    var flushOutbounds = false
-
-    val outboundTags = ArrayList<String>()
-    val firstOutbound = outbounds?.get(0)
-    if (firstOutbound != null) {
-        if (firstOutbound.tag == null) {
-            firstOutbound.tag = TAG_AGENT
-            outboundTags.add(TAG_AGENT)
-            flushOutbounds = true
-        } else {
-            outboundTags.add(firstOutbound.tag)
-        }
-    }
-
-    var directTag = ""
-    val directOutbounds = outbounds?.filter { it.protocol == "freedom" }
-    if (!directOutbounds.isNullOrEmpty()) {
-        val directOutbound = if (directOutbounds.size == 1) {
-            directOutbounds[0]
-        } else {
-            val directOutboundsWithTag = directOutbounds.filter { it.tag != null }
-            if (directOutboundsWithTag.isNotEmpty()) {
-                directOutboundsWithTag[0]
-            } else {
-                directOutbounds[0]
-            }
-        }
-        if (directOutbound.tag.isNullOrBlank()) {
-            directOutbound.tag = TAG_DIRECT
-            flushOutbounds = true
-        }
-        directTag = directOutbound.tag
-    }
-
-    inbounds.forEach { it.init() }
-    config["inbounds"] = JSONArray(inbounds.map { JSONObject(gson.toJson(it)) })
-    if (flushOutbounds) {
-        outbounds!!.forEach { it.init() }
-        config["outbounds"] = JSONArray(outbounds.map { JSONObject(gson.toJson(it)) })
-    }
-
-
-    return V2rayBuildResult(
-        config.toStringPretty(),
-        emptyList(),
-        requireWs,
-        wsPort,
-        outboundTags,
-        outboundTags,
-        emptyMap(),
-        directTag,
-        emptySet(),
-        false,
-        emptyList()
-    )
 
 }

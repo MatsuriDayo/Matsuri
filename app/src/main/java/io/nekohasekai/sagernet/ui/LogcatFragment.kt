@@ -20,7 +20,6 @@ package io.nekohasekai.sagernet.ui
 
 import android.annotation.SuppressLint
 import android.graphics.Color
-import android.graphics.text.LineBreaker.BREAK_STRATEGY_SIMPLE
 import android.os.Build
 import android.os.Bundle
 import android.text.SpannableString

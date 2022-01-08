@@ -19,7 +19,9 @@
 
 package io.nekohasekai.sagernet.fmt.http
 
-import io.nekohasekai.sagernet.ktx.*
+import io.nekohasekai.sagernet.ktx.isTLS
+import io.nekohasekai.sagernet.ktx.setTLS
+import io.nekohasekai.sagernet.ktx.urlSafe
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 

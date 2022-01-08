@@ -21,16 +21,12 @@ package io.nekohasekai.sagernet.utils
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
-import androidx.core.content.FileProvider
 import com.jakewharton.processphoenix.ProcessPhoenix
 import io.nekohasekai.sagernet.BuildConfig
-import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.preference.PublicDatabase
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.app
-import io.nekohasekai.sagernet.ktx.use
 import io.nekohasekai.sagernet.ui.BlankActivity
-import io.nekohasekai.sagernet.ui.MainActivity
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*

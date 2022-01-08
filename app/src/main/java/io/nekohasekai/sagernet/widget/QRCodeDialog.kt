@@ -41,7 +41,6 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.readableMessage
 import io.nekohasekai.sagernet.ui.MainActivity
-import java.lang.Exception
 import java.nio.charset.StandardCharsets
 import kotlin.math.roundToInt
 

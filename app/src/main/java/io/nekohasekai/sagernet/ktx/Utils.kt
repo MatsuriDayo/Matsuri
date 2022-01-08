@@ -48,7 +48,6 @@ import androidx.recyclerview.widget.RecyclerView
 import cn.hutool.core.net.URLDecoder
 import cn.hutool.core.net.URLEncoder
 import cn.hutool.core.util.CharsetUtil
-import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore

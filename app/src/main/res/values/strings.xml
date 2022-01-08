@@ -19,6 +19,9 @@
     <string name="quick_toggle">Toggle</string>
     <string name="tile_title">Switcher</string>
     <string name="menu_traffic">Traffic</string>
+    <!-- externel -->
+    <string name="action_copy">Copy</string>
+    <string name="action_open">Open</string>
     <!-- group -->
     <string name="group_name">Group name</string>
     <string name="group_update">Update</string>

@@ -34,7 +34,6 @@ import io.nekohasekai.sagernet.database.SubscriptionBean;
 import io.nekohasekai.sagernet.fmt.http.HttpBean;
 import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean;
 import io.nekohasekai.sagernet.fmt.internal.ChainBean;
-import io.nekohasekai.sagernet.fmt.internal.ConfigBean;
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean;
 import io.nekohasekai.sagernet.fmt.pingtunnel.PingTunnelBean;
 import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean;
@@ -146,12 +145,6 @@ public class KryoConverters {
     public static WireGuardBean wireguardDeserialize(byte[] bytes) {
         if (ArrayUtil.isEmpty(bytes)) return null;
         return deserialize(new WireGuardBean(), bytes);
-    }
-
-    @TypeConverter
-    public static ConfigBean configDeserialize(byte[] bytes) {
-        if (ArrayUtil.isEmpty(bytes)) return null;
-        return deserialize(new ConfigBean(), bytes);
     }
 
     @TypeConverter

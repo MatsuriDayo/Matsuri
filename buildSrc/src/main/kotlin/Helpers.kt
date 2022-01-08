@@ -1,5 +1,4 @@
 import cn.hutool.core.codec.Base64
-import cn.hutool.core.util.RuntimeUtil
 import cn.hutool.crypto.digest.DigestUtil
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension

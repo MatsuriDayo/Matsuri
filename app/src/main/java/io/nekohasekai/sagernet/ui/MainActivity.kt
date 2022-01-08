@@ -25,13 +25,11 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.RemoteException
-import android.provider.Settings
 import android.view.KeyEvent
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.annotation.IdRes
 import androidx.core.view.ViewCompat
-import androidx.core.view.get
 import androidx.preference.PreferenceDataStore
 import cn.hutool.core.codec.Base64Decoder
 import cn.hutool.core.util.ZipUtil
@@ -55,7 +53,6 @@ import io.nekohasekai.sagernet.group.GroupUpdater
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.plugin.PluginManager
 import io.nekohasekai.sagernet.widget.ListHolderListener
-import kotlinx.coroutines.runBlocking
 import com.github.shadowsocks.plugin.PluginManager as ShadowsocksPluginPluginManager
 
 class MainActivity : ThemedActivity(),

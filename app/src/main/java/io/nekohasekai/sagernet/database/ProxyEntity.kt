@@ -33,7 +33,6 @@ import io.nekohasekai.sagernet.fmt.http.toUri
 import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
 import io.nekohasekai.sagernet.fmt.hysteria.buildHysteriaConfig
 import io.nekohasekai.sagernet.fmt.internal.ChainBean
-import io.nekohasekai.sagernet.fmt.internal.ConfigBean
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean
 import io.nekohasekai.sagernet.fmt.naive.buildNaiveConfig
 import io.nekohasekai.sagernet.fmt.naive.toUri
@@ -85,7 +84,6 @@ data class ProxyEntity(
     var hysteriaBean: HysteriaBean? = null,
     var sshBean: SSHBean? = null,
     var wgBean: WireGuardBean? = null,
-    var configBean: ConfigBean? = null,
     var chainBean: ChainBean? = null,
 ) : Serializable() {
 
@@ -107,10 +105,7 @@ data class ProxyEntity(
 
         const val TYPE_CHAIN = 8
 
-        const val TYPE_CONFIG = 13
-
         val chainName by lazy { app.getString(R.string.proxy_chain) }
-        val configName by lazy { app.getString(R.string.custom_config) }
 
         private val placeHolderBean = SOCKSBean().applyDefaultValues()
 
@@ -193,7 +188,6 @@ data class ProxyEntity(
             TYPE_SSH -> sshBean = KryoConverters.sshDeserialize(byteArray)
             TYPE_WG -> wgBean = KryoConverters.wireguardDeserialize(byteArray)
 
-            TYPE_CONFIG -> configBean = KryoConverters.configDeserialize(byteArray)
             TYPE_CHAIN -> chainBean = KryoConverters.chainDeserialize(byteArray)
         }
     }
@@ -212,7 +206,6 @@ data class ProxyEntity(
         TYPE_SSH -> "SSH"
         TYPE_WG -> "WireGuard"
         TYPE_CHAIN -> chainName
-        TYPE_CONFIG -> configName
         else -> "Undefined type $type"
     }
 
@@ -234,7 +227,6 @@ data class ProxyEntity(
             TYPE_SSH -> sshBean
             TYPE_WG -> wgBean
 
-            TYPE_CONFIG -> configBean
             TYPE_CHAIN -> chainBean
             else -> error("Undefined type $type")
         } ?: error("Null ${displayType()} profile")
@@ -243,14 +235,12 @@ data class ProxyEntity(
     fun haveLink(): Boolean {
         return when (type) {
             TYPE_CHAIN -> false
-            TYPE_CONFIG -> false
             else -> true
         }
     }
 
     fun haveStandardLink(): Boolean {
         return when (requireBean()) {
-            is ConfigBean -> false
             is HysteriaBean -> false
             is SSHBean -> false
             is WireGuardBean -> false
@@ -269,7 +259,6 @@ data class ProxyEntity(
             is TrojanGoBean -> toUri()
             is NaiveBean -> toUri()
             is PingTunnelBean -> toUri()
-            is ConfigBean -> toUniversalLink()
             is HysteriaBean -> toUniversalLink()
             is SSHBean -> toUniversalLink()
             is WireGuardBean -> toUniversalLink()
@@ -320,7 +309,6 @@ data class ProxyEntity(
             TYPE_NAIVE -> true
             TYPE_PING_TUNNEL -> true
             TYPE_HYSTERIA -> true
-            TYPE_CONFIG -> true
             else -> false
         }
     }
@@ -356,7 +344,6 @@ data class ProxyEntity(
         sshBean = null
         wgBean = null
 
-        configBean = null
         chainBean = null
 
         when (bean) {
@@ -408,10 +395,6 @@ data class ProxyEntity(
                 type = TYPE_WG
                 wgBean = bean
             }
-            is ConfigBean -> {
-                type = TYPE_CONFIG
-                configBean = bean
-            }
             is ChainBean -> {
                 type = TYPE_CHAIN
                 chainBean = bean
@@ -437,7 +420,6 @@ data class ProxyEntity(
                 TYPE_SSH -> SSHSettingsActivity::class.java
                 TYPE_WG -> WireGuardSettingsActivity::class.java
 
-                TYPE_CONFIG -> ConfigSettingsActivity::class.java
                 TYPE_CHAIN -> ChainSettingsActivity::class.java
                 else -> throw IllegalArgumentException()
             }

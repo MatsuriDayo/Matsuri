@@ -314,9 +314,6 @@ class ConfigurationFragment @JvmOverloads constructor(
             R.id.action_new_wg -> {
                 startActivity(Intent(requireActivity(), WireGuardSettingsActivity::class.java))
             }
-            R.id.action_new_config -> {
-                startActivity(Intent(requireActivity(), ConfigSettingsActivity::class.java))
-            }
             R.id.action_new_chain -> {
                 startActivity(Intent(requireActivity(), ChainSettingsActivity::class.java))
             }
