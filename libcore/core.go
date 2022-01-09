@@ -92,11 +92,15 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 	systemRoots = roots
 
 	// CA for other programs
-	f, err = os.OpenFile(filepath.Join(internalAssets, "ca.pem"), os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
+	f, err = os.OpenFile(filepath.Join(internalAssets, "ca.pem"), os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		errorHandler.HandleError(err.Error())
 	} else {
-		f.Write([]byte(mozillaCA))
+		if b, _ := ioutil.ReadAll(f); b == nil || string(b) != mozillaCA {
+			f.Truncate(0)
+			f.Seek(0, 0)
+			f.Write([]byte(mozillaCA))
+		}
 		f.Close()
 	}
 

@@ -94,25 +94,19 @@ func (p *shadowsocksrPlugin) ProtocolConn(conn *shadowsocks.ProtocolConn, iv []b
 	}
 }
 
-func (p *shadowsocksrPlugin) EncodePacket(buffer *buf.Buffer) (*buf.Buffer, error) {
-	defer buffer.Release()
-	packet := &bytes.Buffer{}
-	err := p.p.EncodePacket(packet, buffer.Bytes())
+func (p *shadowsocksrPlugin) EncodePacket(data []byte) ([]byte, error) {
+	dst := &bytes.Buffer{}
+	err := p.p.EncodePacket(dst, data)
 	if err != nil {
 		return nil, err
 	}
-	newBuf := buf.FromBytes(packet.Bytes())
-	newBuf.Endpoint = buffer.Endpoint
-	return buffer, nil
+	return dst.Bytes(), nil
 }
 
-func (p *shadowsocksrPlugin) DecodePacket(buffer *buf.Buffer) (*buf.Buffer, error) {
-	defer buffer.Release()
-	packet, err := p.p.DecodePacket(buffer.Bytes())
+func (p *shadowsocksrPlugin) DecodePacket(data []byte) ([]byte, error) {
+	dst, err := p.p.DecodePacket(data)
 	if err != nil {
 		return nil, err
 	}
-	newBuf := buf.FromBytes(packet)
-	newBuf.Endpoint = buffer.Endpoint
-	return newBuf, nil
+	return dst, nil
 }
