@@ -450,4 +450,6 @@
     <string name="backup_importing">正导入…</string>
     <string name="action_copy">复制</string>
     <string name="action_open">打开</string>
+    <string name="please_update">您的 Matsuri (%s) 太旧了喵，%s 再不更新就没的用了喵～</string>
+    <string name="please_update_force">您的 Matsuri (%s) 版本过旧，已于 %s 停止工作，请立即升级。</string>
 </resources>

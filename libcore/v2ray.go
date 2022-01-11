@@ -2,6 +2,7 @@ package libcore
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	gonet "net"
@@ -51,8 +52,13 @@ func NewV2rayInstance() *V2RayInstance {
 }
 
 func (instance *V2RayInstance) LoadConfig(content string) error {
+	if outdated != "" {
+		return errors.New(outdated)
+	}
+
 	instance.access.Lock()
 	defer instance.access.Unlock()
+
 	config, err := serial.LoadJSONConfig(strings.NewReader(content))
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "geoip.dat: no such file or directory") {

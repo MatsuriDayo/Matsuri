@@ -488,5 +488,7 @@
     <string name="backup_importing">Importing…</string>
 
     <string name="packet_encoding">Packet Encoding</string>
+    <string name="please_update">Your Matsuri is too old (%s). And will stop working at %s. Please update!</string>
+    <string name="please_update_force">Your Matsuri is too old (%s). And has been stopped working at %s. Please update!</string>
 
 </resources>

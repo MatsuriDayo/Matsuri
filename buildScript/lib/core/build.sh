@@ -5,7 +5,7 @@ export CGO_ENABLED=1
 export GO386=softfloat
 
 cd libcore
-./build.sh || exit 1
+rel=1 ./build.sh || exit 1
 
 # copy v2ray soucre to build/ for generating proto
 TEMP_V2RAY_PATH="$PROJECT/build/v2ray-core"
