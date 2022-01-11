@@ -50,7 +50,6 @@ import io.nekohasekai.sagernet.plugin.PluginManager
 import kotlinx.coroutines.*
 import libcore.Libcore
 import libcore.V2RayInstance
-import okhttp3.internal.closeQuietly
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -318,7 +317,9 @@ abstract class V2RayInstance(
     @Suppress("EXPERIMENTAL_API_USAGE")
     override fun close() {
         for (instance in externalInstances.values) {
-            instance.closeQuietly()
+            runCatching {
+                instance.close()
+            }
         }
 
         cacheFiles.removeAll { it.delete(); true }

@@ -37,10 +37,7 @@ import io.nekohasekai.sagernet.fmt.trojan_go.TrojanGoBean
 import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
 import io.nekohasekai.sagernet.ktx.*
 import kotlinx.coroutines.*
-import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import okhttp3.OkHttpClient
-import okhttp3.dnsoverhttps.DnsOverHttps
+import libcore.Libcore
 import java.net.Inet4Address
 import java.net.InetAddress
 import java.util.*
@@ -53,7 +50,6 @@ abstract class GroupUpdater {
         proxyGroup: ProxyGroup,
         subscription: SubscriptionBean,
         userInterface: GroupManager.Interface?,
-        httpClient: OkHttpClient,
         byUser: Boolean
     )
 
@@ -64,7 +60,7 @@ abstract class GroupUpdater {
     }
 
     protected suspend fun forceResolve(
-        okHttpClient: OkHttpClient, profiles: List<AbstractBean>, groupId: Long?
+        profiles: List<AbstractBean>, groupId: Long?
     ) {
         val connected = DataStore.state == BaseService.State.Connected
 
@@ -87,18 +83,21 @@ abstract class GroupUpdater {
             }
         }
 
-        val dohHttpUrl = dohUrl?.toHttpUrlOrNull() ?: (if (connected) {
+        val dohHttpUrl = dohUrl ?: if (connected) {
             "https://1.0.0.1/dns-query"
         } else {
             "https://223.5.5.5/dns-query"
-        }).toHttpUrl()
+        }
+
+        val client = Libcore.newHttpClient().apply {
+            modernTLS()
+            keepAlive()
+            trySocks5(DataStore.socksPort)
+        }
 
         Logs.d("Using doh url $dohHttpUrl")
 
         val ipv6Mode = DataStore.ipv6Mode
-        val dohClient = DnsOverHttps.Builder().client(okHttpClient).url(dohHttpUrl).apply {
-            if (ipv6Mode == IPv6Mode.DISABLE) includeIPv6(false)
-        }.build()
         val lookupPool = newFixedThreadPoolContext(5, "DNS Lookup")
         val lookupJobs = mutableListOf<Job>()
         val progress = Progress(profiles.size)
@@ -118,11 +117,26 @@ abstract class GroupUpdater {
 
             lookupJobs.add(GlobalScope.launch(lookupPool) {
                 try {
-                    val results = dohClient.lookup(profile.serverAddress)
+                    val message = Libcore.encodeDomainNameSystemQuery(
+                        1, profile.serverAddress, ipv6Mode
+                    )
+                    val response = client.newRequest().apply {
+                        setMethod("POST")
+                        setURL(dohHttpUrl)
+                        setContent(message)
+                        setHeader("Accept", "application/dns-message")
+                        setHeader("Content-Type", "application/dns-message")
+                    }.execute()
+
+                    val results = Libcore.decodeContentDomainNameSystemResponse(response.content)
+                        .trimStart()
+                        .split(" ")
+                        .map { InetAddress.getByName(it) }
+
                     if (results.isEmpty()) error("empty response")
                     rewriteAddress(profile, results, ipv6First)
                 } catch (e: Exception) {
-                    Logs.d("Lookup ${profile.serverAddress} failed: ${e.readableMessage}")
+                    Logs.d("Lookup ${profile.serverAddress} failed: ${e.readableMessage}",e)
                 }
                 if (groupId != null) {
                     progress.progress++
@@ -131,6 +145,7 @@ abstract class GroupUpdater {
             })
         }
 
+        client.close()
         lookupJobs.joinAll()
         lookupPool.close()
     }
@@ -186,8 +201,6 @@ abstract class GroupUpdater {
 
                 val subscription = proxyGroup.subscription!!
                 val connected = DataStore.state == BaseService.State.Connected
-
-                val httpClient = createProxyClient()
                 val userInterface = GroupManager.userInterface
 
                 if ((subscription.link?.startsWith("http://") == true || subscription.updateWhenConnectedOnly) && !connected) {
@@ -204,7 +217,7 @@ abstract class GroupUpdater {
                         SubscriptionType.OOCv1 -> OpenOnlineConfigUpdater
                         SubscriptionType.SIP008 -> SIP008Updater
                         else -> error("wtf")
-                    }.doUpdate(proxyGroup, subscription, userInterface, httpClient, byUser)
+                    }.doUpdate(proxyGroup, subscription, userInterface, byUser)
                     true
                 } catch (e: Throwable) {
                     Logs.w(e)
