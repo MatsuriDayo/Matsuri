@@ -1066,14 +1066,6 @@ fun buildV2RayConfig(
             }
         }
 
-        if (enableDnsRouting) {
-            for (bypassRule in extraRules.filter { it.isBypassRule() }) {
-                if (bypassRule.domains.isNotBlank()) {
-                    directLookupDomain.addAll(bypassRule.domains.split("\n"))
-                }
-            }
-        }
-
         remoteDns.forEach {
             var address = it
             if (address.contains("://")) {
@@ -1088,9 +1080,11 @@ fun buildV2RayConfig(
 
         // dns object user rules
         // Note: "geosite:cn" matches before user rule... v2ray-core
-        dns.servers[0].valueY?.uidList = uidListDNSRemote.toHashSet().toList()
-        dns.servers[0].valueY?.domains = domainListDNSRemote.toHashSet().toList()
-        directLookupDomain += domainListDNSDirect
+        if (enableDnsRouting) {
+            dns.servers[0].valueY?.uidList = uidListDNSRemote.toHashSet().toList()
+            dns.servers[0].valueY?.domains = domainListDNSRemote.toHashSet().toList()
+            directLookupDomain += domainListDNSDirect
+        }
 
         // add directDNS objects here
         dns.servers.addAll(directDNS.map {
