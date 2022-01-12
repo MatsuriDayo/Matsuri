@@ -87,6 +87,7 @@ object Key {
     const val ALWAYS_SHOW_ADDRESS = "alwaysShowAddress"
 
     const val PROVIDER_TROJAN = "providerTrojan"
+    const val PROVIDER_WIREGUARD = "providerWireguard"
 
     const val TUN_IMPLEMENTATION = "tunImplementation"
     const val ENABLE_PCAP = "enablePcap"
@@ -199,6 +200,11 @@ object TrojanProvider {
     const val V2RAY = 0
     const val TROJAN = 1
     const val TROJAN_GO = 2
+}
+
+object WireguardProvider {
+    const val V2RAY = 0
+    const val PLUGIN = 1
 }
 
 object IPv6Mode {

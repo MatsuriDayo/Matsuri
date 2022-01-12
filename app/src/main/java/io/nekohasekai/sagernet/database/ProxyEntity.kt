@@ -309,6 +309,7 @@ data class ProxyEntity(
             TYPE_NAIVE -> true
             TYPE_PING_TUNNEL -> true
             TYPE_HYSTERIA -> true
+            TYPE_WG -> DataStore.providerWireguard != TrojanProvider.V2RAY
             else -> false
         }
     }

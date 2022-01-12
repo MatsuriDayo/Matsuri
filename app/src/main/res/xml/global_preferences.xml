@@ -164,6 +164,13 @@
             app:key="providerTrojan"
             app:title="@string/trojan_provider"
             app:useSimpleSummaryProvider="true" />
+        <com.takisoft.preferencex.SimpleMenuPreference
+            app:defaultValue="0"
+            app:entries="@array/wireguard_provider"
+            app:entryValues="@array/int_array_2"
+            app:key="providerWireguard"
+            app:title="@string/wireguard_provider"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/cag_dns">
