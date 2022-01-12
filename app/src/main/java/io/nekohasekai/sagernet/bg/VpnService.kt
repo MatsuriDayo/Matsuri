@@ -52,6 +52,7 @@ import kotlinx.coroutines.*
 import libcore.*
 import java.io.FileDescriptor
 import java.net.InetAddress
+import java.net.InetSocketAddress
 import java.net.UnknownHostException
 import kotlin.coroutines.suspendCoroutine
 import android.net.VpnService as BaseVpnService

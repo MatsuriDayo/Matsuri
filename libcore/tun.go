@@ -144,7 +144,7 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 	var self bool
 
 	if t.dumpUid || t.trafficStats {
-		u, err := uidDumper.DumpUid(destination.Address.Family().IsIPv6(), false, source.Address.IP().String(), int32(source.Port), destination.Address.IP().String(), int32(destination.Port))
+		u, err := dumpUid(source, destination)
 		if err == nil {
 			uid = uint16(u)
 			var info *UidInfo
@@ -319,7 +319,7 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 
 	if t.dumpUid || t.trafficStats {
 
-		u, err := uidDumper.DumpUid(source.Address.Family().IsIPv6(), true, source.Address.String(), int32(source.Port), destination.Address.String(), int32(destination.Port))
+		u, err := dumpUid(source, destination)
 		if err == nil {
 			uid = uint16(u)
 			var info *UidInfo
