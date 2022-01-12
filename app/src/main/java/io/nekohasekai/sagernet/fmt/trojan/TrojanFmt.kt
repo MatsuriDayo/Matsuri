@@ -19,16 +19,13 @@
 
 package io.nekohasekai.sagernet.fmt.trojan
 
-import cn.hutool.json.JSONArray
-import cn.hutool.json.JSONObject
 import io.nekohasekai.sagernet.IPv6Mode
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.fmt.LOCALHOST
-import io.nekohasekai.sagernet.ktx.isIpAddress
-import io.nekohasekai.sagernet.ktx.linkBuilder
-import io.nekohasekai.sagernet.ktx.toLink
-import io.nekohasekai.sagernet.ktx.urlSafe
+import io.nekohasekai.sagernet.ktx.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.json.JSONArray
+import org.json.JSONObject
 
 // WTF
 // https://github.com/trojan-gfw/igniter/issues/318
@@ -80,54 +77,54 @@ fun TrojanBean.toUri(): String {
 }
 
 fun TrojanBean.buildTrojanConfig(port: Int): String {
-    return JSONObject().also { conf ->
-        conf["run_type"] = "client"
-        conf["local_addr"] = LOCALHOST
-        conf["local_port"] = port
-        conf["remote_addr"] = finalAddress
-        conf["remote_port"] = finalPort
-        conf["password"] = JSONArray().apply {
-            add(password)
-        }
-        conf["log_level"] = if (DataStore.enableLog) 0 else 2
+    return JSONObject().apply {
+        put("run_type", "client")
+        put("local_addr", LOCALHOST)
+        put("local_port", port)
+        put("remote_addr", finalAddress)
+        put("remote_port", finalPort)
+        put("password", JSONArray().apply {
+            put(password)
+        })
+        put("log_level", if (DataStore.enableLog) 0 else 2)
 
-        conf["ssl"] = JSONObject().also {
-            if (allowInsecure) it["verify"] = false
+        put("ssl", JSONObject().apply {
+            if (allowInsecure) put("verify", false)
             if (sni.isBlank() && finalAddress == LOCALHOST && !serverAddress.isIpAddress()) {
                 sni = serverAddress
             }
-            if (sni.isNotBlank()) it["sni"] = sni
-            if (alpn.isNotBlank()) it["alpn"] = JSONArray(alpn.split("\n"))
-        }
+            if (sni.isNotBlank()) put("sni", sni)
+            if (alpn.isNotBlank()) put("alpn", JSONArray(alpn.split("\n")))
+        })
     }.toStringPretty()
 }
 
 fun TrojanBean.buildTrojanGoConfig(port: Int, mux: Boolean): String {
-    return JSONObject().also { conf ->
-        conf["run_type"] = "client"
-        conf["local_addr"] = LOCALHOST
-        conf["local_port"] = port
-        conf["remote_addr"] = finalAddress
-        conf["remote_port"] = finalPort
-        conf["password"] = JSONArray().apply {
-            add(password)
-        }
-        conf["log_level"] = if (DataStore.enableLog) 0 else 2
-        if (mux && DataStore.enableMuxForAll) conf["mux"] = JSONObject().also {
-            it["enabled"] = true
-            it["concurrency"] = DataStore.muxConcurrency
-        }
-        conf["tcp"] = JSONObject().also {
-            it["prefer_ipv4"] = DataStore.ipv6Mode <= IPv6Mode.ENABLE
-        }
+    return JSONObject().apply {
+        put("run_type", "client")
+        put("local_addr", LOCALHOST)
+        put("local_port", port)
+        put("remote_addr", finalAddress)
+        put("remote_port", finalPort)
+        put("password", JSONArray().apply {
+            put(password)
+        })
+        put("log_level", if (DataStore.enableLog) 0 else 2)
+        if (mux && DataStore.enableMuxForAll) put("mux", JSONObject().apply {
+            put("enabled", true)
+            put("concurrency", DataStore.muxConcurrency)
+        })
+        put("tcp", JSONObject().apply {
+            put("prefer_ipv4", DataStore.ipv6Mode <= IPv6Mode.ENABLE)
+        })
 
-        conf["ssl"] = JSONObject().also {
-            if (allowInsecure) it["verify"] = false
+        put("ssl", JSONObject().apply {
+            if (allowInsecure) put("verify", false)
             if (sni.isBlank() && finalAddress == LOCALHOST && !serverAddress.isIpAddress()) {
                 sni = serverAddress
             }
-            if (sni.isNotBlank()) it["sni"] = sni
-            if (alpn.isNotBlank()) it["alpn"] = JSONArray(alpn.split("\n"))
-        }
+            if (sni.isNotBlank()) put("sni", sni)
+            if (alpn.isNotBlank()) put("alpn", JSONArray(alpn.split("\n")))
+        })
     }.toStringPretty()
 }

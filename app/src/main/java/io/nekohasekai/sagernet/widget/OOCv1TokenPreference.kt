@@ -23,12 +23,14 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.core.widget.addTextChangedListener
 import cn.hutool.core.util.CharUtil
-import cn.hutool.json.JSONObject
 import com.google.android.material.textfield.TextInputLayout
 import com.takisoft.preferencex.EditTextPreference
 import io.nekohasekai.sagernet.R
+import io.nekohasekai.sagernet.ktx.getIntNya
+import io.nekohasekai.sagernet.ktx.getStr
 import io.nekohasekai.sagernet.ktx.readableMessage
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.json.JSONObject
 
 class OOCv1TokenPreference : EditTextPreference {
 
@@ -57,8 +59,8 @@ class OOCv1TokenPreference : EditTextPreference {
                 }
                 var isValid = true
                 try {
-                    val tokenObject = JSONObject(editText.text)
-                    val version = tokenObject.getInt("version")
+                    val tokenObject = JSONObject(editText.text.toString())
+                    val version = tokenObject.getIntNya("version")
                     if (version != 1) {
                         isValid = false
                         if (version != null) {

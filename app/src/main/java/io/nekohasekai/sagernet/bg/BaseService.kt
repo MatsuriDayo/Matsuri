@@ -29,7 +29,6 @@ import android.os.Build
 import android.os.IBinder
 import android.os.RemoteCallbackList
 import android.os.RemoteException
-import cn.hutool.json.JSONException
 import io.nekohasekai.sagernet.Action
 import io.nekohasekai.sagernet.BootReceiver
 import io.nekohasekai.sagernet.R
@@ -448,8 +447,8 @@ class BaseService {
                     preInit()
                     try {
                         proxy.init()
-                    } catch (jsonEx: JSONException) {
-                        error(jsonEx.readableMessage.replace("cn.hutool.json.", ""))
+                    } catch (e: Exception) {
+                        error(e.readableMessage)
                     }
                     proxy.processes = GuardedProcessPool {
                         Logs.w(it)

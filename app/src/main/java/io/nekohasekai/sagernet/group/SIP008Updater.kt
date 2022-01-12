@@ -20,16 +20,14 @@
 package io.nekohasekai.sagernet.group
 
 import android.net.Uri
-import cn.hutool.json.JSONObject
 import io.nekohasekai.sagernet.ExtraType
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.*
 import io.nekohasekai.sagernet.fmt.AbstractBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.parseShadowsocks
-import io.nekohasekai.sagernet.ktx.Logs
-import io.nekohasekai.sagernet.ktx.app
-import io.nekohasekai.sagernet.ktx.applyDefaultValues
+import io.nekohasekai.sagernet.ktx.*
 import libcore.Libcore
+import org.json.JSONObject
 
 object SIP008Updater : GroupUpdater() {
 
@@ -66,8 +64,8 @@ object SIP008Updater : GroupUpdater() {
             sip008Response = JSONObject(response.contentString)
         }
 
-        subscription.bytesUsed = sip008Response.getLong("bytesUsed", -1)
-        subscription.bytesRemaining = sip008Response.getLong("bytesRemaining", -1)
+        subscription.bytesUsed = sip008Response.optLong("bytesUsed", -1)
+        subscription.bytesRemaining = sip008Response.optLong("bytesRemaining", -1)
         subscription.applyDefaultValues()
 
         val servers = sip008Response.getJSONArray("servers").filterIsInstance<JSONObject>()

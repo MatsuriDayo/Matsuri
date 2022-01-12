@@ -20,15 +20,11 @@
 package io.nekohasekai.sagernet.fmt.shadowsocks
 
 import cn.hutool.core.codec.Base64
-import cn.hutool.json.JSONObject
 import com.github.shadowsocks.plugin.PluginConfiguration
-import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.plugin.PluginOptions
-import io.nekohasekai.sagernet.IPv6Mode
-import io.nekohasekai.sagernet.database.DataStore
-import io.nekohasekai.sagernet.fmt.LOCALHOST
 import io.nekohasekai.sagernet.ktx.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.json.JSONObject
 
 fun PluginConfiguration.fixInvalidParams() {
 
@@ -183,39 +179,12 @@ fun JSONObject.parseShadowsocks(): ShadowsocksBean {
         }
 
         serverAddress = getStr("server")
-        serverPort = getInt("server_port")
+        serverPort = getIntNya("server_port")
         password = getStr("password")
         method = getStr("method")
         plugin = pluginStr
-        name = getStr("remarks", "")
+        name = optString("remarks", "")
 
         fixInvalidParams()
     }
-}
-
-
-fun ShadowsocksBean.buildShadowsocksConfig(port: Int): String {
-    val proxyConfig = JSONObject().also {
-        it["server"] = finalAddress
-        it["server_port"] = finalPort
-        it["method"] = method
-        it["password"] = password
-        it["local_address"] = LOCALHOST
-        it["local_port"] = port
-        it["local_udp_address"] = LOCALHOST
-        it["local_udp_port"] = port
-        it["mode"] = "tcp_and_udp"
-        it["ipv6_first"] = DataStore.ipv6Mode >= IPv6Mode.PREFER
-        it["keep_alive"] = DataStore.tcpKeepAliveInterval
-    }
-
-    if (plugin.isNotBlank()) {
-        val pluginConfiguration = PluginConfiguration(plugin ?: "")
-        PluginManager.init(pluginConfiguration)?.let { (path, opts, _) ->
-            proxyConfig["plugin"] = path
-            proxyConfig["plugin_opts"] = opts.toString()
-        }
-    }
-
-    return proxyConfig.toStringPretty()
 }

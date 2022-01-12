@@ -19,8 +19,6 @@
 
 package io.nekohasekai.sagernet.fmt.trojan_go
 
-import cn.hutool.json.JSONArray
-import cn.hutool.json.JSONObject
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginManager
 import com.github.shadowsocks.plugin.PluginOptions
@@ -30,6 +28,8 @@ import io.nekohasekai.sagernet.fmt.LOCALHOST
 import io.nekohasekai.sagernet.fmt.shadowsocks.fixInvalidParams
 import io.nekohasekai.sagernet.ktx.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.json.JSONArray
+import org.json.JSONObject
 
 fun parseTrojanGo(server: String): TrojanGoBean {
     val link = server.replace("trojan-go://", "https://").toHttpUrlOrNull() ?: error(
@@ -104,61 +104,61 @@ fun TrojanGoBean.toUri(): String {
 }
 
 fun TrojanGoBean.buildTrojanGoConfig(port: Int, mux: Boolean): String {
-    return JSONObject().also { conf ->
-        conf["run_type"] = "client"
-        conf["local_addr"] = LOCALHOST
-        conf["local_port"] = port
-        conf["remote_addr"] = finalAddress
-        conf["remote_port"] = finalPort
-        conf["password"] = JSONArray().apply {
-            add(password)
-        }
-        conf["log_level"] = if (DataStore.enableLog) 0 else 2
-        if (mux) conf["mux"] = JSONObject().also {
-            it["enabled"] = true
-            it["concurrency"] = DataStore.muxConcurrency
-        }
-        conf["tcp"] = JSONObject().also {
-            it["prefer_ipv4"] = DataStore.ipv6Mode <= IPv6Mode.ENABLE
-        }
+    return JSONObject().apply {
+        put("run_type", "client")
+        put("local_addr", LOCALHOST)
+        put("local_port", port)
+        put("remote_addr", finalAddress)
+        put("remote_port", finalPort)
+        put("password", JSONArray().apply {
+            put(password)
+        })
+        put("log_level", if (DataStore.enableLog) 0 else 2)
+        if (mux) put("mux", JSONObject().apply {
+            put("enabled", true)
+            put("concurrency", DataStore.muxConcurrency)
+        })
+        put("tcp", JSONObject().apply {
+            put("prefer_ipv4", DataStore.ipv6Mode <= IPv6Mode.ENABLE)
+        })
 
         when (type) {
             "original" -> {
             }
-            "ws" -> conf["websocket"] = JSONObject().also {
-                it["enabled"] = true
-                it["host"] = host
-                it["path"] = path
-            }
+            "ws" -> put("websocket", JSONObject().apply {
+                put("enabled", true)
+                put("host", host)
+                put("path", path)
+            })
         }
 
         if (sni.isBlank() && finalAddress == LOCALHOST && !serverAddress.isIpAddress()) {
             sni = serverAddress
         }
 
-        conf["ssl"] = JSONObject().also {
-            if (sni.isNotBlank()) it["sni"] = sni
-        }
+        put("ssl", JSONObject().apply {
+            if (sni.isNotBlank()) put("sni", sni)
+        })
 
         when {
             encryption == "none" -> {
             }
-            encryption.startsWith("ss;") -> conf["shadowsocks"] = JSONObject().also {
-                it["enabled"] = true
-                it["method"] = encryption.substringAfter(";").substringBefore(":")
-                it["password"] = encryption.substringAfter(":")
-            }
+            encryption.startsWith("ss;") -> put("shadowsocks", JSONObject().apply {
+                put("enabled", true)
+                put("method", encryption.substringAfter(";").substringBefore(":"))
+                put("password", encryption.substringAfter(":"))
+            })
         }
 
         if (plugin.isNotBlank()) {
             val pluginConfiguration = PluginConfiguration(plugin ?: "")
             PluginManager.init(pluginConfiguration)?.let { (path, opts, isV2) ->
-                conf["transport_plugin"] = JSONObject().also {
-                    it["enabled"] = true
-                    it["type"] = "shadowsocks"
-                    it["command"] = path
-                    it["option"] = opts.toString()
-                }
+                put("transport_plugin", JSONObject().apply {
+                    put("enabled", true)
+                    put("type", "shadowsocks")
+                    put("command", path)
+                    put("option", opts.toString())
+                })
             }
         }
     }.toStringPretty()
@@ -166,8 +166,8 @@ fun TrojanGoBean.buildTrojanGoConfig(port: Int, mux: Boolean): String {
 
 fun JSONObject.parseTrojanGo(): TrojanGoBean {
     return TrojanGoBean().applyDefaultValues().apply {
-        serverAddress = getStr("remote_addr", serverAddress)
-        serverPort = getInt("remote_port", serverPort)
+        serverAddress = optString("remote_addr", serverAddress)
+        serverPort = optInt("remote_port", serverPort)
         when (val pass = get("password")) {
             is String -> {
                 password = pass
@@ -176,41 +176,41 @@ fun JSONObject.parseTrojanGo(): TrojanGoBean {
                 password = pass[0] as String
             }
         }
-        getJSONObject("ssl")?.apply {
-            sni = getStr("sni", sni)
+        optJSONArray("ssl")?.apply {
+            sni = optString("sni", sni)
         }
-        getJSONObject("websocket")?.apply {
-            if (getBool("enabled", false)) {
+        optJSONArray("websocket")?.apply {
+            if (optBoolean("enabled", false)) {
                 type = "ws"
-                host = getStr("host", host)
-                path = getStr("path", path)
+                host = optString("host", host)
+                path = optString("path", path)
             }
         }
-        getJSONObject("shadowsocks")?.apply {
-            if (getBool("enabled", false)) {
-                encryption = "ss;${getStr("method", "")}:${getStr("password", "")}"
+        optJSONArray("shadowsocks")?.apply {
+            if (optBoolean("enabled", false)) {
+                encryption = "ss;${optString("method", "")}:${optString("password", "")}"
             }
         }
-        getJSONObject("transport_plugin")?.apply {
-            if (getBool("enabled", false)) {
+        optJSONArray("transport_plugin")?.apply {
+            if (optBoolean("enabled", false)) {
                 when (type) {
                     "shadowsocks" -> {
                         val pl = PluginConfiguration()
-                        pl.selected = getStr("command")
-                        getJSONArray("arg")?.also {
+                        pl.selected = optString("command")
+                        optJSONArray("arg")?.also {
                             pl.pluginsOptions[pl.selected] = PluginOptions().also { opts ->
                                 var key = ""
-                                it.forEachIndexed { index, param ->
+                                for (index in 0 until it.length()) {
                                     if (index % 2 != 0) {
-                                        key = param.toString()
+                                        key = it[index].toString()
                                     } else {
-                                        opts[key] = param.toString()
+                                        opts[key] = it[index].toString()
                                     }
                                 }
                             }
                         }
-                        getStr("option")?.also {
-                            pl.pluginsOptions[pl.selected] = PluginOptions(it)
+                        optString("option").also {
+                            if (it != "") pl.pluginsOptions[pl.selected] = PluginOptions(it)
                         }
                         pl.fixInvalidParams()
                         plugin = pl.toString()

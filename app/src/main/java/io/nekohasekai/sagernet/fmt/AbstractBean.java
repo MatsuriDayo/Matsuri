@@ -32,7 +32,6 @@ import java.util.List;
 
 import cn.hutool.core.clone.Cloneable;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.json.JSONUtil;
 import io.nekohasekai.sagernet.ExtraType;
 import io.nekohasekai.sagernet.fmt.gson.GsonsKt;
 import io.nekohasekai.sagernet.ktx.KryosKt;
@@ -184,7 +183,7 @@ public abstract class AbstractBean extends Serializable implements Cloneable<Abs
     @NotNull
     @Override
     public String toString() {
-        return getClass().getSimpleName() + " " + JSONUtil.formatJsonStr(GsonsKt.getGson().toJson(this));
+        return getClass().getSimpleName() + " " + GsonsKt.getGson().toJson(this);
     }
 
     public void applyFeatureSettings(AbstractBean other) {

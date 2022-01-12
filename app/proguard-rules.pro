@@ -10,12 +10,6 @@
 # SnakeYaml
 -keep class org.yaml.snakeyaml.** { *; }
 
-# IDK Why
--keep class cn.hutool.core.** { *; }
-
-# Used to be this, but R8 crashes after this commit
-# -keep class cn.hutool.core.convert.** { *; }
-
 -dontobfuscate
 -keepattributes SourceFile
 

@@ -19,11 +19,11 @@
 
 package io.nekohasekai.sagernet.fmt.naive
 
-import cn.hutool.json.JSONObject
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.fmt.LOCALHOST
 import io.nekohasekai.sagernet.ktx.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.json.JSONObject
 
 fun parseNaive(link: String): NaiveBean {
     val proto = link.substringAfter("+").substringBefore(":")
@@ -74,14 +74,14 @@ fun NaiveBean.toUri(proxyOnly: Boolean = false): String {
 }
 
 fun NaiveBean.buildNaiveConfig(port: Int): String {
-    return JSONObject().also {
+    return JSONObject().apply {
         // process ipv6
         finalAddress = finalAddress.wrapIPV6Host()
         serverAddress = serverAddress.wrapIPV6Host()
 
         // process sni
         if (sni.isNotBlank()) {
-            it["host-resolver-rules"] = "MAP $sni $finalAddress"
+            put("host-resolver-rules", "MAP $sni $finalAddress")
             finalAddress = sni
         } else {
             if (serverAddress.isIpAddress()) {
@@ -89,21 +89,21 @@ fun NaiveBean.buildNaiveConfig(port: Int): String {
                 // and host-resolver-rules cannot resolve the SNI problem
                 // so do nothing
             } else {
-                it["host-resolver-rules"] = "MAP $serverAddress $finalAddress"
+                put("host-resolver-rules", "MAP $serverAddress $finalAddress")
                 finalAddress = serverAddress
             }
         }
 
-        it["listen"] = "socks://$LOCALHOST:$port"
-        it["proxy"] = toUri(true)
+        put("listen", "socks://$LOCALHOST:$port")
+        put("proxy", toUri(true))
         if (extraHeaders.isNotBlank()) {
-            it["extra-headers"] = extraHeaders.split("\n").joinToString("\r\n")
+            put("extra-headers", extraHeaders.split("\n").joinToString("\r\n"))
         }
         if (DataStore.enableLog) {
-            it["log"] = ""
+            put("log", "")
         }
         if (insecureConcurrency > 0) {
-            it["insecure-concurrency"] = insecureConcurrency
+            put("insecure-concurrency", insecureConcurrency)
         }
     }.toStringPretty()
 }

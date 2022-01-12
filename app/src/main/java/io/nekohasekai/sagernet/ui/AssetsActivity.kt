@@ -29,7 +29,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import cn.hutool.json.JSONObject
 import com.google.android.material.snackbar.Snackbar
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
@@ -38,7 +37,7 @@ import io.nekohasekai.sagernet.databinding.LayoutAssetsBinding
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.widget.UndoSnackbarManager
 import libcore.Libcore
-import okhttp3.Request
+import org.json.JSONObject
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.*
@@ -301,7 +300,7 @@ class AssetsActivity : ThemedActivity() {
             }.execute()
 
             val release = JSONObject(response.contentString)
-            val tagName = release.getStr("tag_name")
+            val tagName = release.optString("tag_name")
 
             if (tagName == localVersion) {
                 onMainDispatcher {

@@ -267,7 +267,7 @@ data class ProxyEntity(
     }
 
     fun exportConfig(): Pair<String, String> {
-        var name = "profile.json"
+        var name = "${requireBean().displayName()}.json"
 
         return with(requireBean()) {
             StringBuilder().apply {

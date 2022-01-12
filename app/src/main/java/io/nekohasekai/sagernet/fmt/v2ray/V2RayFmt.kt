@@ -20,9 +20,9 @@
 package io.nekohasekai.sagernet.fmt.v2ray
 
 import cn.hutool.core.codec.Base64
-import cn.hutool.json.JSONObject
 import io.nekohasekai.sagernet.ktx.*
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.json.JSONObject
 
 fun parseV2Ray(link: String): StandardV2RayBean {
     if (!link.contains("@")) {
@@ -213,10 +213,10 @@ fun parseV2RayN(link: String): VMessBean {
     val json = JSONObject(result)
 
     bean.serverAddress = json.getStr("add") ?: ""
-    bean.serverPort = json.getInt("port") ?: 1080
+    bean.serverPort = json.getIntNya("port") ?: 1080
     bean.encryption = json.getStr("scy") ?: ""
     bean.uuid = json.getStr("id") ?: ""
-    bean.alterId = json.getInt("aid") ?: 0
+    bean.alterId = json.getIntNya("aid") ?: 0
     bean.type = json.getStr("net") ?: ""
     bean.headerType = json.getStr("type") ?: ""
     bean.host = json.getStr("host") ?: ""
@@ -239,7 +239,7 @@ fun parseV2RayN(link: String): VMessBean {
     bean.sni = json.getStr("sni") ?: bean.host
     bean.security = json.getStr("tls")
 
-    if (json.getInt("v", 2) < 2) {
+    if (json.optInt("v", 2) < 2) {
         when (bean.type) {
             "ws" -> {
                 var path = ""
@@ -313,37 +313,37 @@ private fun parseCsvVMess(csv: String): VMessBean {
 
 fun VMessBean.toV2rayN(): String {
 
-    return "vmess://" + JSONObject().also {
+    return "vmess://" + JSONObject().apply {
 
-        it["v"] = 2
-        it["ps"] = name
-        it["add"] = serverAddress
-        it["port"] = serverPort
-        it["id"] = uuid
-        it["aid"] = alterId
-        it["net"] = type
-        it["host"] = host
-        it["path"] = path
-        it["type"] = headerType
+        put("v", 2)
+        put("ps", name)
+        put("add", serverAddress)
+        put("port", serverPort)
+        put("id", uuid)
+        put("aid", alterId)
+        put("net", type)
+        put("host", host)
+        put("path", path)
+        put("type", headerType)
 
         when (headerType) {
             "quic" -> {
-                it["host"] = quicSecurity
-                it["path"] = quicKey
+                put("host", quicSecurity)
+                put("path", quicKey)
             }
             "kcp" -> {
-                it["path"] = mKcpSeed
+                put("path", mKcpSeed)
             }
             "grpc" -> {
-                it["path"] = grpcServiceName
+                put("path", grpcServiceName)
             }
         }
 
-        it["tls"] = if (security == "tls") "tls" else ""
-        it["sni"] = sni
-        it["scy"] = encryption
+        put("tls", if (security == "tls") "tls" else "")
+        put("sni", sni)
+        put("scy", encryption)
 
-    }.toString().let { Base64.encodeUrlSafe(it) }
+    }.toStringPretty().let { Base64.encodeUrlSafe(it) }
 
 }
 

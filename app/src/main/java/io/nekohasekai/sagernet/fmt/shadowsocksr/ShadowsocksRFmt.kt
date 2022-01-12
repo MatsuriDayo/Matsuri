@@ -20,12 +20,10 @@
 package io.nekohasekai.sagernet.fmt.shadowsocksr
 
 import cn.hutool.core.codec.Base64
-import cn.hutool.json.JSONObject
-import io.nekohasekai.sagernet.IPv6Mode
-import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
 import io.nekohasekai.sagernet.ktx.decodeBase64UrlSafe
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.json.JSONObject
 import java.util.*
 
 fun parseShadowsocksR(url: String): ShadowsocksRBean {
@@ -72,30 +70,17 @@ fun ShadowsocksRBean.toUri(): String {
     )
 }
 
-fun ShadowsocksRBean.buildShadowsocksRConfig(): String {
-    return JSONObject().also {
-        it["server"] = finalAddress
-        it["server_port"] = finalPort
-        it["method"] = method
-        it["password"] = password
-        it["protocol"] = protocol
-        it["protocol_param"] = protocolParam
-        it["obfs"] = obfs
-        it["obfs_param"] = obfsParam
-        it["ipv6"] = DataStore.ipv6Mode >= IPv6Mode.ENABLE
-    }.toStringPretty()
-}
 
 fun JSONObject.parseShadowsocksR(): ShadowsocksRBean {
     return ShadowsocksRBean().applyDefaultValues().apply {
-        serverAddress = getStr("server", serverAddress)
-        serverPort = getInt("server_port", serverPort)
-        method = getStr("method", method)
-        password = getStr("password", password)
-        protocol = getStr("protocol", protocol)
-        protocolParam = getStr("protocol_param", protocolParam)
-        obfs = getStr("obfs", obfs)
-        obfsParam = getStr("obfs_param", obfsParam)
-        name = getStr("remarks", name)
+        serverAddress = optString("server", serverAddress)
+        serverPort = optInt("server_port", serverPort)
+        method = optString("method", method)
+        password = optString("password", password)
+        protocol = optString("protocol", protocol)
+        protocolParam = optString("protocol_param", protocolParam)
+        obfs = optString("obfs", obfs)
+        obfsParam = optString("obfs_param", obfsParam)
+        name = optString("remarks", name)
     }
 }

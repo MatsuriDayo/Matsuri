@@ -232,6 +232,8 @@ class VpnService : BaseVpnService(),
                 bypass = false
             }
 
+            val added = mutableListOf<String>()
+
             individual.apply {
                 // Allow Matsuri itself using VPN.
                 remove(packageName)
@@ -240,14 +242,19 @@ class VpnService : BaseVpnService(),
                 try {
                     if (bypass) {
                         builder.addDisallowedApplication(it)
-                        Logs.d("Add bypass: $it")
                     } else {
                         builder.addAllowedApplication(it)
-                        Logs.d("Add allow: $it")
                     }
+                    added.add(it)
                 } catch (ex: PackageManager.NameNotFoundException) {
                     Logs.w(ex)
                 }
+            }
+
+            if (bypass) {
+                Logs.d("Add bypass: ${added.joinToString(", ")}")
+            } else {
+                Logs.d("Add allow: ${added.joinToString(", ")}")
             }
         }
 

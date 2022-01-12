@@ -20,7 +20,6 @@
 package io.nekohasekai.sagernet.group
 
 import android.net.Uri
-import cn.hutool.json.*
 import com.github.shadowsocks.plugin.PluginOptions
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.*
@@ -41,6 +40,9 @@ import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
 import io.nekohasekai.sagernet.ktx.*
 import libcore.Libcore
 import org.ini4j.Ini
+import org.json.JSONArray
+import org.json.JSONObject
+import org.json.JSONTokener
 import org.yaml.snakeyaml.TypeDescription
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.error.YAMLException
@@ -398,9 +400,9 @@ object RawUpdater : GroupUpdater() {
         }
 
         try {
-            val json = JSONUtil.parse(text)
+            val json = JSONTokener(text).nextValue()
             return parseJSON(json)
-        } catch (ignored: JSONException) {
+        } catch (ignored: Exception) {
         }
 
         try {
@@ -450,31 +452,31 @@ object RawUpdater : GroupUpdater() {
         return beans
     }
 
-    fun parseJSON(json: JSON): List<AbstractBean> {
+    fun parseJSON(json: Any): List<AbstractBean> {
         val proxies = ArrayList<AbstractBean>()
 
         if (json is JSONObject) {
             when {
-                json.containsKey("protocol_param") -> {
+                json.has("protocol_param") -> {
                     return listOf(json.parseShadowsocksR())
                 }
-                json.containsKey("method") -> {
+                json.has("method") -> {
                     return listOf(json.parseShadowsocks())
                 }
-                json.containsKey("protocol") -> {
+                json.has("protocol") -> {
                     val v2rayConfig = gson.fromJson(
                         json.toString(), V2RayConfig.OutboundObject::class.java
                     ).apply { init() }
                     return parseOutbound(v2rayConfig)
                 }
-                json.containsKey("outbound") -> {
+                json.has("outbound") -> {
                     val v2rayConfig = gson.fromJson(
                         json.getJSONObject("outbound").toString(),
                         V2RayConfig.OutboundObject::class.java
                     ).apply { init() }
                     return parseOutbound(v2rayConfig)
                 }
-                json.containsKey("outbounds") -> {/*   val fakedns = json["fakedns"]
+                json.has("outbounds") -> {/*   val fakedns = json["fakedns"]
                        if (fakedns is JSONObject) {
                            json["fakedns"] = JSONArray().apply {
                                add(fakedns)
@@ -514,19 +516,19 @@ object RawUpdater : GroupUpdater() {
                      proxies.addAll(parseOutbound(it))
                  }*/
                 }
-                json.containsKey("remote_addr") -> {
+                json.has("remote_addr") -> {
                     return listOf(json.parseTrojanGo())
                 }
                 else -> json.forEach { _, it ->
-                    if (it is JSON) {
+                    if (isJsonObjectValid(it)) {
                         proxies.addAll(parseJSON(it))
                     }
                 }
             }
         } else {
             json as JSONArray
-            json.forEach {
-                if (it is JSON) {
+            json.forEach { _, it ->
+                if (isJsonObjectValid(it)) {
                     proxies.addAll(parseJSON(it))
                 }
             }

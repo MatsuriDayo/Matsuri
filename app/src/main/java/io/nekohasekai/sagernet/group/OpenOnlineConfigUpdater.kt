@@ -20,7 +20,6 @@
 package io.nekohasekai.sagernet.group
 
 import cn.hutool.core.util.CharUtil
-import cn.hutool.json.JSONObject
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginOptions
 import io.nekohasekai.sagernet.ExtraType
@@ -29,13 +28,11 @@ import io.nekohasekai.sagernet.database.*
 import io.nekohasekai.sagernet.fmt.AbstractBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.fixInvalidParams
-import io.nekohasekai.sagernet.ktx.Logs
-import io.nekohasekai.sagernet.ktx.USER_AGENT_ORIGIN
-import io.nekohasekai.sagernet.ktx.app
-import io.nekohasekai.sagernet.ktx.applyDefaultValues
+import io.nekohasekai.sagernet.ktx.*
 import libcore.Libcore
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import org.json.JSONObject
 
 object OpenOnlineConfigUpdater : GroupUpdater() {
 
@@ -51,7 +48,7 @@ object OpenOnlineConfigUpdater : GroupUpdater() {
         try {
             apiToken = JSONObject(subscription.token)
 
-            val version = apiToken.getInt("version")
+            val version = apiToken.getIntNya("version")
             if (version != 1) {
                 if (version != null) {
                     error("Unsupported OOC version $version")
@@ -109,9 +106,9 @@ object OpenOnlineConfigUpdater : GroupUpdater() {
 
         val oocResponse = JSONObject(response.contentString)
         subscription.username = oocResponse.getStr("username")
-        subscription.bytesUsed = oocResponse.getLong("bytesUsed", -1)
-        subscription.bytesRemaining = oocResponse.getLong("bytesRemaining", -1)
-        subscription.expiryDate = oocResponse.getInt("expiryDate", -1)
+        subscription.bytesUsed = oocResponse.optLong("bytesUsed", -1)
+        subscription.bytesRemaining = oocResponse.optLong("bytesRemaining", -1)
+        subscription.expiryDate = oocResponse.optInt("expiryDate", -1)
         subscription.protocols = oocResponse.getJSONArray("protocols").filterIsInstance<String>()
         subscription.applyDefaultValues()
 
@@ -132,7 +129,7 @@ object OpenOnlineConfigUpdater : GroupUpdater() {
 
                 bean.name = profile.getStr("name")
                 bean.serverAddress = profile.getStr("address")
-                bean.serverPort = profile.getInt("port")
+                bean.serverPort = profile.getIntNya("port")
                 bean.method = profile.getStr("method")
                 bean.password = profile.getStr("password")
 
@@ -271,7 +268,7 @@ object OpenOnlineConfigUpdater : GroupUpdater() {
         bean.profileId = profile.getStr("id")
         bean.group = profile.getStr("group")
         bean.owner = profile.getStr("owner")
-        bean.tags = profile.getJSONArray("tags")?.filterIsInstance<String>()
+        bean.tags = profile.optJSONArray("tags")?.filterIsInstance()
     }
 
     val supportedProtocols = arrayOf("shadowsocks")

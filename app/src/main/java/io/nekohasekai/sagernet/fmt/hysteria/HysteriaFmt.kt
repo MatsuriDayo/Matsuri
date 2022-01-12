@@ -20,11 +20,11 @@
 package io.nekohasekai.sagernet.fmt.hysteria
 
 import cn.hutool.core.util.NumberUtil
-import cn.hutool.json.JSONObject
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.fmt.LOCALHOST
 import io.nekohasekai.sagernet.ktx.*
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import org.json.JSONObject
 import java.io.File
 
 
@@ -109,12 +109,12 @@ fun HysteriaBean.toUri(): String {
 
 fun JSONObject.parseHysteria(): HysteriaBean {
     return HysteriaBean().apply {
-        serverAddress = getStr("server").substringBeforeLast(":")
-        serverPort = getStr("server").substringAfterLast(":")
+        serverAddress = optString("server").substringBeforeLast(":")
+        serverPort = optString("server").substringAfterLast(":")
             .takeIf { NumberUtil.isInteger(it) }
             ?.toInt() ?: 443
-        uploadMbps = getInt("up_mbps")
-        downloadMbps = getInt("down_mbps")
+        uploadMbps = getIntNya("up_mbps")
+        downloadMbps = getIntNya("down_mbps")
         obfuscation = getStr("obfs")
         getStr("auth")?.also {
             authPayloadType = HysteriaBean.TYPE_BASE64
@@ -138,49 +138,49 @@ fun JSONObject.parseHysteria(): HysteriaBean {
         alpn = getStr("alpn")
         allowInsecure = getBool("insecure")
 
-        streamReceiveWindow = getInt("recv_window_conn")
-        connectionReceiveWindow = getInt("recv_window")
+        streamReceiveWindow = getIntNya("recv_window_conn")
+        connectionReceiveWindow = getIntNya("recv_window")
         disableMtuDiscovery = getBool("disable_mtu_discovery")
     }
 }
 
 fun HysteriaBean.buildHysteriaConfig(port: Int, cacheFile: (() -> File)?): String {
-    return JSONObject().also {
-        it["server"] = wrapUri()
+    return JSONObject().apply {
+        put("server", wrapUri())
         when (protocol) {
             HysteriaBean.PROTOCOL_FAKETCP -> {
-                it["protocol"] = "faketcp"
+                put("protocol", "faketcp")
             }
             HysteriaBean.PROTOCOL_WECHAT_VIDEO -> {
-                it["protocol"] = "wechat-video"
+                put("protocol", "wechat-video")
             }
         }
-        it["up_mbps"] = uploadMbps
-        it["down_mbps"] = downloadMbps
-        it["socks5"] = JSONObject(mapOf("listen" to "$LOCALHOST:$port"))
-        it["obfs"] = obfuscation
+        put("up_mbps", uploadMbps)
+        put("down_mbps", downloadMbps)
+        put("socks5", JSONObject(mapOf("listen" to "$LOCALHOST:$port")))
+        put("obfs", obfuscation)
         when (authPayloadType) {
-            HysteriaBean.TYPE_BASE64 -> it["auth"] = authPayload
-            HysteriaBean.TYPE_STRING -> it["auth_str"] = authPayload
+            HysteriaBean.TYPE_BASE64 -> put("auth", authPayload)
+            HysteriaBean.TYPE_STRING -> put("auth_str", authPayload)
         }
         if (sni.isBlank() && finalAddress == LOCALHOST && !serverAddress.isIpAddress()) {
             sni = serverAddress
         }
         if (sni.isNotBlank()) {
-            it["server_name"] = sni
+            put("server_name", sni)
         }
-        if (alpn.isNotBlank()) it["alpn"] = alpn
+        if (alpn.isNotBlank()) put("alpn", alpn)
         if (caText.isNotBlank() && cacheFile != null) {
             val caFile = cacheFile()
             caFile.writeText(caText)
-            it["ca"] = caFile.absolutePath
+            put("ca", caFile.absolutePath)
         }
 
-        if (allowInsecure) it["insecure"] = true
-        if (streamReceiveWindow > 0) it["recv_window_conn"] = streamReceiveWindow
-        if (connectionReceiveWindow > 0) it["recv_window"] = connectionReceiveWindow
-        if (disableMtuDiscovery) it["disable_mtu_discovery"] = true
+        if (allowInsecure) put("insecure", true)
+        if (streamReceiveWindow > 0) put("recv_window_conn", streamReceiveWindow)
+        if (connectionReceiveWindow > 0) put("recv_window", connectionReceiveWindow)
+        if (disableMtuDiscovery) put("disable_mtu_discovery", true)
 
-        it["resolver"] = "127.0.0.1:" + DataStore.localDNSPort
+        put("resolver", "127.0.0.1:" + DataStore.localDNSPort)
     }.toStringPretty()
-} 
+}
