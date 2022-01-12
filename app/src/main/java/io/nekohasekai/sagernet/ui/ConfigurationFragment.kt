@@ -1089,9 +1089,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                         recyclerView: RecyclerView,
                         viewHolder: RecyclerView.ViewHolder,
                     ): Int {
-                        return if (isProfileEditable((viewHolder as ConfigurationHolder).entity.id)) {
-                            super.getSwipeDirs(recyclerView, viewHolder)
-                        } else 0
+                        return 0
                     }
 
                     override fun getDragDirs(
@@ -1100,9 +1098,6 @@ class ConfigurationFragment @JvmOverloads constructor(
                     ) = if (isEnabled) super.getDragDirs(recyclerView, viewHolder) else 0
 
                     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                        val index = viewHolder.bindingAdapterPosition
-                        adapter.remove(index)
-                        undoManager.remove(index to (viewHolder as ConfigurationHolder).entity)
                     }
 
                     override fun onMove(
@@ -1383,6 +1378,7 @@ class ConfigurationFragment @JvmOverloads constructor(
             val shareLayout: LinearLayout = view.findViewById(R.id.share)
             val shareLayer: LinearLayout = view.findViewById(R.id.share_layer)
             val shareButton: ImageView = view.findViewById(R.id.shareIcon)
+            val removeButton: ImageView = view.findViewById(R.id.remove)
 
             fun bind(proxyEntity: ProxyEntity) {
                 val pf = parentFragment as? ConfigurationFragment ?: return
@@ -1498,14 +1494,22 @@ class ConfigurationFragment @JvmOverloads constructor(
                     )
                 }
 
+                removeButton.setOnClickListener {
+                    val index = adapter.configurationIdList.indexOf(proxyEntity.id)
+                    adapter.remove(index)
+                    undoManager.remove(index to proxyEntity)
+                }
+
                 shareLayout.isGone = proxyEntity.type == ProxyEntity.TYPE_CHAIN
                 editButton.isGone = select
+                removeButton.visibility = View.VISIBLE
 
                 runOnDefaultDispatcher {
                     val selected = (selectedItem?.id ?: DataStore.selectedProxy) == proxyEntity.id
                     val started = selected && SagerNet.started && DataStore.currentProfile == proxyEntity.id
                     onMainDispatcher {
                         editButton.isEnabled = !started
+                        removeButton.isEnabled = !started
                         selectedView.visibility = if (selected) View.VISIBLE else View.INVISIBLE
                     }
 

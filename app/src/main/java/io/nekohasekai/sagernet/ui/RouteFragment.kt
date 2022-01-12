@@ -28,6 +28,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProfileManager
@@ -124,11 +125,17 @@ class RouteFragment : ToolbarFragment(R.layout.layout_route), Toolbar.OnMenuItem
                 startActivity(Intent(context, RouteSettingsActivity::class.java))
             }
             R.id.action_reset_route -> {
-                runOnDefaultDispatcher {
-                    SagerDatabase.rulesDao.reset()
-                    DataStore.rulesFirstCreate = false
-                    ruleAdapter.reload()
-                }
+                MaterialAlertDialogBuilder(activity).setTitle(R.string.confirm)
+                    .setMessage(R.string.clear_profiles_message)
+                    .setPositiveButton(R.string.yes) { _, _ ->
+                        runOnDefaultDispatcher {
+                            SagerDatabase.rulesDao.reset()
+                            DataStore.rulesFirstCreate = false
+                            ruleAdapter.reload()
+                        }
+                    }
+                    .setNegativeButton(R.string.no, null)
+                    .show()
             }
             R.id.action_manage_assets -> {
                 startActivity(Intent(requireContext(), AssetsActivity::class.java))

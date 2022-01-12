@@ -73,7 +73,7 @@ class GroupSettingsActivity(
 
     fun ProxyGroup.serialize() {
         name = DataStore.groupName.takeIf { it.isNotBlank() }
-            ?: "My group " + System.currentTimeMillis() / 1000
+            ?: "My group"
         type = DataStore.groupType
         order = DataStore.groupOrder
 
