@@ -353,24 +353,7 @@ class VpnService : BaseVpnService(),
                 }
             }
         } else {
-            val underlyingNetwork = underlyingNetwork ?: error("upstream network not found")
-            val answer = try {
-                underlyingNetwork.getAllByName(domain)
-            } catch (e: UnknownHostException) {
-                error("unknown host")
-            }
-            val filtered = mutableListOf<String>()
-            when {
-                network.endsWith("4") -> for (address in answer) {
-                    address.hostAddress?.takeIf { Validator.isIpv4(it) }?.also { filtered.add(it) }
-                }
-                network.endsWith("6") -> for (address in answer) {
-                    address.hostAddress?.takeIf { Validator.isIpv6(it) }?.also { filtered.add(it) }
-                }
-                else -> filtered.addAll(answer.mapNotNull { it.hostAddress })
-            }
-            if (filtered.isEmpty()) error("unknown host")
-            return filtered.joinToString(",")
+            throw Exception("114514")
         }
     }
 
