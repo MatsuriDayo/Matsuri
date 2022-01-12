@@ -37,7 +37,6 @@ import io.nekohasekai.sagernet.fmt.trojan_go.TrojanGoBean
 import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
 import io.nekohasekai.sagernet.ktx.*
 import kotlinx.coroutines.*
-import libcore.Libcore
 import java.net.Inet4Address
 import java.net.InetAddress
 import java.util.*
@@ -62,41 +61,6 @@ abstract class GroupUpdater {
     protected suspend fun forceResolve(
         profiles: List<AbstractBean>, groupId: Long?
     ) {
-        val connected = DataStore.state == BaseService.State.Connected
-
-        var dohUrl: String? = null
-        if (connected) {
-            val remoteDns = DataStore.remoteDns
-            when {
-                remoteDns.startsWith("https+local://") -> dohUrl = remoteDns.replace(
-                    "https+local://", "https://"
-                )
-                remoteDns.startsWith("https://") -> dohUrl = remoteDns
-            }
-        } else {
-            val directDns = DataStore.directDns
-            when {
-                directDns.startsWith("https+local://") -> dohUrl = directDns.replace(
-                    "https+local://", "https://"
-                )
-                directDns.startsWith("https://") -> dohUrl = directDns
-            }
-        }
-
-        val dohHttpUrl = dohUrl ?: if (connected) {
-            "https://1.0.0.1/dns-query"
-        } else {
-            "https://223.5.5.5/dns-query"
-        }
-
-        val client = Libcore.newHttpClient().apply {
-            modernTLS()
-            keepAlive()
-            trySocks5(DataStore.socksPort)
-        }
-
-        Logs.d("Using doh url $dohHttpUrl")
-
         val ipv6Mode = DataStore.ipv6Mode
         val lookupPool = newFixedThreadPoolContext(5, "DNS Lookup")
         val lookupJobs = mutableListOf<Job>()
@@ -117,22 +81,8 @@ abstract class GroupUpdater {
 
             lookupJobs.add(GlobalScope.launch(lookupPool) {
                 try {
-                    val message = Libcore.encodeDomainNameSystemQuery(
-                        1, profile.serverAddress, ipv6Mode
-                    )
-                    val response = client.newRequest().apply {
-                        setMethod("POST")
-                        setURL(dohHttpUrl)
-                        setContent(message)
-                        setHeader("Accept", "application/dns-message")
-                        setHeader("Content-Type", "application/dns-message")
-                    }.execute()
-
-                    val results = Libcore.decodeContentDomainNameSystemResponse(response.content)
-                        .trimStart()
-                        .split(" ")
-                        .map { InetAddress.getByName(it) }
-
+                    // System DNS is enough (when VPN connected, it uses v2ray-core)
+                    val results = InetAddress.getAllByName(profile.serverAddress).toList()
                     if (results.isEmpty()) error("empty response")
                     rewriteAddress(profile, results, ipv6First)
                 } catch (e: Exception) {
@@ -145,7 +95,6 @@ abstract class GroupUpdater {
             })
         }
 
-        client.close()
         lookupJobs.joinAll()
         lookupPool.close()
     }
