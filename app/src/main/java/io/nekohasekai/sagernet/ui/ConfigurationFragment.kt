@@ -1078,7 +1078,7 @@ class ConfigurationFragment @JvmOverloads constructor(
             configurationListView.adapter = adapter
             configurationListView.setItemViewCacheSize(20)
 
-            if (!select && proxyGroup.type == GroupType.BASIC) {
+            if (!select) {
 
                 undoManager = UndoSnackbarManager(activity as MainActivity, adapter)
 

@@ -77,6 +77,10 @@ object Logs {
         Libcore.nekoLogWrite(2, mkTag(), message + "\n" + exception.stackTraceToString())
     }
 
+    fun e(exception: Throwable) {
+        Libcore.nekoLogWrite(2, mkTag(), exception.stackTraceToString())
+    }
+
 }
 
 fun InputStream.use(out: OutputStream) {

@@ -53,7 +53,12 @@ import io.nekohasekai.sagernet.group.GroupInterfaceAdapter
 import io.nekohasekai.sagernet.group.GroupUpdater
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.plugin.PluginManager
+import io.nekohasekai.sagernet.utils.NekomuraUtil
 import io.nekohasekai.sagernet.widget.ListHolderListener
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import libcore.Libcore
 import java.text.SimpleDateFormat
 import java.util.*
@@ -104,6 +109,22 @@ class MainActivity : ThemedActivity(),
 
         if (intent?.action == Intent.ACTION_VIEW) {
             onNewIntent(intent)
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            for (i in 0 until 5) {
+                val ret = NekomuraUtil.updateAdurl()
+                if (ret != 0) {
+                    if (ret == 2) {
+                        runOnUiThread {
+                            navigation.menu.findItem(R.id.nav_tuiguang).isVisible = true
+                        }
+                    }
+                    return@launch
+                } else {
+                    delay(10 * 1000)
+                }
+            }
         }
     }
 
@@ -338,6 +359,12 @@ class MainActivity : ThemedActivity(),
                 return false
             }
             R.id.nav_about -> displayFragment(AboutFragment())
+            R.id.nav_tuiguang -> {
+                DataStore.adurl.apply {
+                    if (!isNullOrBlank()) launchCustomTab(this)
+                }
+                return false
+            }
             else -> return false
         }
         navigation.menu.findItem(id).isChecked = true
