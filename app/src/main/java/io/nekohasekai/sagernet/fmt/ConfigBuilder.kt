@@ -1045,7 +1045,6 @@ fun buildV2RayConfig(
 
         for (dns in directDNS) {
             if (!dns.isIpAddress()) continue
-
             routing.rules.add(0, RoutingObject.RuleObject().apply {
                 type = "field"
                 outboundTag = TAG_DIRECT
@@ -1090,7 +1089,7 @@ fun buildV2RayConfig(
         dns.servers.addAll(directDNS.map {
             DnsObject.StringOrServerObject().apply {
                 valueY = DnsObject.ServerObject().apply {
-                    address = it
+                    address = it.replace("https://", "https+local://")
                     domains = directLookupDomain.toList()
                     skipFallback = true
                     uidList = uidListDNSDirect.toHashSet().toList()
