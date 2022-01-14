@@ -117,6 +117,14 @@ object ProfileManager {
         }
     }
 
+    suspend fun deleteProfile2(groupId: Long, profileId: Long) {
+        if (SagerDatabase.proxyDao.deleteById(profileId) == 0) return
+        if (DataStore.selectedProxy == profileId) {
+            if (DataStore.directBootAware) DirectBoot.clean()
+            DataStore.selectedProxy = 0L
+        }
+    }
+
     suspend fun deleteProfile(groupId: Long, profileId: Long) {
         if (SagerDatabase.proxyDao.deleteById(profileId) == 0) return
         if (DataStore.selectedProxy == profileId) {
@@ -208,11 +216,11 @@ object ProfileManager {
                 RuleEntity(
                     name = app.getString(R.string.route_opt_block_analysis),
                     domains = app.assets.open("analysis.txt").use {
-                            it.bufferedReader()
-                                .readLines()
-                                .filter { it.isNotBlank() }
-                                .joinToString("\n")
-                        },
+                        it.bufferedReader()
+                            .readLines()
+                            .filter { it.isNotBlank() }
+                            .joinToString("\n")
+                    },
                     outbound = -2,
                 )
             )
@@ -259,19 +267,3 @@ object ProfileManager {
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
