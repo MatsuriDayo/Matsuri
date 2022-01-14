@@ -141,6 +141,11 @@ fun Project.setupCommon() {
                         isMinifyEnabled = false
                     }
                 }
+                getByName("debug") {
+                    applicationIdSuffix = "debug"
+                    debuggable(true)
+                    jniDebuggable(true)
+                }
             }
             applicationVariants.forEach { variant ->
                 variant.outputs.forEach {
@@ -453,7 +458,6 @@ fun Project.setupApp() {
         flavorDimensions("vendor")
         productFlavors {
             create("oss")
-            create("expert")
             create("play") {
                 versionCode = verCode - 4
             }

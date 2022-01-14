@@ -21,6 +21,7 @@ package io.nekohasekai.sagernet.utils
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import com.jakewharton.processphoenix.ProcessPhoenix
 import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.database.preference.PublicDatabase
@@ -36,6 +37,17 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
 
     @Suppress("UNNECESSARY_SAFE_CALL")
     override fun uncaughtException(thread: Thread, throwable: Throwable) {
+        // note: libc / go panic is in android log
+        try {
+            Logs.e(thread.toString())
+            Logs.e(throwable.stackTraceToString())
+        } catch (e: Exception) {
+            try {
+                Log.e("nya", throwable.stackTraceToString())
+            } catch (e: Exception) {
+            }
+        }
+
         ProcessPhoenix.triggerRebirth(app, Intent(app, BlankActivity::class.java).apply {
             putExtra("sendLog", "Matsuri Crash")
         })

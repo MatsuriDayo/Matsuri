@@ -38,7 +38,7 @@ class ToolsFragment : ToolbarFragment(R.layout.layout_tools) {
         tools.add(NetworkFragment())
         tools.add(BackupFragment())
 
-        if (BuildConfig.DEBUG || isExpert) tools.add(DebugFragment())
+        if (isExpert) tools.add(DebugFragment())
 
         val binding = LayoutToolsBinding.bind(view)
         binding.toolsPager.adapter = ToolsAdapter(tools)
