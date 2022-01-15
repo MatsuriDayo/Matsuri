@@ -95,7 +95,6 @@
     <string name="ooc_missing_protocol">La suscripción requiere soporte para el protocolo %s, pero no se puede encontrar. Se ignorarán los perfiles no admitidos.</string>
     <string name="raw">Crudo</string>
     <string name="deduplication_sum">Eliminar configuraciones duplicadas al actualizar</string>
-    <string name="force_vmess_aead_sum">Reescriba la configuración de VMess con un método de autenticación inseguro en AEAD (alterId 0)</string>
     <string name="clipboard_empty">El portapapeles está vacío</string>
     <string name="connect">Conectar</string>
     <string name="profile_empty">Por favor seleccione un perfil</string>
@@ -241,7 +240,6 @@
     <string name="tile_title">Conmutador</string>
     <string name="group_default">Desagrupado</string>
     <string name="plugin_exists_but_on_shit_system">El perfil %s requiere el complemento %s, pero su proveedor de equipo patentado (generalmente los gigantes del capital de vigilancia y el fabricante de malware) manipuló su Android, haciendo que el complemento sea inutilizable.</string>
-    <string name="force_vmess_aead">Fuerza VMess AEAD</string>
     <string name="force_resolve">Forzar resolución</string>
     <string name="delete_group_prompt">¿Estás seguro de que quieres eliminar este grupo\?</string>
     <string name="subscription_type">Tipo de suscripción</string>

@@ -151,8 +151,6 @@
     <string name="force_resolve_sum">При обновлении преобразовать все доменные имена в IP-адреса. Хост и SNI будут добавлены автоматически, если это возможно</string>
     <string name="raw">Сырой</string>
     <string name="deduplication_sum">Удалите повторяющиеся конфигурации при обновлении</string>
-    <string name="force_vmess_aead_sum">Перепишите конфигурацию VMess с небезопасным методом аутентификации в AEAD (alterId 0)</string>
-    <string name="force_vmess_aead">Принудительно использовать VMess AEAD</string>
     <string name="force_resolve">Сила разрешить</string>
     <string name="delete_group_prompt">Вы уверены, что хотите удалить эту группу\?</string>
     <string name="subscription_type">Тип подписки</string>

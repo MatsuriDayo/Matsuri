@@ -347,8 +347,6 @@
     <string name="update_settings">بروزرسانی تنظیمات</string>
     <string name="raw">خام</string>
     <string name="deduplication_sum">هنگام به روزرسانی، پیکربندی های تکراری را حذف کنید</string>
-    <string name="force_vmess_aead_sum">بازنویسی پیکربندی VMess با روش تأیید ناامن به AEAD (تغییر 0)</string>
-    <string name="force_vmess_aead">اجبار VMess AEAD</string>
     <string name="hysteria_download_mbps">حداکثر سرعت بارگیری (در مگابیت بر ثانیه)</string>
     <string name="hysteria_upload_mbps">حداکثر سرعت بارگذاری (در مگابیت بر ثانیه)</string>
     <string name="hysteria_auth_payload">ظرفیت بار احراز هویت</string>
@@ -414,4 +412,6 @@
     <string name="app_traffic_statistics">آمار ترافیک برنامه</string>
     <string name="profile_traffic_statistics_summary">در صورت غیرفعال بودن، ترافیک استفاده شده محاسبه نمی شود</string>
     <string name="pcap_notice">فایل های Pcap در %s ذخیره می شوند</string>
+    <string name="naive_insecure_concurrency">همزمانی ناامن</string>
+    <string name="route_opt_block_analysis">آنالیز بلاک</string>
 </resources>

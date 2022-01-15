@@ -229,7 +229,6 @@
     <string name="update_settings">Güncelleme Ayarları</string>
     <string name="raw">Ham</string>
     <string name="deduplication_sum">Güncellerken tekrarlanan yapılandırmaları kaldır</string>
-    <string name="force_vmess_aead">VMess AEAD\'i Zorla</string>
     <string name="force_resolve">Çözmeye Zorla</string>
     <string name="delete_group_prompt">Bu grubu kaldırmak istediğinize emin misiniz\?</string>
     <string name="subscription_type">Abonelik Türü</string>
@@ -382,7 +381,6 @@
     <string name="experimental_authenticated_length">Her yük bölümünun uzunluğunu artık biçimlendirilebilir yapma. Bu deneysel özellik istemci ve sunucunun aynı v2ray-core sürümünü kullanmasını gerektirir. Bu deneysel özellik için daha fazla bozucu güncelleme bekleniyor.</string>
     <string name="hysteria_auth_payload">Doğrulama Yükü</string>
     <string name="hysteria_obfs">Şaşırtmaca Parolası</string>
-    <string name="force_vmess_aead_sum">VMess yapılandırmasını güvenliksiz doğrulama metoduyla AEAD\'ye yeniden yaz (alterId 0)</string>
     <string name="no_statistics">Henüz istatistik yok</string>
     <string name="traffic_statistics_summary">Güç tüketimini arttırabilir</string>
     <string name="clear_logcat">Günlüğü Temizle</string>

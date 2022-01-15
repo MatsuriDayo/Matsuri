@@ -123,14 +123,12 @@ class GroupSettingsActivity(
         val subscriptionType = findPreference<SimpleMenuPreference>(Key.SUBSCRIPTION_TYPE)!!
         val subscriptionLink = findPreference<EditTextPreference>(Key.SUBSCRIPTION_LINK)!!
         val subscriptionToken = findPreference<EditTextPreference>(Key.SUBSCRIPTION_TOKEN)!!
-        val subscriptionForceVMessAEAD = findPreference<SwitchPreference>(Key.SUBSCRIPTION_FORCE_VMESS_AEAD)!!
         val subscriptionUserAgent = findPreference<UserAgentPreference>(Key.SUBSCRIPTION_USER_AGENT)!!
 
         fun updateSubscriptionType(subscriptionType: Int = DataStore.subscriptionType) {
             val isRaw = subscriptionType == SubscriptionType.RAW
             val isOOCv1 = subscriptionType == SubscriptionType.OOCv1
 
-            subscriptionForceVMessAEAD.isVisible = isRaw
             subscriptionLink.isVisible = !isOOCv1
             subscriptionToken.isVisible = isOOCv1
             subscriptionUserAgent.isOOCv1 = isOOCv1
