@@ -1460,9 +1460,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                             if (update) {
                                 ProfileManager.postUpdate(lastSelected)
                                 if (pa.state.canStop && reloadAccess.tryLock()) {
-                                    SagerNet.stopService()
-                                    delay(1000L)
-                                    SagerNet.startService()
+                                    SagerNet.reloadService()
                                     reloadAccess.unlock()
                                 }
                             } else if (SagerNet.isTv) {
