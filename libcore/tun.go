@@ -85,6 +85,9 @@ func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
 		trafficStats:        config.TrafficStats,
 	}
 
+	// setup resolver first
+	androidUnderlyingResolver.sekaiResolver = config.LocalResolver
+
 	if config.TrafficStats {
 		t.appStats = map[uint16]*appStats{}
 	}
@@ -113,9 +116,6 @@ func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	androidUnderlyingResolver.sekaiResolver = config.LocalResolver
-	config.V2Ray.setupDialer(config.FakeDNS)
 
 	return t, nil
 }

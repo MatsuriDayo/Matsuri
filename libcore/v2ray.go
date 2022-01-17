@@ -82,11 +82,13 @@ func (instance *V2RayInstance) LoadConfig(content string) error {
 	if err != nil {
 		return err
 	}
+
 	instance.core = c
 	instance.statsManager = c.GetFeature(stats.ManagerType()).(stats.Manager)
 	instance.dispatcher = c.GetFeature(routing.DispatcherType()).(routing.Dispatcher).(*dispatcher.DefaultDispatcher)
 	instance.dnsClient = c.GetFeature(dns.ClientType()).(dns.Client)
-	instance.setupDialer(false)
+
+	instance.setupDialer()
 
 	o := c.GetFeature(extension.ObservatoryType())
 	if o != nil {
@@ -355,7 +357,7 @@ func (p *simpleSekaiWrapper) LookupIP(network, host string) (ret []net.IP, err e
 }
 
 // setup dialer and resolver for v2ray (v2ray options)
-func (v2ray *V2RayInstance) setupDialer(fakedns bool) {
+func (v2ray *V2RayInstance) setupDialer() {
 	setupResolvers()
 	dc := v2ray.dnsClient
 

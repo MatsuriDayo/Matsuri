@@ -34,7 +34,6 @@ import android.os.ParcelFileDescriptor
 import android.system.ErrnoException
 import android.system.Os
 import androidx.annotation.RequiresApi
-import cn.hutool.core.lang.Validator
 import io.nekohasekai.sagernet.*
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.SagerDatabase
@@ -52,8 +51,6 @@ import kotlinx.coroutines.*
 import libcore.*
 import java.io.FileDescriptor
 import java.net.InetAddress
-import java.net.InetSocketAddress
-import java.net.UnknownHostException
 import kotlin.coroutines.suspendCoroutine
 import android.net.VpnService as BaseVpnService
 
@@ -335,7 +332,7 @@ class VpnService : BaseVpnService(),
                             underlyingNetwork,
                             domain,
                             type,
-                            DnsResolver.FLAG_NO_RETRY,
+                            DnsResolver.FLAG_EMPTY,
                             Dispatchers.IO.asExecutor(),
                             signal,
                             callback
@@ -344,7 +341,7 @@ class VpnService : BaseVpnService(),
                         DnsResolver.getInstance().query(
                             underlyingNetwork,
                             domain,
-                            DnsResolver.FLAG_NO_RETRY,
+                            DnsResolver.FLAG_EMPTY,
                             Dispatchers.IO.asExecutor(),
                             signal,
                             callback
