@@ -602,12 +602,6 @@
         <item>2</item>
     </string-array>
 
-    <string-array name="trojan_provider_experimental">
-        <item>V2Ray</item>
-        <item>Trojan</item>
-        <item>Trojan-Go</item>
-    </string-array>
-
     <string-array name="wireguard_provider">
         <item>V2Sekai</item>
         <item>Wireguard Plugin</item>
