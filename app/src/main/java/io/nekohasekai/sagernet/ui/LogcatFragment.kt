@@ -75,7 +75,7 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
                     color = ForegroundColorSpan(Color.GRAY)
                 }
                 line.contains(" [Info] ") -> {
-                    color = ForegroundColorSpan(Color.BLACK)
+                    color = ForegroundColorSpan((0xFF86C166).toInt())
                 }
             }
             span.setSpan(
