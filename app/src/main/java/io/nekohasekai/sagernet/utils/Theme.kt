@@ -57,7 +57,8 @@ object Theme {
     }
 
     fun getTheme(): Int {
-        return getTheme(DataStore.appTheme)
+        // TODO new color picker
+        return getTheme(defaultTheme())
     }
 
     fun getTheme(theme: Int): Int {

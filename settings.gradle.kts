@@ -8,8 +8,6 @@ include(":plugin:api")
 include(":external:preferencex:preferencex")
 include(":external:preferencex:preferencex-simplemenu")
 include(":external:preferencex:flexbox")
-include(":external:preferencex:colorpicker")
-include(":external:preferencex:preferencex-colorpicker")
 
 include(":app")
 rootProject.name = "SagerNet"

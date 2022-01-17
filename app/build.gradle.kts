@@ -51,7 +51,6 @@ dependencies {
 
     implementation(project(":external:preferencex:preferencex"))
     implementation(project(":external:preferencex:preferencex-simplemenu"))
-    implementation(project(":external:preferencex:preferencex-colorpicker"))
 
     implementation("com.google.android.material:material:1.4.0")
     implementation("cn.hutool:hutool-core:$hutoolVersion")
