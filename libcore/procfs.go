@@ -36,6 +36,15 @@ func querySocketUidFromProcFs(source, _ net.Destination) int32 {
 		path += "6"
 	}
 
+	sIP := source.Address.IP()
+	if len(sIP) == 0 {
+		return -1
+	}
+
+	var bytes [2]byte
+	binary.BigEndian.PutUint16(bytes[:], uint16(source.Port))
+	local := fmt.Sprintf("%s:%s", hex.EncodeToString(nativeEndianIP(sIP)), hex.EncodeToString(bytes[:]))
+
 	file, err := os.Open(path)
 	if err != nil {
 		return -1
@@ -44,9 +53,6 @@ func querySocketUidFromProcFs(source, _ net.Destination) int32 {
 	defer file.Close()
 
 	reader := bufio.NewReader(file)
-	var bytes [2]byte
-	binary.BigEndian.PutUint16(bytes[:], uint16(source.Port))
-	local := fmt.Sprintf("%s:%s", hex.EncodeToString(nativeEndianIP(source.Address.IP())), hex.EncodeToString(bytes[:]))
 
 	for {
 		row, _, err := reader.ReadLine()
@@ -71,11 +77,11 @@ func querySocketUidFromProcFs(source, _ net.Destination) int32 {
 	}
 }
 
-func nativeEndianIP(ip []byte) []byte {
+func nativeEndianIP(ip net.IP) []byte {
 	result := make([]byte, len(ip))
 
-	for i := 0; i < len(result); i += 4 {
-		value := binary.BigEndian.Uint32(ip[:i])
+	for i := 0; i < len(ip); i += 4 {
+		value := binary.BigEndian.Uint32(ip[i:])
 
 		nativeEndian.PutUint32(result[i:], value)
 	}

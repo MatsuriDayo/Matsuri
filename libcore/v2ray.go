@@ -209,6 +209,9 @@ func (c *dispatcherConn) handleInput() {
 			} else {
 				packet.Source = *buffer.Endpoint
 			}
+			if packet.Source.Address.Family().IsDomain() {
+				packet.Source.Address = net.AnyIP
+			}
 			select {
 			case c.cache <- &packet:
 				continue
