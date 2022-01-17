@@ -63,12 +63,8 @@ func (instance *V2RayInstance) LoadConfig(content string) error {
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "geoip.dat: no such file or directory") {
 			err = extractAssetName(geoipDat, true)
-		} else if strings.HasSuffix(err.Error(), "not found in geoip.dat") {
-			err = extractAssetName(geoipDat, false)
 		} else if strings.HasSuffix(err.Error(), "geosite.dat: no such file or directory") {
 			err = extractAssetName(geositeDat, true)
-		} else if strings.HasSuffix(err.Error(), "not found in geosite.dat") {
-			err = extractAssetName(geositeDat, false)
 		}
 		if err == nil {
 			config, err = serial.LoadJSONConfig(strings.NewReader(content))

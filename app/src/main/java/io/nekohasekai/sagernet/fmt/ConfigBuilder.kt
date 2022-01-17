@@ -119,7 +119,7 @@ fun buildV2RayConfig(
     var directDNS = DataStore.directDns.split("\n")
         .mapNotNull { dns -> dns.trim().takeIf { it.isNotBlank() && !it.startsWith("#") } }
     val enableDnsRouting = DataStore.enableDnsRouting
-    val useFakeDns = DataStore.enableFakeDns
+    val useFakeDns = DataStore.enableFakeDns && !forTest
     val trafficSniffing = DataStore.trafficSniffing
     val indexMap = ArrayList<IndexEntity>()
     var requireWs = false
