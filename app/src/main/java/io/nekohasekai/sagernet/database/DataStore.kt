@@ -121,7 +121,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var remoteDns by configurationStore.string(Key.REMOTE_DNS) { "https://1.0.0.1/dns-query" }
     var directDns by configurationStore.string(Key.DIRECT_DNS) { "https+local://223.5.5.5/dns-query" }
     var directDnsUseSystem by configurationStore.boolean(Key.DIRECT_DNS_USE_SYSTEM)
-    var enableDnsRouting by configurationStore.boolean(Key.ENABLE_DNS_ROUTING)
+    var enableDnsRouting by configurationStore.boolean(Key.ENABLE_DNS_ROUTING) { true }
     var enableFakeDns by configurationStore.boolean(Key.ENABLE_FAKEDNS)
     var hosts by configurationStore.string(Key.DNS_HOSTS)
 
@@ -194,7 +194,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var connectionTestURL by configurationStore.string(Key.CONNECTION_TEST_URL) { CONNECTION_TEST_URL }
     var alwaysShowAddress by configurationStore.boolean(Key.ALWAYS_SHOW_ADDRESS)
 
-    var tunImplementation by configurationStore.stringToInt(Key.TUN_IMPLEMENTATION) { TunImplementation.GVISOR }
+    var tunImplementation by configurationStore.stringToInt(Key.TUN_IMPLEMENTATION) { TunImplementation.SYSTEM }
 
     var appTrafficStatistics by configurationStore.boolean(Key.APP_TRAFFIC_STATISTICS)
     var profileTrafficStatistics by configurationStore.boolean(Key.PROFILE_TRAFFIC_STATISTICS) { true }

@@ -34,7 +34,7 @@
             app:title="@string/service_mode"
             app:useSimpleSummaryProvider="true" />
         <com.takisoft.preferencex.SimpleMenuPreference
-            app:defaultValue="0"
+            app:defaultValue="1"
             app:entries="@array/tun_implementation"
             app:entryValues="@array/int_array_2"
             app:icon="@drawable/ic_baseline_flip_camera_android_24"
@@ -195,6 +195,7 @@
             app:title="@string/dns_hosts"
             app:useSimpleSummaryProvider="true" />
         <SwitchPreference
+            app:defaultValue="true"
             app:icon="@drawable/ic_baseline_camera_24"
             app:key="enableDnsRouting"
             app:summary="@string/dns_routing_message"
