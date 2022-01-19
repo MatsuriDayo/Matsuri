@@ -573,6 +573,7 @@ public class V2RayConfig {
             public String password;
             public Integer level;
             public String email;
+            public Boolean experimentReducedIvHeadEntropy;
 
         }
 
