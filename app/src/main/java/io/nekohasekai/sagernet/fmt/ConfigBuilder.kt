@@ -1079,7 +1079,7 @@ fun buildV2RayConfig(
 
         // dns object user rules
         // Note: "geosite:cn" matches before user rule... v2ray-core
-        if (enableDnsRouting) {
+        if (enableDnsRouting && !forTest) {
             dns.servers[0].valueY?.uidList = uidListDNSRemote.toHashSet().toList()
             dns.servers[0].valueY?.domains = domainListDNSRemote.toHashSet().toList()
             directLookupDomain += domainListDNSDirect
