@@ -2,7 +2,6 @@ package io.nekohasekai.sagernet.utils
 
 import android.util.Base64
 import io.nekohasekai.sagernet.database.DataStore
-import io.nekohasekai.sagernet.ktx.Logs
 import libcore.HTTPResponse
 import libcore.Libcore
 import org.json.JSONObject
@@ -23,7 +22,6 @@ object NekomuraUtil {
                 setURL("https://api.github.com/repos/MatsuriDayo/nya/contents/ad1.txt?ref=main")
             }.execute()
         } catch (e: Exception) {
-            Logs.e(e)
             return 0
         }
 

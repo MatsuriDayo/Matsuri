@@ -38,14 +38,16 @@ object CrashHandler : Thread.UncaughtExceptionHandler {
     @Suppress("UNNECESSARY_SAFE_CALL")
     override fun uncaughtException(thread: Thread, throwable: Throwable) {
         // note: libc / go panic is in android log
+
+        try {
+            Log.e(thread.toString(), throwable.stackTraceToString())
+        } catch (e: Exception) {
+        }
+
         try {
             Logs.e(thread.toString())
             Logs.e(throwable.stackTraceToString())
         } catch (e: Exception) {
-            try {
-                Log.e("nya", throwable.stackTraceToString())
-            } catch (e: Exception) {
-            }
         }
 
         ProcessPhoenix.triggerRebirth(app, Intent(app, BlankActivity::class.java).apply {
