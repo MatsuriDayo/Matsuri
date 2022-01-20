@@ -26,7 +26,6 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.material.snackbar.Snackbar
-import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.utils.Theme
 
 abstract class ThemedActivity : AppCompatActivity {
@@ -56,11 +55,6 @@ abstract class ThemedActivity : AppCompatActivity {
 
         if (newConfig.uiMode != uiMode) {
             uiMode = newConfig.uiMode
-
-            if (DataStore.appTheme == Theme.BLACK) {
-                Theme.apply(this)
-            }
-
             ActivityCompat.recreate(this)
         }
     }

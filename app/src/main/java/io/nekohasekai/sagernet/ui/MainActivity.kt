@@ -53,13 +53,13 @@ import io.nekohasekai.sagernet.group.GroupInterfaceAdapter
 import io.nekohasekai.sagernet.group.GroupUpdater
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.plugin.PluginManager
-import io.nekohasekai.sagernet.utils.NekomuraUtil
 import io.nekohasekai.sagernet.widget.ListHolderListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import libcore.Libcore
+import moe.nya.utils.NekomuraUtil
 import java.text.SimpleDateFormat
 import java.util.*
 import com.github.shadowsocks.plugin.PluginManager as ShadowsocksPluginPluginManager

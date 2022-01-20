@@ -28,7 +28,9 @@ import io.nekohasekai.sagernet.database.preference.PublicDatabase
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ui.BlankActivity
-import java.io.*
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.regex.Pattern

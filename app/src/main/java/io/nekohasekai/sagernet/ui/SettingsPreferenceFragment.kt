@@ -39,6 +39,7 @@ import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.utils.Theme
 import libcore.Libcore
+import moe.nya.ui.ColorPickerPreference
 import java.io.File
 
 class SettingsPreferenceFragment : PreferenceFragmentCompat() {
@@ -60,19 +61,19 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         preferenceManager.preferenceDataStore = DataStore.configurationStore
         DataStore.initGlobal()
         addPreferencesFromResource(R.xml.global_preferences)
-//        val appTheme = findPreference<ColorPickerPreference>(Key.APP_THEME)!!
-//        appTheme.setOnPreferenceChangeListener { _, newTheme ->
-//            if (SagerNet.started) {
-//                SagerNet.reloadService()
-//            }
-//            val theme = Theme.getTheme(newTheme as Int)
-//            app.setTheme(theme)
-//            requireActivity().apply {
-//                setTheme(theme)
-//                ActivityCompat.recreate(this)
-//            }
-//            true
-//        }
+        val appTheme = findPreference<ColorPickerPreference>(Key.APP_THEME)!!
+        appTheme.setOnPreferenceChangeListener { _, newTheme ->
+            if (SagerNet.started) {
+                SagerNet.reloadService()
+            }
+            val theme = Theme.getTheme(newTheme as Int)
+            app.setTheme(theme)
+            requireActivity().apply {
+                setTheme(theme)
+                ActivityCompat.recreate(this)
+            }
+            true
+        }
 
         val nightTheme = findPreference<SimpleMenuPreference>(Key.NIGHT_THEME)!!
         nightTheme.setOnPreferenceChangeListener { _, newTheme ->

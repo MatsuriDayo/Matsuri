@@ -29,7 +29,7 @@ import io.nekohasekai.sagernet.ktx.app
 object Theme {
 
     const val RED = 1
-    const val PINK_SSR = 2 // 2 is default
+    const val PINK_SSR = 2
     const val PINK = 3
     const val PURPLE = 4
     const val DEEP_PURPLE = 5
@@ -48,7 +48,6 @@ object Theme {
     const val BROWN = 18
     const val GREY = 19
     const val BLUE_GREY = 20
-    const val BLACK = 21
 
     private fun defaultTheme() = PINK_SSR
 
@@ -57,8 +56,7 @@ object Theme {
     }
 
     fun getTheme(): Int {
-        // TODO new color picker
-        return getTheme(defaultTheme())
+        return getTheme(DataStore.appTheme)
     }
 
     fun getTheme(theme: Int): Int {
@@ -83,7 +81,6 @@ object Theme {
             BROWN -> R.style.Theme_SagerNet_Brown
             GREY -> R.style.Theme_SagerNet_Grey
             BLUE_GREY -> R.style.Theme_SagerNet_BlueGrey
-            BLACK -> if (usingNightMode()) R.style.Theme_SagerNet_Black else R.style.Theme_SagerNet_LightBlack
             else -> getTheme(defaultTheme())
         }
     }

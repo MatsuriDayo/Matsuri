@@ -2,6 +2,7 @@ package io.nekohasekai.sagernet.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import moe.nya.utils.SendLog
 
 class BlankActivity : AppCompatActivity() {
 
@@ -10,7 +11,7 @@ class BlankActivity : AppCompatActivity() {
 
         // process crash log
         intent?.getStringExtra("sendLog")?.apply {
-            UIUtils.sendLog(this@BlankActivity, this)
+            SendLog.sendLog(this@BlankActivity, this)
         }
 
         finish()

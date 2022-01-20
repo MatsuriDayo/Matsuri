@@ -1,4 +1,4 @@
-package io.nekohasekai.sagernet.utils
+package moe.nya.utils
 
 import android.util.Base64
 import io.nekohasekai.sagernet.database.DataStore

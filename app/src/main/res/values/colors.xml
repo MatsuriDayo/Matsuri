@@ -24,7 +24,6 @@
         <item>@color/material_brown_500</item>
         <item>@color/material_grey_500</item>
         <item>@color/material_blue_grey_500</item>
-        <item>@color/material_light_black</item>
     </integer-array>
 
     <color name="material_amber_100">#FFECB3</color>

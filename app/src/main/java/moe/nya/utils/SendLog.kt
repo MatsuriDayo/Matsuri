@@ -1,4 +1,4 @@
-package io.nekohasekai.sagernet.ui
+package moe.nya.utils
 
 import android.content.Context
 import android.content.Intent
@@ -14,7 +14,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
-object UIUtils {
+object SendLog {
     // Create full log and send
     fun sendLog(context: Context, title: String) {
         val logFile = File.createTempFile(

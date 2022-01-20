@@ -33,6 +33,7 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.databinding.LayoutLogcatBinding
 import io.nekohasekai.sagernet.ktx.*
 import libcore.Libcore
+import moe.nya.utils.SendLog
 import java.util.*
 
 class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
@@ -112,7 +113,7 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
             R.id.action_send_logcat -> {
                 val context = requireContext()
                 runOnDefaultDispatcher {
-                    UIUtils.sendLog(context, "Matsuri")
+                    SendLog.sendLog(context, "Matsuri")
                 }
             }
         }

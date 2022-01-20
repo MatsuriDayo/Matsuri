@@ -16,10 +16,8 @@
             <option value="$PROJECT_DIR$/buildSrc" />
             <option value="$PROJECT_DIR$/external" />
             <option value="$PROJECT_DIR$/external/preferencex" />
-            <option value="$PROJECT_DIR$/external/preferencex/colorpicker" />
             <option value="$PROJECT_DIR$/external/preferencex/flexbox" />
             <option value="$PROJECT_DIR$/external/preferencex/preferencex" />
-            <option value="$PROJECT_DIR$/external/preferencex/preferencex-colorpicker" />
             <option value="$PROJECT_DIR$/external/preferencex/preferencex-simplemenu" />
             <option value="$PROJECT_DIR$/library" />
             <option value="$PROJECT_DIR$/library/include" />
