@@ -1,13 +1,14 @@
 package nat
 
 import (
-	"net"
-
 	"libcore/tun"
+	"net"
+	"runtime/debug"
 
-	"github.com/v2fly/v2ray-core/v5/common/buf"
+	"github.com/sirupsen/logrus"
 	v2rayNet "github.com/v2fly/v2ray-core/v5/common/net"
 	"gvisor.dev/gvisor/pkg/tcpip"
+	"gvisor.dev/gvisor/pkg/tcpip/buffer"
 	"gvisor.dev/gvisor/pkg/tcpip/header"
 	"gvisor.dev/gvisor/pkg/tcpip/header/parse"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
@@ -142,58 +143,62 @@ func (n *SystemTun) processUDP(hdr *UDPHeader) {
 	hdr.SetDestinationPort(sourcePort)
 
 	data := hdr.Packet().Data().ExtractVV()
-	go n.handler.NewPacket(source, destination, data.ToView(), func(bytes []byte, addr *v2rayNet.UDPAddr) (int, error) {
-		buffer := buf.New()
-		defer buffer.Release()
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logrus.Warningln("processUDP panic", r)
+				logrus.Warningln(string(debug.Stack()))
+			}
+		}()
 
-		var hdrLen int
-		switch ipHdr := hdr.IPHeader.(type) {
-		case *IPv4Header:
-			hdrLen = int(ipHdr.IPv4.HeaderLength())
-			buffer.Write(ipHdr.IPv4[:hdrLen])
-		case *IPv6Header:
-			hdrLen = len(ipHdr.IPv6) - int(ipHdr.IPv6.PayloadLength())
-			buffer.Write(ipHdr.IPv6[:hdrLen])
-		}
-		buffer.Write(hdr.UDP[:header.UDPMinimumSize])
-		buffer.Write(bytes)
+		n.handler.NewPacket(source, destination, data.ToView(), func(bytes []byte, addr *v2rayNet.UDPAddr) (int, error) {
+			ipData := stack.PayloadSince(hdr.Packet().NetworkHeader())
+			udpData := stack.PayloadSince(hdr.Packet().TransportHeader())[:header.UDPMinimumSize]
 
-		var newSourceAddress tcpip.Address
-		var newSourcePort uint16
+			var newSourceAddress tcpip.Address
+			var newSourcePort uint16
 
-		if addr != nil {
-			newSourceAddress = tcpip.Address(addr.IP)
-			newSourcePort = uint16(addr.Port)
-		} else {
-			newSourceAddress = destinationAddress
-			newSourcePort = destinationPort
-		}
+			if addr != nil {
+				newSourceAddress = tcpip.Address(addr.IP)
+				newSourcePort = uint16(addr.Port)
+			} else {
+				newSourceAddress = destinationAddress
+				newSourcePort = destinationPort
+			}
 
-		switch hdr.IPHeader.(type) {
-		case *IPv4Header:
-			ipHdr := header.IPv4(buffer.Bytes())
-			ipHdr.SetSourceAddress(newSourceAddress)
-			ipHdr.SetTotalLength(uint16(buffer.Len()))
-			ipHdr.SetChecksum(0)
-			ipHdr.SetChecksum(^ipHdr.CalculateChecksum())
-		case *IPv6Header:
-			ipHdr := header.IPv6(buffer.Bytes())
-			ipHdr.SetSourceAddress(newSourceAddress)
-			ipHdr.SetPayloadLength(uint16(buffer.Len() - int32(hdrLen)))
-		}
+			switch hdr.IPHeader.(type) {
+			case *IPv4Header:
+				ipHdr := header.IPv4(ipData)
+				ipData = ipData[:ipHdr.HeaderLength()]
+				ipHdr.SetSourceAddress(newSourceAddress)
+				ipHdr.SetTotalLength(uint16(len(ipData) + len(udpData) + len(bytes)))
+				ipHdr.SetChecksum(0)
+				ipHdr.SetChecksum(^ipHdr.CalculateChecksum())
+			case *IPv6Header:
+				ipHdr := header.IPv6(ipData)
+				ipData = ipData[:ipData.Size()-int(ipHdr.PayloadLength())]
+				ipHdr.SetSourceAddress(newSourceAddress)
+				ipHdr.SetPayloadLength(uint16(len(udpData) + len(bytes)))
+			}
 
-		udpHdr := header.UDP(buffer.BytesFrom(int32(hdrLen)))
-		udpHdr.SetSourcePort(newSourcePort)
-		udpHdr.SetLength(uint16(buffer.Len() - int32(hdrLen)))
-		udpHdr.SetChecksum(0)
-		udpHdr.SetChecksum(^udpHdr.CalculateChecksum(header.Checksum(bytes, header.PseudoHeaderChecksum(header.UDPProtocolNumber, newSourceAddress, sourceAddress, udpHdr.Length()))))
+			udpHdr := header.UDP(udpData)
+			udpHdr.SetSourcePort(newSourcePort)
+			udpHdr.SetLength(uint16(len(udpData) + len(bytes)))
+			udpHdr.SetChecksum(0)
+			udpHdr.SetChecksum(^udpHdr.CalculateChecksum(header.Checksum(bytes, header.PseudoHeaderChecksum(header.UDPProtocolNumber, newSourceAddress, sourceAddress, uint16(len(udpData)+len(bytes))))))
 
-		if err := n.dispatcher.writeBuffer(buffer.Bytes()); err != nil {
-			return 0, newError(err.String())
-		}
+			replyVV := buffer.VectorisedView{}
+			replyVV.AppendView(ipData)
+			replyVV.AppendView(udpData)
+			replyVV.AppendView(bytes)
 
-		return len(bytes), nil
-	}, hdr)
+			if err := n.dispatcher.writeRawPacket(replyVV); err != nil {
+				return 0, newError(err.String())
+			}
+
+			return len(bytes), nil
+		}, hdr)
+	}()
 }
 
 func (n *SystemTun) processICMPv4(hdr *ICMPv4Header) {

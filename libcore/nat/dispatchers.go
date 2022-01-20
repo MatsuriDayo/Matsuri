@@ -148,6 +148,16 @@ func (d *readVDispatcher) dispatchLoop() tcpip.Error {
 	}
 }
 
+func (d *readVDispatcher) writeRawPacket(vv buffer.VectorisedView) tcpip.Error {
+	views := vv.Views()
+	size := vv.Size()
+	var iovecs []unix.Iovec
+	for _, v := range views {
+		iovecs = rawfile.AppendIovecFromBytes(iovecs, v, size)
+	}
+	return rawfile.NonBlockingWriteIovec(d.fd, iovecs)
+}
+
 func (d *readVDispatcher) writePacket(pkt *stack.PacketBuffer) tcpip.Error {
 	views := pkt.Views()
 	numIovecs := len(views)

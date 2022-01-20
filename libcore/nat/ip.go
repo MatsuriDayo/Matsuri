@@ -91,6 +91,7 @@ type UDPHeader struct {
 	header.UDP
 }
 
+// wrapper
 func (h *UDPHeader) Close() error {
 	h.Packet().DecRef()
 	return nil

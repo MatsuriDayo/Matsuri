@@ -44,10 +44,10 @@ func closeIgnore(closer ...interface{}) {
 func InitCore(internalAssets string, externalAssets string, prefix string, useOfficial BoolFunc,
 	cachePath string, errorHandler ErrorHandler,
 ) {
-	defer func() { // TODO receive core panic log (other goroutine)
+	defer func() {
 		if r := recover(); r != nil {
 			if errorHandler != nil {
-				s := fmt.Sprintln("InitCore panic: ", r, debug.Stack())
+				s := fmt.Sprintln("InitCore panic: ", r, string(debug.Stack()))
 				errorHandler.HandleError(s)
 				logrus.Errorln(s)
 			}
