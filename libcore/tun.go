@@ -61,6 +61,7 @@ type TunConfig struct {
 	PCap                bool
 	ErrorHandler        ErrorHandler
 	LocalResolver       LocalResolver
+	FdProtector         Protector
 }
 
 type ErrorHandler interface {
@@ -87,6 +88,7 @@ func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
 
 	// setup resolver first
 	androidUnderlyingResolver.sekaiResolver = config.LocalResolver
+	fdProtector = config.FdProtector
 
 	if config.TrafficStats {
 		t.appStats = map[uint16]*appStats{}
@@ -125,6 +127,8 @@ func (t *Tun2ray) Close() {
 	defer t.access.Unlock()
 
 	androidUnderlyingResolver.sekaiResolver = nil
+	fdProtector = nil
+
 	closeIgnore(t.dev)
 }
 

@@ -46,12 +46,6 @@ class ProxyInstance(profile: ProxyEntity, val service: BaseService.Interface) : 
     lateinit var observatoryJob: Job
 
     override fun init() {
-        if (service is VpnService) {
-            Libcore.setProtector { service.protect(it) }
-        } else {
-            Libcore.setProtector { true }
-        }
-
         super.init()
 
         Logs.d(config.config)

@@ -57,7 +57,8 @@ import android.net.VpnService as BaseVpnService
 class VpnService : BaseVpnService(),
     BaseService.Interface,
     TrafficListener,
-    LocalResolver {
+    LocalResolver,
+    Protector {
 
     companion object {
         var instance: VpnService? = null
@@ -285,6 +286,7 @@ class VpnService : BaseVpnService(),
                 stopRunner(false, it)
             }
             localResolver = this@VpnService
+            fdProtector = this@VpnService
         }
 
         tun = Libcore.newTun2ray(config)

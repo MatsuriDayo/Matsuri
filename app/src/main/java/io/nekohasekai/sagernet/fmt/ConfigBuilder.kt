@@ -375,12 +375,6 @@ fun buildV2RayConfig(
                     needGlobal = false
                 }
 
-                // profileList.lastIndex is first profile object in UI and it means "front proxy"
-                // index == 0 means last profile in chain / not chain
-                if (index == 0) {
-                    chainOutboundTag = tagOut
-                }
-
                 if (needGlobal) {
                     if (globalOutbounds.contains(tagOut)) {
                         return@forEachIndexed
@@ -390,7 +384,10 @@ fun buildV2RayConfig(
 
                 outboundTagsAll[tagOut] = proxyEntity
 
+                // profileList.lastIndex is first profile object in UI and it means "front proxy"
+                // index == 0 means last profile in chain / not chain
                 if (index == 0) {
+                    chainOutboundTag = tagOut
                     outboundTags.add(tagOut)
                     if (chainTag == TAG_AGENT) {
                         outboundTagsCurrent.add(tagOut)
@@ -1087,7 +1084,7 @@ fun buildV2RayConfig(
         }
 
         // add directDNS objects here
-        dns.servers.addAll(directDNS.map {
+        if (directLookupDomain.isNotEmpty() || uidListDNSDirect.isNotEmpty()) dns.servers.addAll(directDNS.map {
             DnsObject.StringOrServerObject().apply {
                 valueY = DnsObject.ServerObject().apply {
                     address = it.replace("https://", "https+local://")

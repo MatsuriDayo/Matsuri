@@ -22,10 +22,6 @@ type Protector interface {
 	Protect(fd int32) bool
 }
 
-func SetProtector(protector Protector) {
-	fdProtector = protector
-}
-
 // TODO now it is v2ray's default dialer, test for bug (VPN / non-VPN)
 type protectedDialer struct {
 	resolver func(domain string) ([]net.IP, error)
