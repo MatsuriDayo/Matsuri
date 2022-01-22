@@ -70,7 +70,8 @@ func (stdLogWriter) Write(p []byte) (n int, err error) {
 }
 
 // manage log file
-var _logfile *logfile
+var _logfile = &logfile{}
+var max = 50 * 1024
 
 type logfile struct {
 	f     *os.File
@@ -99,7 +100,6 @@ func (lp *logfile) Write(p []byte) (n int, err error) {
 	defer lp.unlock()
 
 	// Truncate long file
-	max := 50 * 1024
 	if lp.f != nil {
 		if offset, _ := lp.f.Seek(0, os.SEEK_END); offset > int64(max) {
 			lp.f.Seek(0, os.SEEK_SET)
@@ -176,30 +176,27 @@ func NekoLogWrite2(level int32, str string) {
 }
 
 func NekoLogClear() {
-	if _logfile != nil {
-		_logfile.Clear()
-	}
+	_logfile.Clear()
 }
 
 func NekoLogGet() []byte {
-	if _logfile != nil {
-		return _logfile.Get()
-	}
-	return []byte{0}
+	return _logfile.Get()
 }
 
-func SetEnableLog(enableLog bool) {
+func SetEnableLog(enableLog bool, maxKB int32) {
 	if enableLog {
 		logrus.SetLevel(logrus.DebugLevel)
 	} else {
 		logrus.SetLevel(logrus.FatalLevel)
+	}
+	if maxKB > 0 {
+		max = int(maxKB) * 1024
 	}
 }
 
 func setupLogger(path string) (err error) {
 	//init neko logger
 	logrus.SetFormatter(&logrusFormatter{})
-	_logfile = &logfile{}
 	err = _logfile.init(path)
 	logrus.SetOutput(_logfile)
 

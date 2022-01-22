@@ -83,12 +83,12 @@ class SagerNet : Application(),
 
         // matsuri: init core (sn: extract v2ray assets
         externalAssets.mkdirs()
+        Libcore.setEnableLog(DataStore.enableLog, DataStore.logBufSize)
         Libcore.initCore(filesDir.absolutePath + "/", externalAssets.absolutePath + "/", "v2ray/", {
             DataStore.rulesProvider == 0
         }, cacheDir.absolutePath, {
             Toast.makeText(this, it, Toast.LENGTH_LONG).show()
         })
-        Libcore.setEnableLog(DataStore.enableLog)
 
         runOnDefaultDispatcher {
             PackageCache.register()

@@ -162,7 +162,7 @@ class StatsBar @JvmOverloads constructor(
                 }
 
             } catch (e: Exception) {
-                Logs.w(e)
+                Logs.w(e.toString())
                 onMainDispatcher {
                     isEnabled = true
                     setStatus(app.getText(R.string.connection_test_testing))

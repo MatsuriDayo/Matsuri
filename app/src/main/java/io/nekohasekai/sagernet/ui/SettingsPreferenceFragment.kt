@@ -23,6 +23,8 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import androidx.core.app.ActivityCompat
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
@@ -40,6 +42,7 @@ import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.utils.Theme
 import libcore.Libcore
 import moe.nya.ui.ColorPickerPreference
+import moe.nya.ui.LongClickSwitchPreference
 import java.io.File
 
 class SettingsPreferenceFragment : PreferenceFragmentCompat() {
@@ -61,6 +64,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         preferenceManager.preferenceDataStore = DataStore.configurationStore
         DataStore.initGlobal()
         addPreferencesFromResource(R.xml.global_preferences)
+
         val appTheme = findPreference<ColorPickerPreference>(Key.APP_THEME)!!
         appTheme.setOnPreferenceChangeListener { _, newTheme ->
             if (SagerNet.started) {
@@ -161,11 +165,30 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         val requireTransproxy = findPreference<SwitchPreference>(Key.REQUIRE_TRANSPROXY)!!
         val transproxyPort = findPreference<EditTextPreference>(Key.TRANSPROXY_PORT)!!
         val transproxyMode = findPreference<SimpleMenuPreference>(Key.TRANSPROXY_MODE)!!
-        val enableLog = findPreference<SwitchPreference>(Key.ENABLE_LOG)!!
+        val enableLog = findPreference<LongClickSwitchPreference>(Key.ENABLE_LOG)!!
 
         enableLog.setOnPreferenceChangeListener { _, newValue ->
-            Libcore.setEnableLog(newValue as Boolean)
+            Libcore.setEnableLog(newValue as Boolean, DataStore.logBufSize)
             needReload()
+            true
+        }
+        enableLog.setOnLongClickListener {
+            if (context == null) return@setOnLongClickListener true
+
+            val view = EditText(context).apply {
+                inputType = EditorInfo.TYPE_CLASS_NUMBER
+                setText(DataStore.logBufSize.toString())
+            }
+
+            MaterialAlertDialogBuilder(context!!).setTitle("Log buffer size (kb)")
+                .setView(view)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    DataStore.logBufSize = view.text.toString().toInt()
+                    Libcore.setEnableLog(DataStore.enableLog, DataStore.logBufSize)
+                    needReload()
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
             true
         }
 

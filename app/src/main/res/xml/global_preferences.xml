@@ -93,7 +93,7 @@
             app:key="allowAccess"
             app:summary="@string/allow_access_sum"
             app:title="@string/allow_access" />
-        <SwitchPreference
+        <moe.nya.ui.LongClickSwitchPreference
             app:icon="@drawable/ic_baseline_bug_report_24"
             app:key="enableLog"
             app:summary="@string/enable_log_sum"

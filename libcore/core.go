@@ -12,7 +12,6 @@ import (
 	_ "unsafe"
 
 	"github.com/sagernet/libping"
-	"github.com/sirupsen/logrus"
 	"github.com/v2fly/v2ray-core/v5/common"
 )
 
@@ -46,11 +45,12 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 ) {
 	defer func() {
 		if r := recover(); r != nil {
+			s := fmt.Sprintln("InitCore panic", time.Now().Unix(), r, string(debug.Stack()))
 			if errorHandler != nil {
-				s := fmt.Sprintln("InitCore panic: ", r, string(debug.Stack()))
 				errorHandler.HandleError(s)
-				logrus.Errorln(s)
 			}
+			// Note: use _logfile in InitCore, bypassing the loglevel
+			_logfile.Write([]byte(s))
 		}
 	}()
 
@@ -76,22 +76,21 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 	}
 
 	// Set up log
-	s := fmt.Sprintln("InitCore called", externalAssets, cachePath, os.Getpid(), processName, isBgProcess)
+	s := fmt.Sprintln(time.Now().Unix(), "[Debug] InitCore called", externalAssets, cachePath, os.Getpid(), processName, isBgProcess)
 	err := setupLogger(filepath.Join(cachePath, "neko.log"))
 	if err == nil {
-		logrus.Debugln(s)
+		_logfile.Write([]byte(s))
 	} else { // not fatal
 		errorHandler.HandleError(fmt.Sprintln("Log not inited:", s, err.Error()))
 	}
 
-	// Set up some go component
+	// Set up some component
 	setupResolvers()
+	Setenv("v2ray.conf.geoloader", "memconservative")
 
 	if !isBgProcess {
 		return
 	}
-
-	Setenv("v2ray.conf.geoloader", "memconservative")
 
 	// Set up CA for the bg process
 	x509.SystemCertPool()

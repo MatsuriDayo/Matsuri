@@ -83,7 +83,7 @@ abstract class V2RayInstance(
     }
 
     protected open fun loadConfig() {
-        Libcore.setEnableLog(DataStore.enableLog)
+        Libcore.setEnableLog(DataStore.enableLog, DataStore.logBufSize)
         v2rayPoint.loadConfig(config.config)
     }
 
