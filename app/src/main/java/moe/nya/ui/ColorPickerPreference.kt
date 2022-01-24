@@ -65,7 +65,7 @@ class ColorPickerPreference
 
     fun getNekoAtColor(res: Resources, color: Int): Drawable {
         val neko = ResourcesCompat.getDrawable(res, R.drawable.ic_baseline_fiber_manual_record_24, null)!!
-        DrawableCompat.setTint(neko, color)
+        DrawableCompat.setTint(neko.mutate(), color)
         return neko
     }
 
