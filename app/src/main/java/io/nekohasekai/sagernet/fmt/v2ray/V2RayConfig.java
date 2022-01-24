@@ -688,6 +688,9 @@ public class V2RayConfig {
             public Integer mark;
             public Boolean tcpFastOpen;
             public String tproxy;
+            // https://github.com/v2ray/v2ray-core/issues/2564
+            // https://github.com/v2fly/v2ray-core/pull/1395
+            @SerializedName("tcpKeepAliveIdle")
             public Integer tcpKeepAliveInterval;
 
         }
