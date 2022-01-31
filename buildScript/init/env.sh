@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# For CI build, use downloaded golang
+export golang=$PWD/build/golang
+export GOPATH=$golang/gopath
+export GOROOT=$golang/go
+export PATH=$golang/go/bin:$GOPATH/bin:$PATH
+
 if [ -z "$ANDROID_HOME" ]; then
   if [ -d "$HOME/Android/Sdk" ]; then
     export ANDROID_HOME="$HOME/Android/Sdk"
@@ -32,18 +38,6 @@ if [[ "$OSTYPE" =~ ^darwin ]]; then
   export PROJECT=$PWD
 else
   export PROJECT=$(realpath .)
-fi
-
-if [ ! $(command -v go) ]; then
-  if [ -d /usr/lib/go-1.16 ]; then
-    export PATH="$PATH:/usr/lib/go-1.16/bin"
-  elif [ -d $HOME/.go ]; then
-    export PATH="$PATH:$HOME/.go/bin"
-  fi
-fi
-
-if [ $(command -v go) ]; then
-  export PATH="$PATH:$(go env GOPATH)/bin"
 fi
 
 DEPS=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin

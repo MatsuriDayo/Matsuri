@@ -312,111 +312,6 @@ fun Project.setupAppCommon() {
     }
 }
 
-fun Project.setupPlugin(projectName: String) {
-    val propPrefix = projectName.toUpperCase(Locale.ROOT)
-    val projName = projectName.toLowerCase(Locale.ROOT)
-    val verName = requireMetadata().getProperty("${propPrefix}_VERSION_NAME")
-    val verCode = requireMetadata().getProperty("${propPrefix}_VERSION").toInt() * 5
-    android.defaultConfig {
-        applicationId = "io.nekohasekai.sagernet.plugin.$projName"
-
-        versionName = verName
-        versionCode = verCode
-    }
-
-    apply(plugin = "kotlin-android")
-
-    setupAppCommon()
-
-    val targetAbi = requireTargetAbi()
-
-    android.apply {
-        this as AbstractAppExtension
-
-        buildTypes {
-            getByName("release") {
-                proguardFiles(
-                    getDefaultProguardFile("proguard-android-optimize.txt"),
-                    project(":plugin:api").file("proguard-rules.pro")
-                )
-            }
-        }
-
-        splits.abi {
-            isEnable = true
-            isUniversalApk = false
-
-            if (targetAbi.isNotBlank()) {
-                reset()
-                include(targetAbi)
-            }
-        }
-
-        flavorDimensions("vendor")
-        productFlavors {
-            create("oss")
-            create("play") {
-                versionCode = verCode - 4
-            }
-        }
-
-        if (System.getenv("SKIP_BUILD") != "on" && System.getProperty("SKIP_BUILD_$propPrefix") != "on") {
-            if (targetAbi.isBlank()) {
-                tasks.register<Exec>("externalBuild") {
-                    executable(rootProject.file("run"))
-                    args("plugin", projName)
-                    workingDir(rootProject.projectDir)
-                }
-
-                tasks.whenTaskAdded {
-                    if (name.startsWith("merge") && name.endsWith("JniLibFolders")) {
-                        dependsOn("externalBuild")
-                    }
-                }
-            } else {
-                tasks.register<Exec>("externalBuildInit") {
-                    executable(rootProject.file("run"))
-                    args("plugin", projName, "init")
-                    workingDir(rootProject.projectDir)
-                }
-                tasks.register<Exec>("externalBuild") {
-                    executable(rootProject.file("run"))
-                    args("plugin", projName, targetAbi)
-                    workingDir(rootProject.projectDir)
-                    dependsOn("externalBuildInit")
-                }
-                tasks.register<Exec>("externalBuildEnd") {
-                    executable(rootProject.file("run"))
-                    args("plugin", projName, "end")
-                    workingDir(rootProject.projectDir)
-                    dependsOn("externalBuild")
-                }
-                tasks.whenTaskAdded {
-                    if (name.startsWith("merge") && name.endsWith("JniLibFolders")) {
-                        dependsOn("externalBuildEnd")
-                    }
-                }
-            }
-        }
-
-        applicationVariants.all {
-
-            outputs.all {
-                this as BaseVariantOutputImpl
-                outputFileName = outputFileName.replace(
-                    project.name, "${project.name}-plugin-$versionName"
-                ).replace("-release", "").replace("-oss", "")
-
-            }
-        }
-    }
-
-    dependencies.add("implementation", project(":plugin:api"))
-
-    setupPlay()
-
-}
-
 fun Project.setupApp() {
     val pkgName = requireMetadata().getProperty("PACKAGE_NAME")
     val verName = requireMetadata().getProperty("VERSION_NAME")
@@ -446,18 +341,23 @@ fun Project.setupApp() {
         }
 
         splits.abi {
-            isEnable = true
-            isUniversalApk = false
+            if (requireFlavor().startsWith("Fdroid")) {
+                isEnable = false
+            } else {
+                isEnable = true
+                isUniversalApk = false
 
-            if (targetAbi.isNotBlank()) {
-                reset()
-                include(targetAbi)
+                if (targetAbi.isNotBlank()) {
+                    reset()
+                    include(targetAbi)
+                }
             }
         }
 
         flavorDimensions("vendor")
         productFlavors {
             create("oss")
+            create("fdroid")
             create("play") {
                 versionCode = verCode - 4
             }

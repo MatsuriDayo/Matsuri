@@ -30,7 +30,7 @@ https://t.me/Matsuridayo
 
 ## 文档 Documents
 
-https://sagernet.org
+https://matsuridayo.github.io
 
 ## 代理 Proxy
 

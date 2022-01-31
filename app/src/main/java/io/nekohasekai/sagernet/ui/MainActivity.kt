@@ -112,7 +112,7 @@ class MainActivity : ThemedActivity(),
             onNewIntent(intent)
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
+        if(!isFdroid) CoroutineScope(Dispatchers.IO).launch {
             for (i in 0 until 5) {
                 val ret = NekomuraUtil.updateAd()
                 if (ret.code != 0) {

@@ -304,6 +304,9 @@ var isExpert: Boolean
     get() = BuildConfig.DEBUG || DataStore.isExpert
     set(value) = TODO()
 
+const val isOss  = BuildConfig.FLAVOR == "oss"
+const val isFdroid  = BuildConfig.FLAVOR == "fdroid"
+
 val LAUNCH_DELAY = System.currentTimeMillis() - SystemClock.elapsedRealtime()
 
 private val protectDirectAvailable by lazy {
