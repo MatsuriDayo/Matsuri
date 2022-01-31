@@ -1,0 +1,1 @@
+This is a fork of SagerNet, which improves the experience in some cases. Compared with SagerNet, this software has fewer functions.
