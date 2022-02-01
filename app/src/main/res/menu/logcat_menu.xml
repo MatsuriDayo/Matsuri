@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_refresh"
+        android:icon="@drawable/ic_baseline_refresh_24"
+        android:title="@string/group_update"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/action_send_logcat"
         android:icon="@drawable/baseline_send_24"
         android:title="@string/logcat"

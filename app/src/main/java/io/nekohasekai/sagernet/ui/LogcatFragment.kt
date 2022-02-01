@@ -55,8 +55,6 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
             binding.textview.breakStrategy = 0 // simple
         }
 
-        binding.textview.setOnClickListener { reloadSession() }
-
         activity?.apply {
             if (this is MainActivity) {
                 this.binding.stats.performHide()
@@ -115,6 +113,9 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
                 runOnDefaultDispatcher {
                     SendLog.sendLog(context, "Matsuri")
                 }
+            }
+            R.id.action_refresh -> {
+                reloadSession()
             }
         }
         return true

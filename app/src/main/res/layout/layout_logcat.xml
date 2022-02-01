@@ -29,6 +29,7 @@
                 android:ems="10"
                 android:focusable="true"
                 android:gravity="start|top"
+                android:textIsSelectable="true"
                 tools:ignore="LabelFor" />
         </ScrollView>
     </LinearLayout>
