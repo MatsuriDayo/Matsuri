@@ -10,4 +10,4 @@ include(":external:preferencex:preferencex-simplemenu")
 include(":external:preferencex:flexbox")
 
 include(":app")
-rootProject.name = "SagerNet"
+rootProject.name = "Matsuri"

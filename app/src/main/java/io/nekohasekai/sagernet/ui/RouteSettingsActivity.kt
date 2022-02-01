@@ -405,10 +405,11 @@ class RouteSettingsActivity(
     object PasswordSummaryProvider : Preference.SummaryProvider<EditTextPreference> {
 
         override fun provideSummary(preference: EditTextPreference): CharSequence {
-            return if (preference.text.isNullOrBlank()) {
+            val text = preference.text
+            return if (text.isNullOrBlank()) {
                 preference.context.getString(androidx.preference.R.string.not_set)
             } else {
-                "\u2022".repeat(preference.text.length)
+                "\u2022".repeat(text.length)
             }
         }
 

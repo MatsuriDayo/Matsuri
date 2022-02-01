@@ -35,10 +35,8 @@ class ColorPickerPreference
 
     var inited = false
 
-    override fun onBindViewHolder(holder: PreferenceViewHolder?) {
+    override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
-
-        if (holder == null) return
 
         val widgetFrame = holder.findViewById(android.R.id.widget_frame) as LinearLayout
 
