@@ -10,5 +10,4 @@
     app:fastScrollAutoHide="true"
     app:fastScrollThumbColor="?colorPrimary"
     app:fastScrollThumbInactiveColor="?colorPrimary"
-    app:fastScrollTrackColor="?colorOnPrimarySurface"
     tools:listitem="@layout/layout_profile" />
