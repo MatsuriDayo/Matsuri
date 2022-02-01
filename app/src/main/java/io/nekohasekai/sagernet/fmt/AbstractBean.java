@@ -57,12 +57,12 @@ public abstract class AbstractBean extends Serializable implements Cloneable<Abs
         if (StrUtil.isNotBlank(name)) {
             return name;
         } else {
-            return serverAddress + ":" + serverPort;
+            return displayAddress();
         }
     }
 
     public String displayAddress() {
-        return serverAddress + ":" + serverPort;
+        return NetsKt.wrapIPV6Host(serverAddress) + ":" + serverPort;
     }
 
     public String network() {
