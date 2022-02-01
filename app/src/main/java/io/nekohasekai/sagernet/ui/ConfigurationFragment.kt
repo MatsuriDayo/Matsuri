@@ -74,6 +74,7 @@ import libcore.Libcore
 import moe.matsuri.nya.neko.NekoJSInterface
 import moe.matsuri.nya.neko.NekoPluginManager
 import moe.matsuri.nya.neko.NekoSettingActivity
+import moe.matsuri.nya.neko.canShare
 import okhttp3.internal.closeQuietly
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -328,9 +329,6 @@ class ConfigurationFragment @JvmOverloads constructor(
             }
             R.id.action_new_naive -> {
                 startActivity(Intent(requireActivity(), NaiveSettingsActivity::class.java))
-            }
-            R.id.action_new_ping_tunnel -> {
-                startActivity(Intent(requireActivity(), PingTunnelSettingsActivity::class.java))
             }
             R.id.action_new_hysteria -> {
                 startActivity(Intent(requireActivity(), HysteriaSettingsActivity::class.java))
@@ -1585,6 +1583,10 @@ class ConfigurationFragment @JvmOverloads constructor(
                 editButton.isGone = select
                 removeButton.visibility = View.VISIBLE
 
+                proxyEntity.nekoBean?.apply {
+                    shareLayout.isGone = !canShare()
+                }
+
                 runOnDefaultDispatcher {
                     val selected = (selectedItem?.id ?: DataStore.selectedProxy) == proxyEntity.id
                     val started = selected && SagerNet.started && DataStore.currentProfile == proxyEntity.id
@@ -1616,7 +1618,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                             }
                         }
 
-                        if (proxyEntity.ptBean != null) {
+                        if (proxyEntity.nekoBean != null) {
                             popup.menu.removeItem(R.id.action_group_configuration)
                         }
 

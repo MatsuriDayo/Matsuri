@@ -123,3 +123,18 @@ fun NekoBean.onSharedStorageSet() {
     }
     name = sharedStorage.optString("name")
 }
+
+fun NekoBean.needBypassRootUid(): Boolean {
+    val p = NekoPluginManager.findProtocol(protocolId) ?: return false
+    return p.protocolConfig.optBoolean("needBypassRootUid")
+}
+
+fun NekoBean.haveStandardLink(): Boolean {
+    val p = NekoPluginManager.findProtocol(protocolId) ?: return false
+    return p.protocolConfig.optBoolean("haveStandardLink")
+}
+
+fun NekoBean.canShare(): Boolean {
+    val p = NekoPluginManager.findProtocol(protocolId) ?: return false
+    return p.protocolConfig.optBoolean("canShare")
+}

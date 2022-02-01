@@ -40,7 +40,6 @@ import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
 import io.nekohasekai.sagernet.fmt.hysteria.buildHysteriaConfig
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean
 import io.nekohasekai.sagernet.fmt.naive.buildNaiveConfig
-import io.nekohasekai.sagernet.fmt.pingtunnel.PingTunnelBean
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.fmt.trojan.buildTrojanConfig
 import io.nekohasekai.sagernet.fmt.trojan.buildTrojanGoConfig
@@ -126,10 +125,6 @@ abstract class V2RayInstance(
                     is NaiveBean -> {
                         initPlugin("naive-plugin")
                         pluginConfigs[port] = profile.type to bean.buildNaiveConfig(port)
-                    }
-                    is PingTunnelBean -> {
-                        if (needChain) error("PingTunnel is incompatible with chain")
-                        initPlugin("pingtunnel-plugin")
                     }
                     is HysteriaBean -> {
                         initPlugin("hysteria-plugin")
@@ -236,30 +231,6 @@ abstract class V2RayInstance(
                         )
 
                         processes.start(commands, envMap)
-                    }
-                    bean is PingTunnelBean -> {
-                        if (needChain) error("PingTunnel is incompatible with chain")
-
-                        val commands = mutableListOf(
-                            "su",
-                            "-c",
-                            initPlugin("pingtunnel-plugin").path,
-                            "-type",
-                            "client",
-                            "-sock5",
-                            "1",
-                            "-l",
-                            "$LOCALHOST:$port",
-                            "-s",
-                            bean.serverAddress
-                        )
-
-                        if (bean.key.isNotBlank() && bean.key != "1") {
-                            commands.add("-key")
-                            commands.add(bean.key)
-                        }
-
-                        processes.start(commands)
                     }
                     bean is HysteriaBean -> {
                         val configFile = File(

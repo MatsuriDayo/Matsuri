@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "1e528395256049f60bc749774d815a64",
+    "identityHash": "e42cfaf8368d1f05db090cb399789997",
     "entities": [
       {
         "tableName": "proxy_groups",
@@ -62,7 +62,7 @@
       },
       {
         "tableName": "proxy_entities",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `groupId` INTEGER NOT NULL, `type` INTEGER NOT NULL, `userOrder` INTEGER NOT NULL, `tx` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `status` INTEGER NOT NULL, `ping` INTEGER NOT NULL, `uuid` TEXT NOT NULL, `error` TEXT, `socksBean` BLOB, `httpBean` BLOB, `ssBean` BLOB, `ssrBean` BLOB, `vmessBean` BLOB, `trojanBean` BLOB, `trojanGoBean` BLOB, `naiveBean` BLOB, `ptBean` BLOB, `hysteriaBean` BLOB, `sshBean` BLOB, `wgBean` BLOB, `chainBean` BLOB, `nekoBean` BLOB)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `groupId` INTEGER NOT NULL, `type` INTEGER NOT NULL, `userOrder` INTEGER NOT NULL, `tx` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `status` INTEGER NOT NULL, `ping` INTEGER NOT NULL, `uuid` TEXT NOT NULL, `error` TEXT, `socksBean` BLOB, `httpBean` BLOB, `ssBean` BLOB, `ssrBean` BLOB, `vmessBean` BLOB, `trojanBean` BLOB, `trojanGoBean` BLOB, `naiveBean` BLOB, `hysteriaBean` BLOB, `sshBean` BLOB, `wgBean` BLOB, `chainBean` BLOB, `nekoBean` BLOB)",
         "fields": [
           {
             "fieldPath": "id",
@@ -169,12 +169,6 @@
           {
             "fieldPath": "naiveBean",
             "columnName": "naiveBean",
-            "affinity": "BLOB",
-            "notNull": false
-          },
-          {
-            "fieldPath": "ptBean",
-            "columnName": "ptBean",
             "affinity": "BLOB",
             "notNull": false
           },
@@ -402,7 +396,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1e528395256049f60bc749774d815a64')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e42cfaf8368d1f05db090cb399789997')"
     ]
   }
 }

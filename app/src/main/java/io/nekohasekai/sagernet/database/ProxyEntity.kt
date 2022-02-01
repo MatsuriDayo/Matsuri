@@ -36,8 +36,6 @@ import io.nekohasekai.sagernet.fmt.internal.ChainBean
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean
 import io.nekohasekai.sagernet.fmt.naive.buildNaiveConfig
 import io.nekohasekai.sagernet.fmt.naive.toUri
-import io.nekohasekai.sagernet.fmt.pingtunnel.PingTunnelBean
-import io.nekohasekai.sagernet.fmt.pingtunnel.toUri
 import io.nekohasekai.sagernet.fmt.shadowsocks.*
 import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
 import io.nekohasekai.sagernet.fmt.shadowsocksr.toUri
@@ -57,10 +55,7 @@ import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
 import io.nekohasekai.sagernet.ktx.isTLS
 import io.nekohasekai.sagernet.ui.profile.*
-import moe.matsuri.nya.neko.NekoBean
-import moe.matsuri.nya.neko.NekoPluginManager
-import moe.matsuri.nya.neko.NekoSettingActivity
-import moe.matsuri.nya.neko.shareLink
+import moe.matsuri.nya.neko.*
 
 @Entity(
     tableName = "proxy_entities", indices = [Index("groupId", name = "groupId")]
@@ -84,7 +79,6 @@ data class ProxyEntity(
     var trojanBean: TrojanBean? = null,
     var trojanGoBean: TrojanGoBean? = null,
     var naiveBean: NaiveBean? = null,
-    var ptBean: PingTunnelBean? = null,
     var hysteriaBean: HysteriaBean? = null,
     var sshBean: SSHBean? = null,
     var wgBean: WireGuardBean? = null,
@@ -102,7 +96,6 @@ data class ProxyEntity(
         const val TYPE_TROJAN = 6
         const val TYPE_TROJAN_GO = 7
         const val TYPE_NAIVE = 9
-        const val TYPE_PING_TUNNEL = 10
         const val TYPE_HYSTERIA = 15
 
         const val TYPE_SSH = 17
@@ -190,7 +183,6 @@ data class ProxyEntity(
             TYPE_TROJAN -> trojanBean = KryoConverters.trojanDeserialize(byteArray)
             TYPE_TROJAN_GO -> trojanGoBean = KryoConverters.trojanGoDeserialize(byteArray)
             TYPE_NAIVE -> naiveBean = KryoConverters.naiveDeserialize(byteArray)
-            TYPE_PING_TUNNEL -> ptBean = KryoConverters.pingTunnelDeserialize(byteArray)
             TYPE_HYSTERIA -> hysteriaBean = KryoConverters.hysteriaDeserialize(byteArray)
             TYPE_SSH -> sshBean = KryoConverters.sshDeserialize(byteArray)
             TYPE_WG -> wgBean = KryoConverters.wireguardDeserialize(byteArray)
@@ -209,7 +201,6 @@ data class ProxyEntity(
         TYPE_TROJAN -> "Trojan"
         TYPE_TROJAN_GO -> "Trojan-Go"
         TYPE_NAIVE -> "Naïve"
-        TYPE_PING_TUNNEL -> "PingTunnel"
         TYPE_HYSTERIA -> "Hysteria"
         TYPE_SSH -> "SSH"
         TYPE_WG -> "WireGuard"
@@ -231,7 +222,6 @@ data class ProxyEntity(
             TYPE_TROJAN -> trojanBean
             TYPE_TROJAN_GO -> trojanGoBean
             TYPE_NAIVE -> naiveBean
-            TYPE_PING_TUNNEL -> ptBean
             TYPE_HYSTERIA -> hysteriaBean
             TYPE_SSH -> sshBean
             TYPE_WG -> wgBean
@@ -254,9 +244,7 @@ data class ProxyEntity(
             is HysteriaBean -> false
             is SSHBean -> false
             is WireGuardBean -> false
-            is NekoBean -> NekoPluginManager.findProtocol(nekoBean!!.protocolId)?.protocolConfig?.optBoolean(
-                "haveStandardLink"
-            ) == true
+            is NekoBean -> nekoBean!!.haveStandardLink()
             else -> true
         }
     }
@@ -271,7 +259,6 @@ data class ProxyEntity(
             is TrojanBean -> toUri()
             is TrojanGoBean -> toUri()
             is NaiveBean -> toUri()
-            is PingTunnelBean -> toUri()
             is HysteriaBean -> toUniversalLink()
             is SSHBean -> toUniversalLink()
             is WireGuardBean -> toUniversalLink()
@@ -321,7 +308,6 @@ data class ProxyEntity(
             TYPE_TROJAN -> DataStore.providerTrojan != TrojanProvider.V2RAY
             TYPE_TROJAN_GO -> true
             TYPE_NAIVE -> true
-            TYPE_PING_TUNNEL -> true
             TYPE_HYSTERIA -> true
             TYPE_WG -> DataStore.providerWireguard != TrojanProvider.V2RAY
             TYPE_NEKO -> true
@@ -355,7 +341,6 @@ data class ProxyEntity(
         trojanBean = null
         trojanGoBean = null
         naiveBean = null
-        ptBean = null
         hysteriaBean = null
         sshBean = null
         wgBean = null
@@ -395,10 +380,6 @@ data class ProxyEntity(
                 type = TYPE_NAIVE
                 naiveBean = bean
             }
-            is PingTunnelBean -> {
-                type = TYPE_PING_TUNNEL
-                ptBean = bean
-            }
             is HysteriaBean -> {
                 type = TYPE_HYSTERIA
                 hysteriaBean = bean
@@ -435,7 +416,6 @@ data class ProxyEntity(
                 TYPE_TROJAN -> TrojanSettingsActivity::class.java
                 TYPE_TROJAN_GO -> TrojanGoSettingsActivity::class.java
                 TYPE_NAIVE -> NaiveSettingsActivity::class.java
-                TYPE_PING_TUNNEL -> PingTunnelSettingsActivity::class.java
                 TYPE_HYSTERIA -> HysteriaSettingsActivity::class.java
                 TYPE_SSH -> SSHSettingsActivity::class.java
                 TYPE_WG -> WireGuardSettingsActivity::class.java

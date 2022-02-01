@@ -49,6 +49,7 @@ import io.nekohasekai.sagernet.utils.PackageCache
 import io.nekohasekai.sagernet.utils.Subnet
 import kotlinx.coroutines.*
 import libcore.*
+import moe.matsuri.nya.neko.needBypassRootUid
 import java.io.FileDescriptor
 import java.net.InetAddress
 import kotlin.coroutines.suspendCoroutine
@@ -201,7 +202,7 @@ class VpnService : BaseVpnService(),
         var bypass = DataStore.bypass
         var workaroundSYSTEM = DataStore.tunImplementation == TunImplementation.SYSTEM
         var needBypassRootUid = workaroundSYSTEM || data.proxy!!.config.outboundTagsAll.values.any {
-            it.ptBean != null || it.hysteriaBean?.protocol == HysteriaBean.PROTOCOL_FAKETCP
+            it.nekoBean?.needBypassRootUid() == true || it.hysteriaBean?.protocol == HysteriaBean.PROTOCOL_FAKETCP
         }
 
         if (proxyApps || needBypassRootUid) {
