@@ -25,7 +25,6 @@ import cn.hutool.core.util.NumberUtil
 import com.v2ray.core.app.observatory.OutboundStatus
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.bg.BaseService
-import io.nekohasekai.sagernet.bg.VpnService
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.database.SagerDatabase
@@ -34,7 +33,6 @@ import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.utils.DirectBoot
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
-import libcore.Libcore
 import java.io.IOException
 import java.util.*
 import kotlin.concurrent.timerTask
@@ -45,7 +43,7 @@ class ProxyInstance(profile: ProxyEntity, val service: BaseService.Interface) : 
 
     lateinit var observatoryJob: Job
 
-    override fun init() {
+    override suspend fun init() {
         super.init()
 
         Logs.d(config.config)

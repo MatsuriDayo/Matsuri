@@ -1,4 +1,4 @@
-package moe.nya.utils
+package moe.matsuri.nya.utils
 
 import android.content.Context
 import android.content.Intent

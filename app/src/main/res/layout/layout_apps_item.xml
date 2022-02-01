@@ -57,6 +57,13 @@
 
         </LinearLayout>
 
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/add_profile_methods_manual_settings"
+            android:visibility="gone" />
+
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/itemcheck"
             android:layout_width="wrap_content"

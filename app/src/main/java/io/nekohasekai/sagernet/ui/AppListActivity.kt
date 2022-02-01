@@ -32,6 +32,7 @@ import androidx.annotation.UiThread
 import androidx.core.util.contains
 import androidx.core.util.set
 import androidx.core.view.ViewCompat
+import androidx.core.view.isGone
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -40,14 +41,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
 import io.nekohasekai.sagernet.BuildConfig
+import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.databinding.LayoutAppListBinding
 import io.nekohasekai.sagernet.databinding.LayoutAppsItemBinding
-import io.nekohasekai.sagernet.ktx.crossFadeFrom
-import io.nekohasekai.sagernet.ktx.onMainDispatcher
-import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
+import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.utils.PackageCache
 import io.nekohasekai.sagernet.widget.ListHolderListener
 import io.nekohasekai.sagernet.widget.ListListener
@@ -55,6 +55,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import moe.matsuri.nya.neko.NekoPluginManager
+import moe.matsuri.nya.ui.Dialogs
 import kotlin.coroutines.coroutineContext
 
 class AppListActivity : ThemedActivity() {
@@ -91,7 +93,12 @@ class AppListActivity : ThemedActivity() {
             item = app
             binding.itemicon.setImageDrawable(app.icon)
             binding.title.text = app.name
-            binding.desc.text = "${app.packageName} (${app.uid})"
+            if (forNeko) {
+                val ver = cachedApps[app.packageName]?.versionName ?: ""
+                binding.desc.text = "${app.packageName} ($ver)"
+            } else {
+                binding.desc.text = "${app.packageName} (${app.uid})"
+            }
             binding.itemcheck.isChecked = isProxiedApp(app)
         }
 
@@ -103,6 +110,22 @@ class AppListActivity : ThemedActivity() {
             if (isProxiedApp(item)) proxiedUids.delete(item.uid) else proxiedUids[item.uid] = true
             DataStore.routePackages = apps.filter { isProxiedApp(it) }
                 .joinToString("\n") { it.packageName }
+
+            if (forNeko) {
+                if (isProxiedApp(item)) {
+                    runOnIoDispatcher {
+                        try {
+                            NekoPluginManager.installPlugin(item.packageName)
+                        } catch (e: Exception) {
+                            // failed UI
+                            runOnUiThread { onClick(v) }
+                            Dialogs.logExceptionAndShow(this@AppListActivity, e) { }
+                        }
+                    }
+                } else {
+                    NekoPluginManager.removeManagedPlugin(item.packageName)
+                }
+            }
 
             appsAdapter.notifyItemRangeChanged(0, appsAdapter.itemCount, SWITCH)
         }
@@ -192,8 +215,11 @@ class AppListActivity : ThemedActivity() {
         }
     }
 
+    private var forNeko = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        forNeko = intent?.hasExtra(Key.NEKO_PLUGIN_MANAGED) == true
 
         binding = LayoutAppListBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -223,13 +249,24 @@ class AppListActivity : ThemedActivity() {
             appsAdapter.filter.filter(binding.search.text?.toString() ?: "")
         }
 
+        if (forNeko) {
+            DataStore.routePackages = DataStore.nekoPlugins
+            binding.search.setText(Key.NEKO_PLUGIN_PREFIX)
+        }
+
+        binding.searchLayout.isGone = forNeko
+        binding.hintNekoPlugin.isGone = !forNeko
+        binding.actionLearnMore.setOnClickListener {
+            launchCustomTab("https://matsuridayo.github.io/plugin/")
+        }
+
         loadApps()
     }
 
     private var sysApps = false
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.app_list_menu, menu)
+        if (!forNeko) menuInflater.inflate(R.menu.app_list_menu, menu)
         return true
     }
 
@@ -309,6 +346,7 @@ class AppListActivity : ThemedActivity() {
 
     override fun onDestroy() {
         loader?.cancel()
+        if (forNeko) DataStore.nekoPlugins = DataStore.routePackages
         super.onDestroy()
     }
 }

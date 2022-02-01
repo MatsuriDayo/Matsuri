@@ -34,11 +34,10 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.isGone
-import androidx.core.view.isVisible
-import androidx.core.view.size
+import androidx.core.view.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -54,6 +53,7 @@ import io.nekohasekai.sagernet.aidl.TrafficStats
 import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.bg.test.UrlTest
 import io.nekohasekai.sagernet.database.*
+import io.nekohasekai.sagernet.databinding.LayoutAppsItemBinding
 import io.nekohasekai.sagernet.databinding.LayoutProfileBinding
 import io.nekohasekai.sagernet.databinding.LayoutProfileListBinding
 import io.nekohasekai.sagernet.databinding.LayoutProgressListBinding
@@ -64,12 +64,16 @@ import io.nekohasekai.sagernet.group.RawUpdater
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.plugin.PluginManager
 import io.nekohasekai.sagernet.ui.profile.*
+import io.nekohasekai.sagernet.utils.PackageCache
 import io.nekohasekai.sagernet.widget.QRCodeDialog
 import io.nekohasekai.sagernet.widget.UndoSnackbarManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import libcore.Libcore
+import moe.matsuri.nya.neko.NekoJSInterface
+import moe.matsuri.nya.neko.NekoPluginManager
+import moe.matsuri.nya.neko.NekoSettingActivity
 import okhttp3.internal.closeQuietly
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -339,6 +343,37 @@ class ConfigurationFragment @JvmOverloads constructor(
             }
             R.id.action_new_chain -> {
                 startActivity(Intent(requireActivity(), ChainSettingsActivity::class.java))
+            }
+            R.id.action_new_neko -> {
+                val context = requireContext()
+                lateinit var dialog: AlertDialog
+                val linearLayout = LinearLayout(context).apply {
+                    orientation = LinearLayout.VERTICAL
+
+                    NekoPluginManager.getProtocols().forEach { obj ->
+                        LayoutAppsItemBinding.inflate(layoutInflater, this, true).apply {
+                            itemcheck.isGone = true
+                            button.isGone = false
+                            itemicon.setImageDrawable(
+                                PackageCache.installedApps[obj.plgId]?.loadIcon(
+                                    context.packageManager
+                                )
+                            )
+                            title.text = obj.protocolId
+                            desc.text = obj.plgId
+                            button.setOnClickListener {
+                                dialog.dismiss()
+                                val intent = Intent(context, NekoSettingActivity::class.java)
+                                intent.putExtra("plgId", obj.plgId)
+                                intent.putExtra("protocolId", obj.protocolId)
+                                startActivity(intent)
+                            }
+                        }
+                    }
+                }
+                dialog = MaterialAlertDialogBuilder(context).setTitle(R.string.neko_plugin)
+                    .setView(linearLayout)
+                    .show()
             }
             R.id.action_clear_traffic_statistics -> {
                 runOnDefaultDispatcher {
@@ -830,7 +865,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                 }
             }
             val profiles = ConcurrentLinkedQueue(profilesUnfiltered)
-            val urlTest = UrlTest()
+            val urlTest = UrlTest() // note: this is NOT in bg process
 
             repeat(5) {
                 testJobs.add(launch {
@@ -867,6 +902,7 @@ class ConfigurationFragment @JvmOverloads constructor(
             mainJob.cancel()
             runOnDefaultDispatcher {
                 GroupManager.postReload(DataStore.currentGroupId())
+                NekoJSInterface.Default.destroyAllJsi()
             }
         }
     }

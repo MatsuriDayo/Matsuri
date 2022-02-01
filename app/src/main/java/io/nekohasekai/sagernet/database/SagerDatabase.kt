@@ -26,15 +26,14 @@ import androidx.room.TypeConverters
 import dev.matrix.roomigrant.GenerateRoomMigrations
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.SagerNet
-import io.nekohasekai.sagernet.database.preference.KeyValuePair
 import io.nekohasekai.sagernet.fmt.KryoConverters
 import io.nekohasekai.sagernet.fmt.gson.GsonConverters
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 @Database(
-    entities = [ProxyGroup::class, ProxyEntity::class, RuleEntity::class, StatsEntity::class, KeyValuePair::class],
-    version = 3
+    entities = [ProxyGroup::class, ProxyEntity::class, RuleEntity::class, StatsEntity::class],
+    version = 4
 )
 @TypeConverters(value = [KryoConverters::class, GsonConverters::class])
 @GenerateRoomMigrations
@@ -53,7 +52,6 @@ abstract class SagerDatabase : RoomDatabase() {
                 .build()
         }
 
-        val profileCacheDao get() = instance.profileCacheDao()
         val groupDao get() = instance.groupDao()
         val proxyDao get() = instance.proxyDao()
         val rulesDao get() = instance.rulesDao()
@@ -61,7 +59,6 @@ abstract class SagerDatabase : RoomDatabase() {
 
     }
 
-    abstract fun profileCacheDao(): KeyValuePair.Dao
     abstract fun groupDao(): ProxyGroup.Dao
     abstract fun proxyDao(): ProxyEntity.Dao
     abstract fun rulesDao(): RuleEntity.Dao

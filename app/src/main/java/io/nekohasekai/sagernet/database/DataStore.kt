@@ -31,6 +31,7 @@ import io.nekohasekai.sagernet.database.preference.PublicDatabase
 import io.nekohasekai.sagernet.database.preference.RoomPreferenceDataStore
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.utils.DirectBoot
+import moe.matsuri.nya.TempDatabase
 
 object DataStore : OnPreferenceDataStoreChangeListener {
 
@@ -40,7 +41,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var adurl = ""
 
     val configurationStore = RoomPreferenceDataStore(PublicDatabase.kvPairDao)
-    val profileCacheStore = RoomPreferenceDataStore(SagerDatabase.profileCacheDao)
+    val profileCacheStore = RoomPreferenceDataStore(TempDatabase.profileCacheDao)
 
     fun init() {
         if (Build.VERSION.SDK_INT >= 24) {
@@ -97,6 +98,8 @@ object DataStore : OnPreferenceDataStoreChangeListener {
         val groups = SagerDatabase.groupDao.allGroups()
         return groups.find { it.type == GroupType.BASIC }!!.id
     }
+
+    var nekoPlugins by configurationStore.string(Key.NEKO_PLUGIN_MANAGED)
 
     var isExpert by configurationStore.boolean(Key.APP_EXPERT)
     var appTheme by configurationStore.int(Key.APP_THEME)
@@ -217,6 +220,8 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var serverPassword1 by profileCacheStore.string(Key.SERVER_PASSWORD1)
     var serverMethod by profileCacheStore.string(Key.SERVER_METHOD)
     var serverPlugin by profileCacheStore.string(Key.SERVER_PLUGIN)
+
+    var sharedStorage by profileCacheStore.string("sharedStorage")
 
     var serverProtocol by profileCacheStore.string(Key.SERVER_PROTOCOL)
     var serverProtocolParam by profileCacheStore.string(Key.SERVER_PROTOCOL_PARAM)

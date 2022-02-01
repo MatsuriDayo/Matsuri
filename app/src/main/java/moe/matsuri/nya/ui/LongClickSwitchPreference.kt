@@ -1,4 +1,4 @@
-package moe.nya.ui
+package moe.matsuri.nya.ui
 
 import android.content.Context
 import android.util.AttributeSet

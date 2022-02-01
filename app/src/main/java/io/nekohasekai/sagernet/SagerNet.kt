@@ -167,6 +167,7 @@ class SagerNet : Application(),
             uiMode.currentModeType == Configuration.UI_MODE_TYPE_TELEVISION
         }
 
+        // /data/user_de available when not unlocked
         val deviceStorage by lazy {
             if (Build.VERSION.SDK_INT < 24) application else DeviceStorageApp(application)
         }

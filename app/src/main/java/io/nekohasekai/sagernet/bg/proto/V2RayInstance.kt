@@ -53,6 +53,9 @@ import io.nekohasekai.sagernet.plugin.PluginManager
 import kotlinx.coroutines.*
 import libcore.Libcore
 import libcore.V2RayInstance
+import moe.matsuri.nya.neko.NekoBean
+import moe.matsuri.nya.neko.NekoJSInterface
+import moe.matsuri.nya.neko.updateAllConfig
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -82,12 +85,13 @@ abstract class V2RayInstance(
         config = buildV2RayConfig(profile)
     }
 
-    protected open fun loadConfig() {
+    protected open suspend fun loadConfig() {
+        NekoJSInterface.Default.destroyAllJsi()
         Libcore.setEnableLog(DataStore.enableLog, DataStore.logBufSize)
         v2rayPoint.loadConfig(config.config)
     }
 
-    open fun init() {
+    open suspend fun init() {
         v2rayPoint = V2RayInstance()
         buildConfig()
         val enableMux = DataStore.enableMux
@@ -131,8 +135,7 @@ abstract class V2RayInstance(
                         initPlugin("hysteria-plugin")
                         pluginConfigs[port] = profile.type to bean.buildHysteriaConfig(port) {
                             File(
-                                app.cacheDir,
-                                "hysteria_" + SystemClock.elapsedRealtime() + ".ca"
+                                app.cacheDir, "hysteria_" + SystemClock.elapsedRealtime() + ".ca"
                             ).apply {
                                 parentFile?.mkdirs()
                                 cacheFiles.add(this)
@@ -145,6 +148,12 @@ abstract class V2RayInstance(
                             pluginConfigs[port] = profile.type to bean.buildWireGuardUapiConf()
                         }
                     }
+                    is NekoBean -> {
+                        bean.updateAllConfig(port)
+                        if (bean.allConfig == null) {
+                            throw PluginManager.PluginNotFoundException(bean.protocolId + "@" + bean.plgId)
+                        }
+                    }
                 }
             }
         }
@@ -154,7 +163,7 @@ abstract class V2RayInstance(
     @SuppressLint("SetJavaScriptEnabled")
     override fun launch() {
         val context = if (Build.VERSION.SDK_INT < 24 || SagerNet.user.isUserUnlocked) SagerNet.application else SagerNet.deviceStorage
-        val cache = File(context.cacheDir,"tmpcfg")
+        val cache = File(context.cacheDir, "tmpcfg")
         cache.mkdirs()
 
         for ((chain) in config.index) {
@@ -169,8 +178,7 @@ abstract class V2RayInstance(
                     }
                     bean is TrojanBean -> {
                         val configFile = File(
-                            cache,
-                            "trojan_" + SystemClock.elapsedRealtime() + ".json"
+                            cache, "trojan_" + SystemClock.elapsedRealtime() + ".json"
                         )
 
                         configFile.parentFile?.mkdirs()
@@ -188,8 +196,7 @@ abstract class V2RayInstance(
                     }
                     bean is TrojanGoBean -> {
                         val configFile = File(
-                            cache,
-                            "trojan_go_" + SystemClock.elapsedRealtime() + ".json"
+                            cache, "trojan_go_" + SystemClock.elapsedRealtime() + ".json"
                         )
                         configFile.parentFile?.mkdirs()
                         configFile.writeText(config)
@@ -203,8 +210,7 @@ abstract class V2RayInstance(
                     }
                     bean is NaiveBean -> {
                         val configFile = File(
-                            cache,
-                            "naive_" + SystemClock.elapsedRealtime() + ".json"
+                            cache, "naive_" + SystemClock.elapsedRealtime() + ".json"
                         )
 
                         configFile.parentFile?.mkdirs()
@@ -215,8 +221,7 @@ abstract class V2RayInstance(
 
                         if (bean.certificates.isNotBlank()) {
                             val certFile = File(
-                                cache,
-                                "naive_" + SystemClock.elapsedRealtime() + ".crt"
+                                cache, "naive_" + SystemClock.elapsedRealtime() + ".crt"
                             )
 
                             certFile.parentFile?.mkdirs()
@@ -258,8 +263,7 @@ abstract class V2RayInstance(
                     }
                     bean is HysteriaBean -> {
                         val configFile = File(
-                            cache,
-                            "hysteria_" + SystemClock.elapsedRealtime() + ".json"
+                            cache, "hysteria_" + SystemClock.elapsedRealtime() + ".json"
                         )
 
                         configFile.parentFile?.mkdirs()
@@ -284,8 +288,7 @@ abstract class V2RayInstance(
                     }
                     bean is WireGuardBean -> {
                         val configFile = File(
-                            cache,
-                            "wg_" + SystemClock.elapsedRealtime() + ".conf"
+                            cache, "wg_" + SystemClock.elapsedRealtime() + ".conf"
                         )
 
                         configFile.parentFile?.mkdirs()
@@ -303,6 +306,37 @@ abstract class V2RayInstance(
                             "-d",
                             "127.0.0.1:${DataStore.localDNSPort}"
                         )
+
+                        processes.start(commands)
+                    }
+                    bean is NekoBean -> {
+                        // config built from JS
+                        val nekoRunConfig = bean.allConfig.optJSONObject("nekoRunConfig")
+
+                        var configFile: File? = null
+                        if (nekoRunConfig != null) {
+                            configFile = File(cache, nekoRunConfig.getString("name"))
+                            configFile.parentFile?.mkdirs()
+                            val content = nekoRunConfig.getString("content")
+                            configFile.writeText(content)
+                            cacheFiles.add(configFile)
+                            Logs.d(content)
+                        }
+
+                        val nekoCommands = bean.allConfig.getJSONArray("nekoCommands")
+                        val commands = mutableListOf<String>()
+
+                        nekoCommands.forEach { _, any ->
+                            if (any is String) {
+                                if (any == "%config%" && configFile != null) {
+                                    commands.add(configFile.absolutePath)
+                                } else if (any == "%exe%") {
+                                    commands.add(initPlugin(bean.plgId).path)
+                                } else {
+                                    commands.add(any)
+                                }
+                            }
+                        }
 
                         processes.start(commands)
                     }

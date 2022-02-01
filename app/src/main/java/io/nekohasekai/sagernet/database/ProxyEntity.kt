@@ -57,6 +57,10 @@ import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
 import io.nekohasekai.sagernet.ktx.isTLS
 import io.nekohasekai.sagernet.ui.profile.*
+import moe.matsuri.nya.neko.NekoBean
+import moe.matsuri.nya.neko.NekoPluginManager
+import moe.matsuri.nya.neko.NekoSettingActivity
+import moe.matsuri.nya.neko.shareLink
 
 @Entity(
     tableName = "proxy_entities", indices = [Index("groupId", name = "groupId")]
@@ -85,6 +89,7 @@ data class ProxyEntity(
     var sshBean: SSHBean? = null,
     var wgBean: WireGuardBean? = null,
     var chainBean: ChainBean? = null,
+    var nekoBean: NekoBean? = null,
 ) : Serializable() {
 
     companion object {
@@ -104,6 +109,8 @@ data class ProxyEntity(
         const val TYPE_WG = 18
 
         const val TYPE_CHAIN = 8
+
+        const val TYPE_NEKO = 999
 
         val chainName by lazy { app.getString(R.string.proxy_chain) }
 
@@ -148,7 +155,7 @@ data class ProxyEntity(
         output.writeString(error)
 
         val data = KryoConverters.serialize(requireBean())
-        output.writeVarInt(data.size,true)
+        output.writeVarInt(data.size, true)
         output.writeBytes(data)
 
         output.writeBoolean(dirty)
@@ -189,6 +196,7 @@ data class ProxyEntity(
             TYPE_WG -> wgBean = KryoConverters.wireguardDeserialize(byteArray)
 
             TYPE_CHAIN -> chainBean = KryoConverters.chainDeserialize(byteArray)
+            TYPE_NEKO -> nekoBean = KryoConverters.nekoDeserialize(byteArray)
         }
     }
 
@@ -206,6 +214,7 @@ data class ProxyEntity(
         TYPE_SSH -> "SSH"
         TYPE_WG -> "WireGuard"
         TYPE_CHAIN -> chainName
+        TYPE_NEKO -> nekoBean!!.displayType()
         else -> "Undefined type $type"
     }
 
@@ -228,6 +237,7 @@ data class ProxyEntity(
             TYPE_WG -> wgBean
 
             TYPE_CHAIN -> chainBean
+            TYPE_NEKO -> nekoBean
             else -> error("Undefined type $type")
         } ?: error("Null ${displayType()} profile")
     }
@@ -244,6 +254,9 @@ data class ProxyEntity(
             is HysteriaBean -> false
             is SSHBean -> false
             is WireGuardBean -> false
+            is NekoBean -> NekoPluginManager.findProtocol(nekoBean!!.protocolId)?.protocolConfig?.optBoolean(
+                "haveStandardLink"
+            ) == true
             else -> true
         }
     }
@@ -262,6 +275,7 @@ data class ProxyEntity(
             is HysteriaBean -> toUniversalLink()
             is SSHBean -> toUniversalLink()
             is WireGuardBean -> toUniversalLink()
+            is NekoBean -> shareLink()
             else -> null
         }
     }
@@ -310,6 +324,7 @@ data class ProxyEntity(
             TYPE_PING_TUNNEL -> true
             TYPE_HYSTERIA -> true
             TYPE_WG -> DataStore.providerWireguard != TrojanProvider.V2RAY
+            TYPE_NEKO -> true
             else -> false
         }
     }
@@ -400,6 +415,10 @@ data class ProxyEntity(
                 type = TYPE_CHAIN
                 chainBean = bean
             }
+            is NekoBean -> {
+                type = TYPE_NEKO
+                nekoBean = bean
+            }
             else -> error("Undefined type $type")
         }
         return this
@@ -422,6 +441,7 @@ data class ProxyEntity(
                 TYPE_WG -> WireGuardSettingsActivity::class.java
 
                 TYPE_CHAIN -> ChainSettingsActivity::class.java
+                TYPE_NEKO -> NekoSettingActivity::class.java
                 else -> throw IllegalArgumentException()
             }
         ).apply {

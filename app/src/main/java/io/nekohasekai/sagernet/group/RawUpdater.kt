@@ -220,7 +220,7 @@ object RawUpdater : GroupUpdater() {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun parseRaw(text: String): List<AbstractBean>? {
+    suspend fun parseRaw(text: String): List<AbstractBean>? {
 
         val proxies = mutableListOf<AbstractBean>()
 

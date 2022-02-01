@@ -46,6 +46,7 @@ import io.nekohasekai.sagernet.fmt.v2ray.VMessBean;
 import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean;
 import io.nekohasekai.sagernet.ktx.KryosKt;
 import io.nekohasekai.sagernet.ktx.Logs;
+import moe.matsuri.nya.neko.NekoBean;
 
 public class KryoConverters {
 
@@ -151,6 +152,12 @@ public class KryoConverters {
     public static ChainBean chainDeserialize(byte[] bytes) {
         if (ArrayUtil.isEmpty(bytes)) return null;
         return deserialize(new ChainBean(), bytes);
+    }
+
+    @TypeConverter
+    public static NekoBean nekoDeserialize(byte[] bytes) {
+        if (ArrayUtil.isEmpty(bytes)) return null;
+        return deserialize(new NekoBean(), bytes);
     }
 
     @TypeConverter

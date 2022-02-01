@@ -493,5 +493,8 @@
     <string name="please_update">Your Matsuri is too old (%s). And will stop working at %s. Please update!</string>
     <string name="please_update_force">Your Matsuri is too old (%s). And has been stopped working at %s. Please update!</string>
     <string name="connection_test_delete_unavailable">Clear unavailable</string>
+    <string name="neko_plugin">Advanced plugin</string>
+    <string name="neko_plugin_summary">Advanced plugins can provide protocols that are not originally supported.\n\n
+Anyone can write advanced plugins, which can control Matsuri. please download and install from trusted sources.</string>
 
 </resources>

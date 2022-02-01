@@ -58,7 +58,8 @@ class V2RayTestInstance(profile: ProxyEntity, val link: String, val timeout: Int
         config = buildV2RayConfig(profile, true)
     }
 
-    override fun loadConfig() {
+    override suspend fun loadConfig() {
+        // don't call destroyAllJsi here
         v2rayPoint.loadConfig(config.config)
     }
 

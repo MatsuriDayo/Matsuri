@@ -45,3 +45,8 @@ fun runOnMainDispatcher(block: suspend CoroutineScope.() -> Unit) =
 suspend fun <T> onMainDispatcher(block: suspend CoroutineScope.() -> T) =
     withContext(Dispatchers.Main.immediate, block = block)
 
+fun runBlockingOnMainDispatcher(block: suspend CoroutineScope.() -> Unit) {
+    runBlocking {
+        GlobalScope.launch(Dispatchers.Main.immediate, block = block)
+    }
+}

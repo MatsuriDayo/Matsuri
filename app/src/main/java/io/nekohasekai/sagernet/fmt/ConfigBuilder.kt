@@ -19,7 +19,6 @@
 
 package io.nekohasekai.sagernet.fmt
 
-import android.os.Build
 import cn.hutool.core.util.NumberUtil
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginManager

@@ -1,4 +1,4 @@
-package moe.nya.ui
+package moe.matsuri.nya.ui
 
 import android.content.Context
 import android.content.res.Resources
@@ -24,10 +24,10 @@ import kotlin.math.roundToInt
 
 class ColorPickerPreference
 @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyle: Int = TypedArrayUtils.getAttr(
-        context, androidx.preference.R.attr.editTextPreferenceStyle, android.R.attr.editTextPreferenceStyle
+    context: Context, attrs: AttributeSet? = null, defStyle: Int = TypedArrayUtils.getAttr(
+        context,
+        androidx.preference.R.attr.editTextPreferenceStyle,
+        android.R.attr.editTextPreferenceStyle
     )
 ) : Preference(
     context, attrs, defStyle
@@ -45,7 +45,13 @@ class ColorPickerPreference
         if (!inited) {
             inited = true
 
-            widgetFrame.addView(getNekoImageViewAtColor(context.getColorAttr(R.attr.colorAccent), 48, 0))
+            widgetFrame.addView(
+                getNekoImageViewAtColor(
+                    context.getColorAttr(R.attr.colorAccent),
+                    48,
+                    0
+                )
+            )
             widgetFrame.visibility = View.VISIBLE
         }
     }
@@ -64,7 +70,11 @@ class ColorPickerPreference
     }
 
     fun getNekoAtColor(res: Resources, color: Int): Drawable {
-        val neko = ResourcesCompat.getDrawable(res, R.drawable.ic_baseline_fiber_manual_record_24, null)!!
+        val neko = ResourcesCompat.getDrawable(
+            res,
+            R.drawable.ic_baseline_fiber_manual_record_24,
+            null
+        )!!
         DrawableCompat.setTint(neko.mutate(), color)
         return neko
     }
@@ -72,7 +82,7 @@ class ColorPickerPreference
     override fun onClick() {
         super.onClick()
 
-        var dialog: AlertDialog? = null
+        lateinit var dialog: AlertDialog
 
         val grid = GridLayout(context).apply {
             columnCount = 4
@@ -87,7 +97,7 @@ class ColorPickerPreference
                 val view = getNekoImageViewAtColor(color, 64, 0).apply {
                     setOnClickListener {
                         persistInt(themeId)
-                        dialog?.dismiss()
+                        dialog.dismiss()
                         callChangeListener(themeId)
                     }
                 }

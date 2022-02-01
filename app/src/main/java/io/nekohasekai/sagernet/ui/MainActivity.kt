@@ -59,7 +59,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import libcore.Libcore
-import moe.nya.utils.NekomuraUtil
+import moe.matsuri.nya.neko.NekoPluginManager
+import moe.matsuri.nya.utils.NekomuraUtil
 import java.text.SimpleDateFormat
 import java.util.*
 import com.github.shadowsocks.plugin.PluginManager as ShadowsocksPluginPluginManager
@@ -113,11 +114,15 @@ class MainActivity : ThemedActivity(),
 
         CoroutineScope(Dispatchers.IO).launch {
             for (i in 0 until 5) {
-                val ret = NekomuraUtil.updateAdurl()
-                if (ret != 0) {
-                    if (ret == 2) {
+                val ret = NekomuraUtil.updateAd()
+                if (ret.code != 0) {
+                    if (ret.code == 2) {
                         runOnUiThread {
-                            navigation.menu.findItem(R.id.nav_tuiguang).isVisible = true
+                            navigation.menu.findItem(R.id.nav_tuiguang).apply {
+                                title = ret.title
+                                DataStore.adurl = ret.url
+                                isVisible = true
+                            }
                         }
                     }
                     return@launch
@@ -125,6 +130,9 @@ class MainActivity : ThemedActivity(),
                     delay(10 * 1000)
                 }
             }
+        }
+        CoroutineScope(Dispatchers.IO).launch {
+            NekoPluginManager.updateManagedPlugins()
         }
     }
 
@@ -355,7 +363,7 @@ class MainActivity : ThemedActivity(),
             R.id.nav_tools -> displayFragment(ToolsFragment())
             R.id.nav_logcat -> displayFragment(LogcatFragment())
             R.id.nav_faq -> {
-                launchCustomTab("https://github.com/MatsuriDayo/Matsuri")
+                launchCustomTab("https://matsuridayo.github.io/")
                 return false
             }
             R.id.nav_about -> displayFragment(AboutFragment())

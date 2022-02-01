@@ -33,7 +33,7 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.databinding.LayoutLogcatBinding
 import io.nekohasekai.sagernet.ktx.*
 import libcore.Libcore
-import moe.nya.utils.SendLog
+import moe.matsuri.nya.utils.SendLog
 import java.util.*
 
 class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
@@ -105,7 +105,7 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
                         return@runOnDefaultDispatcher
                     }
                     onMainDispatcher {
-                        reloadSession()
+                        binding.textview.text = ""
                     }
                 }
 
@@ -120,7 +120,4 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
         return true
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-    }
 }

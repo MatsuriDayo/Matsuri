@@ -24,6 +24,7 @@ import android.annotation.SuppressLint
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.listenForPackageChanges
 import kotlinx.coroutines.runBlocking
@@ -54,7 +55,7 @@ object PackageCache {
                 when (it.packageName) {
                     "android" -> true
                     else -> it.requestedPermissions?.contains(Manifest.permission.INTERNET) == true
-                }
+                } || it.packageName.startsWith(Key.NEKO_PLUGIN_PREFIX) // TODO prefix
             }
             .associateBy { it.packageName }
 
