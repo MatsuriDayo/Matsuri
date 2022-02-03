@@ -34,9 +34,14 @@ abstract class ThemedActivity : AppCompatActivity {
 
     var themeResId = 0
     var uiMode = 0
+    open val isDialog = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Theme.apply(this)
+        if (!isDialog) {
+            Theme.apply(this)
+        } else {
+            Theme.applyDialog(this)
+        }
         Theme.applyNightTheme()
 
         super.onCreate(savedInstanceState)

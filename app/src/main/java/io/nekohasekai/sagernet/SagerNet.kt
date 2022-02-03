@@ -33,6 +33,7 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.ConnectivityManager
 import android.os.Build
+import android.os.PowerManager
 import android.os.StrictMode
 import android.os.UserManager
 import android.widget.Toast
@@ -190,6 +191,8 @@ class SagerNet : Application(),
         val notification by lazy { application.getSystemService<NotificationManager>()!! }
         val user by lazy { application.getSystemService<UserManager>()!! }
         val uiMode by lazy { application.getSystemService<UiModeManager>()!! }
+        val power by lazy { application.getSystemService<PowerManager>()!! }
+
         val packageInfo: PackageInfo by lazy { application.getPackageInfo(application.packageName) }
         val directBootSupported by lazy {
             Build.VERSION.SDK_INT >= 24 && try {

@@ -488,6 +488,10 @@
     <string name="wireguard_provider">Wireguard Provider</string>
     <string name="experimental_reduced_iv_head_entropy">This is GFWReport\'s proposal for a countermeasure for the random stream like protocol blocking behaviour observed on GFW.
 \n\nThis option remap the first 6 bytes of IV to printable characters, it\'s possible for anyone on the privileged network path to identify the protocol when enabled.</string>
+    <string name="acquire_wake_lock">Acquire WakeLock</string>
+    <string name="release_wake_lock">Release WakeLock</string>
+    <string name="acquire_wake_lock_summary">Keep the CPU on</string>
+    <string name="action_switch">Switch</string>
 
     <string name="please_update">Your Matsuri is too old (%s). And will stop working at %s. Please update!</string>
     <string name="please_update_force">Your Matsuri is too old (%s). And has been stopped working at %s. Please update!</string>

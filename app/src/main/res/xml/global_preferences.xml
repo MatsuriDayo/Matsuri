@@ -13,6 +13,11 @@
             app:summary="@string/auto_connect_summary"
             app:title="@string/auto_connect" />
         <SwitchPreference
+            app:icon="@drawable/baseline_developer_board_24"
+            app:key="acquireWakeLock"
+            app:summary="@string/acquire_wake_lock_summary"
+            app:title="@string/acquire_wake_lock" />
+        <SwitchPreference
             app:icon="@drawable/ic_action_lock"
             app:key="directBootAware"
             app:summary="@string/direct_boot_aware_summary"
@@ -86,12 +91,6 @@
             app:summary="@string/show_direct_speed_sum"
             app:title="@string/show_direct_speed"
             app:useSimpleSummaryProvider="true" />
-        <SwitchPreference
-            app:defaultValue="true"
-            app:icon="@drawable/ic_baseline_multiple_stop_24"
-            app:key="showStopButton"
-            app:summary="@string/show_stop_sum"
-            app:title="@string/show_stop" />
         <SwitchPreference
             app:icon="@drawable/ic_baseline_nat_24"
             app:key="allowAccess"

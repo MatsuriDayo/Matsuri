@@ -29,6 +29,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.RemoteCallbackList
 import android.os.RemoteException
+import android.os.*
 import io.nekohasekai.sagernet.Action
 import io.nekohasekai.sagernet.BootReceiver
 import io.nekohasekai.sagernet.R
@@ -73,10 +74,11 @@ class BaseService {
         var proxy: ProxyInstance? = null
         var notification: ServiceNotification? = null
 
-        val closeReceiver = broadcastReceiver { _, intent ->
+        val receiver = broadcastReceiver { _, intent ->
             when (intent.action) {
                 Intent.ACTION_SHUTDOWN -> service.persistStats()
                 Action.RELOAD -> service.forceLoad()
+                Action.SWITCH_WAKE_LOCK -> service.switchWakeLock()
                 else -> service.stopRunner(keepState = false)
             }
         }
@@ -114,6 +116,7 @@ class BaseService {
 
         override fun registerCallback(cb: ISagerNetServiceCallback) {
             callbacks.register(cb)
+            cb.updateWakeLockStatus(data?.proxy?.service?.wakeLock != null)
         }
 
         fun broadcast(work: (ISagerNetServiceCallback) -> Unit) {
@@ -380,6 +383,10 @@ class BaseService {
         }
 
         fun killProcesses() {
+            wakeLock?.apply {
+                release()
+                wakeLock = null
+            }
             data.proxy?.close()
         }
 
@@ -398,7 +405,7 @@ class BaseService {
                     killProcesses()
                     val data = data
                     if (data.closeReceiverRegistered) {
-                        unregisterReceiver(data.closeReceiver)
+                        unregisterReceiver(data.receiver)
                         data.closeReceiverRegistered = false
                     }
                     data.binder.profilePersisted(listOfNotNull(data.proxy).map { it.profile.id })
@@ -422,6 +429,41 @@ class BaseService {
 
         suspend fun preInit() {}
 
+        var wakeLock: PowerManager.WakeLock?
+        fun acquireWakeLock()
+        fun switchWakeLock() {
+            wakeLock?.apply {
+                release()
+                wakeLock = null
+                data.binder.broadcast {
+                    it.updateWakeLockStatus(false)
+                }
+            } ?: apply {
+                acquireWakeLock()
+                data.binder.broadcast {
+                    it.updateWakeLockStatus(true)
+                }
+            }
+        }
+
+        fun lateInit() {
+            wakeLock?.apply {
+                release()
+                wakeLock = null
+            }
+
+            if (DataStore.acquireWakeLock) {
+                acquireWakeLock()
+                data.binder.broadcast {
+                    it.updateWakeLockStatus(true)
+                }
+            } else {
+                data.binder.broadcast {
+                    it.updateWakeLockStatus(false)
+                }
+            }
+        }
+
         fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
             val data = data
@@ -438,10 +480,11 @@ class BaseService {
             data.proxy = proxy
             BootReceiver.enabled = DataStore.persistAcrossReboot
             if (!data.closeReceiverRegistered) {
-                registerReceiver(data.closeReceiver, IntentFilter().apply {
+                registerReceiver(data.receiver, IntentFilter().apply {
                     addAction(Action.RELOAD)
                     addAction(Intent.ACTION_SHUTDOWN)
                     addAction(Action.CLOSE)
+                    addAction(Action.SWITCH_WAKE_LOCK)
                 }, "$packageName.SERVICE", null)
                 data.closeReceiverRegistered = true
             }
@@ -474,6 +517,8 @@ class BaseService {
                             it.routeAlert(type, routeName)
                         }
                     }
+
+                    lateInit()
                 } catch (_: CancellationException) { // if the job was cancelled, it is canceller's responsibility to call stopRunner
                 } catch (_: UnknownHostException) {
                     stopRunner(false, getString(R.string.invalid_server))

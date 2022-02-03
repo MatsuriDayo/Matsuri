@@ -21,14 +21,35 @@
 
 package io.nekohasekai.sagernet.bg
 
+import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Intent
+import android.os.PowerManager
+import io.nekohasekai.sagernet.SagerNet
+import io.nekohasekai.sagernet.utils.DefaultNetworkListener
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class ProxyService : Service(), BaseService.Interface {
     override val data = BaseService.Data(this)
     override val tag: String get() = "SagerNetProxyService"
     override fun createNotification(profileName: String): ServiceNotification =
         ServiceNotification(this, profileName, "service-proxy", true)
+
+    override var wakeLock: PowerManager.WakeLock? = null
+
+    @SuppressLint("WakelockTimeout")
+    override fun acquireWakeLock() {
+        wakeLock = SagerNet.power.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "sagernet:proxy")
+            .apply { acquire() }
+    }
+
+    @Suppress("EXPERIMENTAL_API_USAGE")
+    override fun killProcesses() {
+        super.killProcesses()
+        GlobalScope.launch(Dispatchers.Default) { DefaultNetworkListener.stop(this) }
+    }
 
     override fun onBind(intent: Intent) = super.onBind(intent)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int =
