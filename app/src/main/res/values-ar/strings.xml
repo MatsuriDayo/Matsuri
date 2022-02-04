@@ -363,7 +363,6 @@
     <string name="experimental_no_termination_signal">لا ترسل إشارة إنهاء اتصال فردية مزدوجة لاتصال TCP عند نقلها عبر VMess. سيؤدي هذا إلى كسر بعض التطبيقات.</string>
     <string name="experimental_authenticated_length">لم يعد طول كل شحنة مرنًا. يتطلب هذا الاختبار خادمًا ويستخدم العميل نفس إصدار v2ray-core. من المتوقع المزيد من التحديثات الفورية في هذا الاختبار.</string>
     <string name="experimental_settings">تجريبي</string>
-    <string name="route_need_fds">تعتمد قاعدة التوجيه %s على تفعيل خدمة كاشف المقدمة، ولكن لم يتم تمكينها.</string>
     <string name="route_need_vpn">تعتمد قاعدة التوجيه %s على أن تكون VPN سارية المفعول، لذلك يتم تجاهلها.</string>
     <string name="route_for">حكم ل %s</string>
     <string name="app_no_launcher">التطبيق ليس له واجهة.</string>

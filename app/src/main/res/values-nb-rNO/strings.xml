@@ -365,7 +365,6 @@
     <string name="wireguard_psk">Forhåndsdelt nøkkel for likemann</string>
     <string name="wireguard_public_key">Offentlig nøkkel for likemann</string>
     <string name="translate_platform">Oversettelsesplattform</string>
-    <string name="route_need_fds">Rutingsregelen %s avhenger av at forgrunnsoppdagelsestjenesten er operativ, men det er den ikke.</string>
     <string name="route_need_vpn">Rutingsregelen %s avhenger av at VPN er operativ, så den ignoreres.</string>
     <string name="traffic_statistics_summary">Kan øke strømforbruket</string>
     <string name="group_order_origin">Opprinnelse</string>

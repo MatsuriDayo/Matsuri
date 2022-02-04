@@ -183,11 +183,9 @@
     <string name="key_opt">金鑰（選用）</string>
     <string name="username">使用者名稱</string>
     <string name="connection_test_url">連線測試 URL</string>
-    <string name="fakedns_message">可能導致其他應用程式在代理停止後需要重新啟動以重新連線至網路</string>
     <string name="transproxy_mode">透明代理模式</string>
     <string name="require_transproxy">啟用透明代理傳入伺服器</string>
     <string name="dns_hosts">網域重寫</string>
-    <string name="enable_fakedns">啟用 FakeDNS</string>
     <string name="dns_routing_message">使用在路由中被略過的直連 DNS 解析網域。請注意潛在的 DNS 洩漏</string>
     <string name="enable_dns_routing">啟用 DNS 路由</string>
     <string name="direct_dns">直連 DNS</string>
@@ -298,7 +296,7 @@
     <string name="connection_test_icmp_ping_unavailable">ICMPing 無法使用</string>
     <string name="connection_test_domain_not_found">網域不存在</string>
     <string name="connection_test_refused">連線被拒</string>
-    <string name="donate_info">貓貓很可愛 請給貓貓錢</string>
+    <string name="donate_info">世界很可愛 請給世界錢</string>
     <string name="connection_test_unreachable">無法連線</string>
     <string name="connection_test_timeout">逾時</string>
     <string name="append_http_proxy">為 VPN 附加 HTTP 代理</string>
@@ -366,7 +364,7 @@
     <string name="ssh_auth_type_none">無</string>
     <string name="no_statistics">暫無統計資料</string>
     <string name="traffic_statistics_summary">可能增加電量消耗</string>
-    <string name="route_need_vpn">路由規則 %s 需要 VPN 模式以生效，因此被忽略。</string>
+    <string name="route_need_vpn">路由規則`%s` 需要 VPN 模式以生效，因此被忽略。</string>
     <string name="route_for">%s 的規則</string>
     <string name="app_no_launcher">此應用程式沒有介面。</string>
     <string name="copy_failed">複製失敗。</string>
@@ -419,11 +417,31 @@
     <string name="app_traffic_statistics">應用程式流量統計資料</string>
     <string name="resolve_destination_summary">如果目的地位址是一個網域，則基於 IPv6 策略傳出。</string>
     <string name="destination_override_summary">使用被偵測到的網域複寫目的地位址，而不是僅用於路由</string>
-    <string name="group_filter_owners">擁有者</string>
+    <string name="group_filter_owners">所有者</string>
     <string name="route_opt_block_analysis">封鎖分析</string>
     <string name="route_play_store">%s 谷歌Play商店規則</string>
-    <string name="group_filter_owners_nf">此訂閱無擁有者</string>
+    <string name="group_filter_owners_nf">此訂閱中沒有所有者</string>
     <string name="naive_insecure_concurrency">不安全並發</string>
-    <string name="stun_test">NAT 行為發現</string>
-    <string name="naive_insecure_concurrency_summary">使用N個並發的隧道能使網路條件較差时更加可用。但數量越多，越易被偵測，安全性越低。由於本項目致力於面對流量分析的安全性，以不安全的方式使用違背了其初忠。如一定要使用，請先嘗試 N=2，觀察其是否解決了您的問題。強烈反對於此使用多於4個隧道。</string>
+    <string name="stun_test">NAT 行為尋找</string>
+    <string name="naive_insecure_concurrency_summary">使用N個並發的隧道能使網路條件較差时更加可用。但數量越多，越易被偵測，安全性越低。由於本項目致力於面對流量分析的安全性，以不安全的方式使用違背了其初忠。
+\n
+\n如一定要使用，請先嘗試 N=2，觀察其是否解決了您的問題。強烈反對於此使用多於4個隧道。</string>
+    <string name="stun_attest_loading">這可能需要數分鐘…</string>
+    <string name="stun_test_summary">使用 STUN 確定客戶端的 NAT 映射行為和 RFC 5780 中定義的 NAT 過濾行為。</string>
+    <string name="start">開始</string>
+    <string name="backup">備份</string>
+    <string name="backup_rules">路由規則</string>
+    <string name="invalid_backup_file">無效的備份文件</string>
+    <string name="tools_network">網路</string>
+    <string name="backup_settings">設置</string>
+    <string name="backup_import">導入</string>
+    <string name="backup_import_summary">導入將覆蓋現有數據。</string>
+    <string name="backup_importing">正在導入…</string>
+    <string name="backup_groups_and_configurations">分組和配置</string>
+    <string name="backup_summary">如果路由規則不與配置一起備份，則自定義出站將丟失。</string>
+    <string name="backup_not_file">不是一個備份文件，預計 .json，但 %s</string>
+    <string name="experimental_reduced_iv_head_entropy">這是 GFWReport 針對在 GFW 上觀察到的隨機流（如封鎖協議的行為）提出的提案。
+\n
+\n此選項將 IV 的前 6 個字節重新映射為可打印字符，啟用後特權網路路徑上的任何人都可以識別協議。</string>
+    <string name="packet_encoding">包編碼</string>
 </resources>

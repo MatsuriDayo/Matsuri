@@ -391,7 +391,6 @@
     <string name="tcp_connections">%d TCP 连接</string>
     <string name="traffic_stats">统计</string>
     <string name="traffic_active">活动</string>
-    <string name="route_need_fds">路由规则 %s 依赖前台检测服务以生效，但它未被启用。</string>
     <string name="route_need_vpn">路由规则 %s 依赖 VPN 以生效，所以其已被忽略。</string>
     <string name="no_statistics">暂无数据</string>
     <string name="traffic_statistics_summary">可能增加电量使用</string>
@@ -454,4 +453,7 @@
     <string name="neko_plugin">高级插件</string>
     <string name="neko_plugin_summary">高级插件可以提供原本不支持的协议。\n\n
 任何人都可以编写高级插件，开启相当于给予其控制 Matsuri 的权限，请从信任的来源下载安装。</string>
+    <string name="wireguard_provider">Wireguard 提供程序</string>
+    <string name="packet_encoding" translatable="false">包编码</string>
+    <string name="action_switch">切换</string>
 </resources>
