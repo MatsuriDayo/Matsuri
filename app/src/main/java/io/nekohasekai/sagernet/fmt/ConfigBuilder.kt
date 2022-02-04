@@ -76,6 +76,7 @@ class V2rayBuildResult(
     var observatoryTags: Set<String>,
     val dumpUid: Boolean,
     val alerts: List<Pair<Int, String>>,
+    val tryDomains: List<String>,
 ) {
     data class IndexEntity(var chain: LinkedHashMap<Int, ProxyEntity>)
 }
@@ -128,6 +129,7 @@ fun buildV2RayConfig(
     val resolveDestination = DataStore.resolveDestination
     val destinationOverride = DataStore.destinationOverride
     val trafficStatistics = !forTest && DataStore.profileTrafficStatistics
+    val tryDomains = mutableListOf<String>()
 
     var currentDomainStrategy = when {
         !resolveDestination -> "AsIs"
@@ -1058,6 +1060,7 @@ fun buildV2RayConfig(
             it.requireBean().apply {
                 if (!serverAddress.isIpAddress()) {
                     directLookupDomain.add("full:$serverAddress")
+                    if(DataStore.enhanceDomain) tryDomains.add(serverAddress)
                 }
             }
         }
@@ -1128,7 +1131,8 @@ fun buildV2RayConfig(
             TAG_BYPASS,
             it.observatory?.subjectSelector ?: HashSet(),
             dumpUid,
-            alerts
+            alerts,
+            tryDomains
         )
     }
 

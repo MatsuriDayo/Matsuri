@@ -1,4 +1,4 @@
-package libcore
+package protect
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"runtime"
+	"syscall"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -16,18 +17,18 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-var fdProtector Protector
+var FdProtector Protector
 
 type Protector interface {
 	Protect(fd int32) bool
 }
 
 // TODO now it is v2ray's default dialer, test for bug (VPN / non-VPN)
-type protectedDialer struct {
-	resolver func(domain string) ([]net.IP, error)
+type ProtectedDialer struct {
+	Resolver func(domain string) ([]net.IP, error)
 }
 
-func (dialer protectedDialer) Dial(ctx context.Context, source v2rayNet.Address, destination v2rayNet.Destination, sockopt *internet.SocketConfig) (conn net.Conn, err error) {
+func (dialer ProtectedDialer) Dial(ctx context.Context, source v2rayNet.Address, destination v2rayNet.Destination, sockopt *internet.SocketConfig) (conn net.Conn, err error) {
 	if destination.Network == v2rayNet.Network_Unknown || destination.Address == nil {
 		buffer := buf.StackNew()
 		buffer.Resize(0, int32(runtime.Stack(buffer.Extend(buf.Size), false)))
@@ -39,7 +40,10 @@ func (dialer protectedDialer) Dial(ctx context.Context, source v2rayNet.Address,
 
 	var ips []net.IP
 	if destination.Address.Family().IsDomain() {
-		ips, err = dialer.resolver(destination.Address.Domain())
+		if dialer.Resolver == nil {
+			return nil, newError("no resolver")
+		}
+		ips, err = dialer.Resolver(destination.Address.Domain())
 		if err == nil && len(ips) == 0 {
 			err = dns.ErrEmptyResponse
 		}
@@ -67,23 +71,27 @@ func (dialer protectedDialer) Dial(ctx context.Context, source v2rayNet.Address,
 	return conn, err
 }
 
-func (dialer protectedDialer) dial(ctx context.Context, source v2rayNet.Address, destination v2rayNet.Destination, sockopt *internet.SocketConfig) (conn net.Conn, err error) {
+func (dialer ProtectedDialer) dial(ctx context.Context, source v2rayNet.Address, destination v2rayNet.Destination, sockopt *internet.SocketConfig) (conn net.Conn, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	destIp := destination.Address.IP()
 	ipv6 := len(destIp) != net.IPv4len
 	fd, err := getFd(destination.Network, ipv6)
+	defer syscall.Close(fd)
 	if err != nil {
 		return nil, err
 	}
 
-	if fdProtector != nil && !fdProtector.Protect(int32(fd)) {
+	if FdProtector != nil && !FdProtector.Protect(int32(fd)) {
 		return nil, newError("protect failed")
 	}
 
 	if sockopt != nil {
 		internet.ApplySockopt(sockopt, destination, uintptr(fd), ctx)
 	}
+
+	// SO_SNDTIMEO default is 75s
+	syscall.SetsockoptTimeval(fd, syscall.SOL_SOCKET, syscall.SO_SNDTIMEO, &syscall.Timeval{Sec: 10})
 
 	var sockaddr unix.Sockaddr
 	if !ipv6 {
@@ -109,6 +117,7 @@ func (dialer protectedDialer) dial(ctx context.Context, source v2rayNet.Address,
 	if file == nil {
 		return nil, newError("failed to connect to fd")
 	}
+	defer file.Close()
 
 	switch destination.Network {
 	case v2rayNet.Network_UDP:
@@ -131,7 +140,6 @@ func (dialer protectedDialer) dial(ctx context.Context, source v2rayNet.Address,
 		return nil, err
 	}
 
-	closeIgnore(file)
 	return conn, nil
 }
 

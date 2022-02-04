@@ -5,13 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"libcore/doh"
+	"libcore/protect"
 	gonet "net"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
-
-	_ "github.com/v2fly/v2ray-core/v5/main/distro/all"
 
 	core "github.com/v2fly/v2ray-core/v5"
 	"github.com/v2fly/v2ray-core/v5/app/dispatcher"
@@ -29,6 +29,8 @@ import (
 	"github.com/v2fly/v2ray-core/v5/features/routing"
 	"github.com/v2fly/v2ray-core/v5/features/stats"
 	"github.com/v2fly/v2ray-core/v5/infra/conf/serial"
+	_ "github.com/v2fly/v2ray-core/v5/main/distro/all"
+	"github.com/v2fly/v2ray-core/v5/nekoutils"
 	"github.com/v2fly/v2ray-core/v5/transport"
 	"github.com/v2fly/v2ray-core/v5/transport/internet"
 )
@@ -296,6 +298,8 @@ func (c *dispatcherConn) SetWriteDeadline(t time.Time) error {
 
 // Nekomura
 
+var staticHosts = make(map[string][]net.IP)
+var tryDomains = make([]string, 0)                                                    // server's domain, set when enhanced domain mode
 var androidResolver = &net.Resolver{PreferGo: false}                                  // Using Android API, lookup from current network.
 var androidUnderlyingResolver = &simpleSekaiWrapper{androidResolver: androidResolver} // Using Android API, lookup from non-VPN network.
 
@@ -360,15 +364,29 @@ func (v2ray *V2RayInstance) setupDialer() {
 	// All lookup except dnsClient -> dc.LookupIP()
 	// and also set protectedDialer
 	if c, ok := dc.(v2rayDns.ClientWithIPOption); ok {
-		internet.UseAlternativeSystemDialer(&protectedDialer{
-			resolver: func(domain string) ([]net.IP, error) {
+		internet.UseAlternativeSystemDialer(&protect.ProtectedDialer{
+			Resolver: func(domain string) ([]net.IP, error) {
+				if ips, ok := staticHosts[domain]; ok && ips != nil {
+					return ips, nil
+				}
+
+				// server domain
+				if nekoutils.In(tryDomains, domain) {
+					// first try A
+					ips, err := doh.LookupManyDoH(domain, 1)
+					if err != nil {
+						// then try AAAA
+						ips, err = doh.LookupManyDoH(domain, 28)
+						if err != nil {
+							return nil, err
+						}
+					}
+					staticHosts[domain] = ips
+					return ips, nil
+				}
+
+				// other domain
 				c.SetFakeDNSOption(false) // Skip FakeDNS
-				return dc.LookupIP(domain)
-			},
-		})
-	} else {
-		internet.UseAlternativeSystemDialer(&protectedDialer{
-			resolver: func(domain string) ([]net.IP, error) {
 				return dc.LookupIP(domain)
 			},
 		})
@@ -380,12 +398,16 @@ func setupResolvers() {
 	gonet.DefaultResolver = androidResolver
 
 	// dnsClient lookup -> androidUnderlyingResolver.LookupIP()
-	internet.UseAlternativeSystemDNSDialer(&protectedDialer{
-		resolver: func(domain string) ([]net.IP, error) {
+	internet.UseAlternativeSystemDNSDialer(&protect.ProtectedDialer{
+		Resolver: func(domain string) ([]net.IP, error) {
 			return androidUnderlyingResolver.LookupIP("ip", domain)
 		},
 	})
 
 	// "localhost" localDns lookup -> androidUnderlyingResolver.LookupIP()
 	localdns.SetLookupFunc(androidUnderlyingResolver.LookupIP)
+}
+
+func SetTryDomains(a string) {
+	tryDomains = strings.Split(a, ",")
 }

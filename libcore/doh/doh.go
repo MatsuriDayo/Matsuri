@@ -1,0 +1,131 @@
+package doh
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"libcore/protect"
+	"net"
+	"net/http"
+	"strconv"
+	"sync/atomic"
+	"time"
+)
+
+var dohs = []string{
+	"https://1.0.0.1/dns-query",
+	"https://101.101.101.101/dns-query",
+	"https://8.8.4.4/resolve",
+	"https://[2606:4700:4700::1111]/dns-query",
+	"https://[2620:fe::9]/dns-query",
+	"https://149.112.112.112:5053/dns-query",
+	"https://9.9.9.9:5053/dns-query",
+}
+
+func LookupManyDoH(domain string, queryType int) ([]net.IP, error) {
+	var good, bad int32
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	in := make(chan string, len(dohs))
+	out := make(chan []net.IP, 0)
+
+	defer func() {
+		cancel()
+		close(in)
+		close(out)
+	}()
+
+	for i := 0; i < len(dohs); i++ {
+		go manyWorker(ctx, domain, queryType, in, out, cancel, &good, &bad)
+	}
+
+	go func() {
+		for _, doh := range dohs {
+			in <- doh
+		}
+	}()
+
+	var err error
+	ips := <-out
+
+	if ips == nil {
+		err = errors.New("LookupManyDoH: all tries failed")
+	}
+
+	return ips, err
+}
+
+func manyWorker(ctx context.Context, domain string, queryType int, in chan string, out chan []net.IP, cancel context.CancelFunc, good, bad *int32) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case doh, ok := <-in:
+			if !ok { // closed
+				return
+			}
+
+			ret := lookupDoH(ctx, doh, domain, queryType)
+			if ret == nil {
+				//failed
+				if atomic.AddInt32(bad, 1) == int32(len(dohs)) {
+					//all failed
+					cancel()
+					out <- nil
+					return
+				}
+				continue
+			}
+			if atomic.AddInt32(good, 1) == 1 {
+				//first success
+				cancel()
+				out <- ret
+			}
+		}
+	}
+}
+
+var dialer = &protect.ProtectedDialer{}
+var client = &http.Client{
+	Transport: &http.Transport{
+		DialContext:           dialer.DialContext,
+		IdleConnTimeout:       5 * time.Second,
+		TLSHandshakeTimeout:   5 * time.Second,
+		ExpectContinueTimeout: 5 * time.Second,
+		ResponseHeaderTimeout: 5 * time.Second,
+	},
+}
+
+func lookupDoH(ctx context.Context, doh, domain string, queryType int) []net.IP {
+	dohURL := doh + "?name=" + domain + "&type=" + strconv.Itoa(queryType)
+
+	req, _ := http.NewRequestWithContext(ctx, "GET", dohURL, nil)
+	req.Header.Set("accept", "application/dns-json")
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil
+	}
+	defer resp.Body.Close()
+
+	v := &struct {
+		Answer []struct {
+			Type int    `json:"type"`
+			Data string `json:"data"`
+		}
+	}{}
+
+	err = json.NewDecoder(resp.Body).Decode(v)
+	if err != nil {
+		return nil
+	}
+
+	ips := make([]net.IP, 0)
+
+	for _, a := range v.Answer {
+		if a.Type == queryType {
+			ips = append(ips, net.ParseIP(a.Data))
+		}
+	}
+
+	return ips
+}

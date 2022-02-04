@@ -5,6 +5,7 @@ import (
 	"io"
 	"libcore/gvisor"
 	"libcore/nat"
+	"libcore/protect"
 	"libcore/tun"
 	"math"
 	"net"
@@ -64,6 +65,10 @@ type TunConfig struct {
 	FdProtector         Protector
 }
 
+type Protector interface {
+	Protect(fd int32) bool
+}
+
 type ErrorHandler interface {
 	HandleError(err string)
 }
@@ -88,7 +93,7 @@ func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
 
 	// setup resolver first
 	androidUnderlyingResolver.sekaiResolver = config.LocalResolver
-	fdProtector = config.FdProtector
+	protect.FdProtector = config.FdProtector
 
 	if config.TrafficStats {
 		t.appStats = map[uint16]*appStats{}
@@ -127,7 +132,7 @@ func (t *Tun2ray) Close() {
 	defer t.access.Unlock()
 
 	androidUnderlyingResolver.sekaiResolver = nil
-	fdProtector = nil
+	protect.FdProtector = nil
 
 	closeIgnore(t.dev)
 }

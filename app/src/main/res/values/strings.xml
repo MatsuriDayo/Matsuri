@@ -80,6 +80,8 @@
     <string name="connection_test_fail">Internet Unavailable</string>
     <string name="connection_test_error_status_code">Error code: #%d</string>
     <string name="cag_dns">DNS Settings</string>
+    <string name="enhance_resolve_server_domain">Enhance resolve of server domain</string>
+    <string name="enhance_resolve_server_domain_summary">Use multiple DNS query server addresses to prevent DNS pollution from causing inability to connect to the server.</string>
     <string name="remote_dns">Remote DNS</string>
     <string name="direct_dns">Direct DNS</string>
     <string name="direct_dns_use_system">Use system DNS as Direct DNS</string>

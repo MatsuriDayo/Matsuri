@@ -177,6 +177,11 @@
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/cag_dns">
+        <SwitchPreference
+            app:key="enhanceDomain"
+            app:icon="@drawable/ic_baseline_location_on_24"
+            app:summary="@string/enhance_resolve_server_domain_summary"
+            app:title="@string/enhance_resolve_server_domain" />
         <moe.matsuri.nya.ui.DnsLinkPreference
             app:defaultValue="https://1.0.0.1/dns-query"
             app:icon="@drawable/ic_action_dns"

@@ -184,13 +184,16 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
 
             val view = EditText(context).apply {
                 inputType = EditorInfo.TYPE_CLASS_NUMBER
-                setText(DataStore.logBufSize.toString())
+                var size = DataStore.logBufSize
+                if (size == 0) size = 50
+                setText(size.toString())
             }
 
-            MaterialAlertDialogBuilder(context!!).setTitle("Log buffer size (kb)")
+            MaterialAlertDialogBuilder(requireContext()).setTitle("Log buffer size (kb)")
                 .setView(view)
                 .setPositiveButton(android.R.string.ok) { _, _ ->
                     DataStore.logBufSize = view.text.toString().toInt()
+                    if (DataStore.logBufSize <= 0) DataStore.logBufSize = 50
                     Libcore.setEnableLog(DataStore.enableLog, DataStore.logBufSize)
                     needReload()
                 }

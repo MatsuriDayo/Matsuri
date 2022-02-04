@@ -37,6 +37,7 @@ object Key {
     const val MODE_VPN = "vpn"
     const val MODE_PROXY = "proxy"
 
+    const val ENHANCE_RESOLVE_SERVER_DOMAIN = "enhanceDomain"
     const val REMOTE_DNS = "remoteDns"
     const val DIRECT_DNS = "directDns"
     const val DIRECT_DNS_USE_SYSTEM = "directDnsUseSystem"

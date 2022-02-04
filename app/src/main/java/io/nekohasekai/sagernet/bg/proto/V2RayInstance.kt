@@ -87,6 +87,7 @@ abstract class V2RayInstance(
     protected open suspend fun loadConfig() {
         NekoJSInterface.Default.destroyAllJsi()
         Libcore.setEnableLog(DataStore.enableLog, DataStore.logBufSize)
+        Libcore.setTryDomains(config.tryDomains.joinToString(","))
         v2rayPoint.loadConfig(config.config)
     }
 

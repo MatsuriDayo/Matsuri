@@ -456,4 +456,6 @@
     <string name="wireguard_provider">Wireguard 提供程序</string>
     <string name="packet_encoding" translatable="false">包编码</string>
     <string name="action_switch">切换</string>
+    <string name="enhance_resolve_server_domain">增强域名解析</string>
+    <string name="enhance_resolve_server_domain_summary">使用多个境外 DNS 查询服务器地址，防止 DNS 污染造成无法连接服务器。</string>
 </resources>
