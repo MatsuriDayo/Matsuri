@@ -145,7 +145,6 @@ fun JSONObject.parseHysteria(): HysteriaBean {
 
         streamReceiveWindow = getIntNya("recv_window_conn")
         connectionReceiveWindow = getIntNya("recv_window")
-        disableMtuDiscovery = getBool("disable_mtu_discovery")
     }
 }
 
@@ -184,7 +183,6 @@ fun HysteriaBean.buildHysteriaConfig(port: Int, cacheFile: (() -> File)?): Strin
         if (allowInsecure) put("insecure", true)
         if (streamReceiveWindow > 0) put("recv_window_conn", streamReceiveWindow)
         if (connectionReceiveWindow > 0) put("recv_window", connectionReceiveWindow)
-        if (disableMtuDiscovery) put("disable_mtu_discovery", true)
 
         put("resolver", "127.0.0.1:" + DataStore.localDNSPort)
     }.toStringPretty()
