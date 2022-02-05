@@ -22,6 +22,8 @@ import android.os.Bundle
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.database.ProfileManager
+import io.nekohasekai.sagernet.ktx.runOnMainDispatcher
 
 class SwitchActivity : ThemedActivity(R.layout.layout_empty),
     ConfigurationFragment.SelectCallback {
@@ -37,7 +39,12 @@ class SwitchActivity : ThemedActivity(R.layout.layout_empty),
     }
 
     override fun returnProfile(profileId: Long) {
+        val old = DataStore.selectedProxy
         DataStore.selectedProxy = profileId
+        runOnMainDispatcher {
+            ProfileManager.postUpdate(old)
+            ProfileManager.postUpdate(profileId)
+        }
         SagerNet.reloadService()
         finish()
     }
