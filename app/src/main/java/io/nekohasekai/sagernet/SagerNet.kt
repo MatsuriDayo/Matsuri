@@ -36,6 +36,7 @@ import android.os.Build
 import android.os.PowerManager
 import android.os.StrictMode
 import android.os.UserManager
+import android.webkit.WebView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
@@ -57,6 +58,7 @@ import kotlinx.coroutines.DEBUG_PROPERTY_VALUE_ON
 import libcore.Libcore
 import libcore.UidDumper
 import libcore.UidInfo
+import moe.matsuri.nya.utils.JavaUtil
 import java.net.InetSocketAddress
 import androidx.work.Configuration as WorkConfiguration
 
@@ -74,6 +76,10 @@ class SagerNet : Application(),
 
     override fun onCreate() {
         super.onCreate()
+
+        // fix multi process issue in Android 9+
+        JavaUtil.handleWebviewDir(this)
+        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
 
         System.setProperty(DEBUG_PROPERTY_NAME, DEBUG_PROPERTY_VALUE_ON)
         Thread.setDefaultUncaughtExceptionHandler(CrashHandler)

@@ -68,8 +68,6 @@ class NekoJSInterface(val plgId: String) {
             return@suspendCoroutine
         }
 
-        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
-
         webView = WebView(SagerNet.application.applicationContext)
         webView!!.settings.javaScriptEnabled = true
         webView!!.addJavascriptInterface(jsObject, "neko")

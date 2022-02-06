@@ -22,7 +22,7 @@ class NekoSettingActivity : ProfileSettingsActivity<NekoBean>() {
     override fun NekoBean.init() {
         if (!this@NekoSettingActivity::plgId.isInitialized) this@NekoSettingActivity.plgId = plgId
         if (!this@NekoSettingActivity::protocolId.isInitialized) this@NekoSettingActivity.protocolId = protocolId
-
+        DataStore.profileCacheStore.putString("name", name)
         DataStore.sharedStorage = sharedStorage.toString()
     }
 
