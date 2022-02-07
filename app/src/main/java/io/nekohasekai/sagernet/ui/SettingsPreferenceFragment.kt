@@ -79,7 +79,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
 
         val appTheme = findPreference<ColorPickerPreference>(Key.APP_THEME)!!
         appTheme.setOnPreferenceChangeListener { _, newTheme ->
-            if (SagerNet.started) {
+            if (DataStore.serviceState.started) {
                 SagerNet.reloadService()
             }
             val theme = Theme.getTheme(newTheme as Int)
@@ -244,7 +244,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
 
         serviceMode.setOnPreferenceChangeListener { _, _ ->
-            if (SagerNet.started) SagerNet.stopService()
+            if (DataStore.serviceState.started) SagerNet.stopService()
             true
         }
 

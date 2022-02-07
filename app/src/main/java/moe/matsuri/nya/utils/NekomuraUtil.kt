@@ -6,10 +6,34 @@ import android.util.Base64
 import androidx.appcompat.content.res.AppCompatResources
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.ktx.Logs
 import libcore.HTTPResponse
 import libcore.Libcore
 import org.json.JSONObject
+import java.io.File
 import kotlin.math.roundToInt
+
+fun SagerNet.cleanWebview() {
+    var pathToClean = "app_webview"
+    if (isBgProcess) pathToClean += "_$process"
+    try {
+        val dataDir = filesDir.parentFile!!
+        File(dataDir, "$pathToClean/BrowserMetrics").recreate(true)
+        File(dataDir, "$pathToClean/BrowserMetrics-spare.pma").recreate(false)
+    } catch (e: Exception) {
+        Logs.e(e)
+    }
+}
+
+fun File.recreate(dir: Boolean) {
+    if (dir && !isFile) {
+        if (exists()) deleteRecursively()
+        createNewFile()
+    } else if (!dir && !isDirectory) {
+        if (exists()) delete()
+        mkdir()
+    }
+}
 
 object NekomuraUtil {
 

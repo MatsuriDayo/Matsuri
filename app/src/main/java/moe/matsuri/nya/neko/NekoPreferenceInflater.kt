@@ -12,7 +12,6 @@ import io.nekohasekai.sagernet.ktx.getStr
 import io.nekohasekai.sagernet.ui.profile.ProfileSettingsActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import moe.matsuri.nya.utils.NekomuraUtil
 import moe.matsuri.nya.utils.getDrawable
 import org.json.JSONArray
 import org.json.JSONObject

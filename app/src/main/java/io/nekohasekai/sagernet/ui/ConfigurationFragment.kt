@@ -682,7 +682,7 @@ class ConfigurationFragment @JvmOverloads constructor(
     }
 
     fun stopService() {
-        if (SagerNet.started) SagerNet.stopService()
+        if (DataStore.serviceState.started) SagerNet.stopService()
     }
 
     @Suppress("EXPERIMENTAL_API_USAGE")
@@ -1076,13 +1076,11 @@ class ConfigurationFragment @JvmOverloads constructor(
 
         private val isEnabled: Boolean
             get() {
-                return ((activity as? MainActivity)
-                    ?: return false).state.let { it.canStop || it == BaseService.State.Stopped }
+                return DataStore.serviceState.let { it.canStop || it == BaseService.State.Stopped }
             }
 
         private fun isProfileEditable(id: Long): Boolean {
-            return ((activity as? MainActivity)
-                ?: return false).state == BaseService.State.Stopped || id != DataStore.selectedProxy
+            return DataStore.serviceState.connected || id != DataStore.selectedProxy
         }
 
         lateinit var layoutManager: LinearLayoutManager
@@ -1492,12 +1490,12 @@ class ConfigurationFragment @JvmOverloads constructor(
 
                             if (update) {
                                 ProfileManager.postUpdate(lastSelected)
-                                if (pa.state.canStop && reloadAccess.tryLock()) {
+                                if (DataStore.serviceState.canStop && reloadAccess.tryLock()) {
                                     SagerNet.reloadService()
                                     reloadAccess.unlock()
                                 }
                             } else if (SagerNet.isTv) {
-                                if (SagerNet.started) {
+                                if (DataStore.serviceState.started) {
                                     SagerNet.stopService()
                                 } else {
                                     SagerNet.startService()
@@ -1593,7 +1591,7 @@ class ConfigurationFragment @JvmOverloads constructor(
 
                 runOnDefaultDispatcher {
                     val selected = (selectedItem?.id ?: DataStore.selectedProxy) == proxyEntity.id
-                    val started = selected && SagerNet.started && DataStore.currentProfile == proxyEntity.id
+                    val started = selected && DataStore.serviceState.started && DataStore.currentProfile == proxyEntity.id
                     onMainDispatcher {
                         editButton.isEnabled = !started
                         removeButton.isEnabled = !started

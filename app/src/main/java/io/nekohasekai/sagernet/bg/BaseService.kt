@@ -25,10 +25,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.os.Build
-import android.os.IBinder
-import android.os.RemoteCallbackList
-import android.os.RemoteException
 import android.os.*
 import io.nekohasekai.sagernet.Action
 import io.nekohasekai.sagernet.BootReceiver
@@ -54,13 +50,17 @@ import io.nekohasekai.sagernet.aidl.AppStats as AidlAppStats
 
 class BaseService {
 
-    enum class State(val canStop: Boolean = false) {
+    enum class State(
+        val canStop: Boolean = false,
+        val started: Boolean = false,
+        val connected: Boolean = false,
+    ) {
         /**
          * Idle state is only used by UI and will never be returned by BaseService.
          */
         Idle,
-        Connecting(true),
-        Connected(true),
+        Connecting(true, true, false),
+        Connected(true, true, true),
         Stopping,
         Stopped,
     }
@@ -495,11 +495,7 @@ class BaseService {
                     Executable.killAll()    // clean up old processes
                     preInit()
 
-                    try {
-                        proxy.init()
-                    } catch (e: Exception) {
-                        error(e.readableMessage)
-                    }
+                    proxy.init()
 
                     DataStore.currentProfile = profile.id
                     data.notification = createNotification(profile.displayName())

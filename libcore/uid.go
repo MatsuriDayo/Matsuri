@@ -27,7 +27,7 @@ func SetUidDumper(dumper UidDumper, procfs bool) {
 }
 
 func dumpUid(source net.Destination, destination net.Destination) (int32, error) {
-	if useProcfs {
+	if useProcfs || uidDumper == nil {
 		return querySocketUidFromProcFs(source, destination), nil
 	} else {
 		var ipProto int32

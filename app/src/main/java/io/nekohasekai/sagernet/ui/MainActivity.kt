@@ -95,11 +95,11 @@ class MainActivity : ThemedActivity(),
         }
 
         binding.fab.setOnClickListener {
-            if (state.canStop) SagerNet.stopService() else connect.launch(
+            if (DataStore.serviceState.canStop) SagerNet.stopService() else connect.launch(
                 null
             )
         }
-        binding.stats.setOnClickListener { if (state == BaseService.State.Connected) binding.stats.testConnection() }
+        binding.stats.setOnClickListener { if (DataStore.serviceState.connected) binding.stats.testConnection() }
 
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(binding.coordinator, ListHolderListener)
@@ -112,7 +112,7 @@ class MainActivity : ThemedActivity(),
             onNewIntent(intent)
         }
 
-        if(!isFdroid) CoroutineScope(Dispatchers.IO).launch {
+        if (!isFdroid) CoroutineScope(Dispatchers.IO).launch {
             for (i in 0 until 5) {
                 val ret = NekomuraUtil.updateAd()
                 if (ret.code != 0) {
@@ -151,7 +151,7 @@ class MainActivity : ThemedActivity(),
     }
 
     fun urlTest(): Int {
-        if (state != BaseService.State.Connected || connection.service == null) {
+        if (!DataStore.serviceState.connected || connection.service == null) {
             error("not started")
         }
         return connection.service!!.urlTest()
@@ -384,14 +384,13 @@ class MainActivity : ThemedActivity(),
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_holder, RouteFragment())
             .commitAllowingStateLoss()
-        if (SagerNet.started) {
+        if (DataStore.serviceState.started) {
             snackbar(getString(R.string.restart)).setAction(R.string.apply) {
                 SagerNet.reloadService()
             }.show()
         }
     }
 
-    var state = BaseService.State.Idle
     var doStop = false
 
     private fun changeState(
@@ -399,17 +398,15 @@ class MainActivity : ThemedActivity(),
         msg: String? = null,
         animate: Boolean = false,
     ) {
-        val started = state == BaseService.State.Connected
+        DataStore.serviceState = state
 
-        if (!started) {
+        if (!DataStore.serviceState.connected) {
             statsUpdated(emptyList())
         }
 
-        binding.fab.changeState(state, this.state, animate)
+        binding.fab.changeState(state, DataStore.serviceState, animate)
         binding.stats.changeState(state)
         if (msg != null) snackbar(getString(R.string.vpn_error, msg)).show()
-        this.state = state
-        DataStore.state = state
 
         when (state) {
             BaseService.State.Connected, BaseService.State.Stopped -> {
@@ -451,9 +448,7 @@ class MainActivity : ThemedActivity(),
     val connection = SagerConnection(true)
     override fun onServiceConnected(service: ISagerNetService) = changeState(
         try {
-            BaseService.State.values()[service.state].also {
-                SagerNet.started = it.canStop
-            }
+            BaseService.State.values()[service.state]
         } catch (_: RemoteException) {
             BaseService.State.Idle
         }
@@ -497,7 +492,7 @@ class MainActivity : ThemedActivity(),
         when (key) {
             Key.SERVICE_MODE -> onBinderDied()
             Key.PROXY_APPS, Key.BYPASS_MODE, Key.INDIVIDUAL -> {
-                if (state.canStop) {
+                if (DataStore.serviceState.canStop) {
                     snackbar(getString(R.string.restart)).setAction(R.string.apply) {
                         SagerNet.reloadService()
                     }.show()

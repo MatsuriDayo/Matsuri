@@ -1,5 +1,6 @@
 package moe.matsuri.nya.utils;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Application;
 import android.content.Context;
@@ -9,6 +10,7 @@ import android.webkit.WebView;
 
 import java.io.File;
 import java.io.RandomAccessFile;
+import java.lang.reflect.Method;
 import java.nio.channels.FileLock;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -135,4 +137,23 @@ public class JavaUtil {
     private static boolean checkIsHuaweiRom() {
         return Build.MANUFACTURER.contains("HUAWEI");
     }
+
+    @SuppressLint("PrivateApi")
+    public static String getProcessName() {
+        if (Build.VERSION.SDK_INT >= 28)
+            return Application.getProcessName();
+
+        // Using the same technique as Application.getProcessName() for older devices
+        // Using reflection since ActivityThread is an internal API
+
+        try {
+            Class<?> activityThread = Class.forName("android.app.ActivityThread");
+            String methodName = "currentProcessName";
+            Method getProcessName = activityThread.getDeclaredMethod(methodName);
+            return (String) getProcessName.invoke(null);
+        } catch (Exception e) {
+            return BuildConfig.APPLICATION_ID;
+        }
+    }
+
 }

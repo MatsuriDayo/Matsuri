@@ -35,10 +35,9 @@ import moe.matsuri.nya.TempDatabase
 
 object DataStore : OnPreferenceDataStoreChangeListener {
 
-    // share service state (and data??) in main process
-    var state = BaseService.State.Idle
-
-    var adurl = ""
+    // share service state in main process
+    @Volatile
+    var serviceState = BaseService.State.Idle
 
     val configurationStore = RoomPreferenceDataStore(PublicDatabase.kvPairDao)
     val profileCacheStore = RoomPreferenceDataStore(TempDatabase.profileCacheDao)
@@ -52,11 +51,12 @@ object DataStore : OnPreferenceDataStoreChangeListener {
         }
     }
 
-    var selectedProxy by configurationStore.long(Key.PROFILE_ID)
+    // last used, but may not be running
     var currentProfile by configurationStore.long(Key.PROFILE_CURRENT)
 
+    var selectedProxy by configurationStore.long(Key.PROFILE_ID)
     var selectedGroup by configurationStore.long(Key.PROFILE_GROUP) {
-        SagerNet.currentProfile?.groupId ?: 0L
+        SagerDatabase.proxyDao.getById(selectedProxy)?.groupId ?: 0L
     }
 
     fun currentGroupId(): Long {
@@ -99,6 +99,8 @@ object DataStore : OnPreferenceDataStoreChangeListener {
         return groups.find { it.type == GroupType.BASIC }!!.id
     }
 
+    var adurl = ""
+
     var nekoPlugins by configurationStore.string(Key.NEKO_PLUGIN_MANAGED)
 
     var isExpert by configurationStore.boolean(Key.APP_EXPERT)
@@ -110,7 +112,6 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var trafficSniffing by configurationStore.boolean(Key.TRAFFIC_SNIFFING) { true }
     var destinationOverride by configurationStore.boolean(Key.DESTINATION_OVERRIDE)
     var resolveDestination by configurationStore.boolean(Key.RESOLVE_DESTINATION)
-
 
     var tcpKeepAliveInterval by configurationStore.stringToInt(Key.TCP_KEEP_ALIVE_INTERVAL) { 15 }
 

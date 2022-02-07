@@ -12,12 +12,12 @@ import java.util.zip.ZipFile
 object NekoPluginManager {
     const val managerVersion = 1
 
-    val managedPlugins get() = DataStore.nekoPlugins.split("\n").filter { it.isNotBlank() }
+    val plugins get() = DataStore.nekoPlugins.split("\n").filter { it.isNotBlank() }
 
     // plgID to plgConfig object
     fun getManagedPlugins(): Map<String, JSONObject> {
         val ret = mutableMapOf<String, JSONObject>()
-        managedPlugins.forEach {
+        plugins.forEach {
             tryGetPlgConfig(it)?.apply {
                 ret[it] = this
             }

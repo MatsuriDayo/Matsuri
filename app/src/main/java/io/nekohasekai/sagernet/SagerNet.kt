@@ -44,7 +44,6 @@ import androidx.core.content.getSystemService
 import go.Seq
 import io.nekohasekai.sagernet.bg.SagerConnection
 import io.nekohasekai.sagernet.database.DataStore
-import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
@@ -59,6 +58,7 @@ import libcore.Libcore
 import libcore.UidDumper
 import libcore.UidInfo
 import moe.matsuri.nya.utils.JavaUtil
+import moe.matsuri.nya.utils.cleanWebview
 import java.net.InetSocketAddress
 import androidx.work.Configuration as WorkConfiguration
 
@@ -73,19 +73,28 @@ class SagerNet : Application(),
     }
 
     val externalAssets by lazy { getExternalFilesDir(null) ?: filesDir }
+    val process = JavaUtil.getProcessName()
+    val isMainProcess = process == BuildConfig.APPLICATION_ID
+    val isBgProcess = process.endsWith(":bg")
 
     override fun onCreate() {
         super.onCreate()
 
-        // fix multi process issue in Android 9+
-        JavaUtil.handleWebviewDir(this)
-        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
-
         System.setProperty(DEBUG_PROPERTY_NAME, DEBUG_PROPERTY_VALUE_ON)
         Thread.setDefaultUncaughtExceptionHandler(CrashHandler)
-        DataStore.init()
-        updateNotificationChannels()
 
+        if (isMainProcess || isBgProcess) {
+            // fix multi process issue in Android 9+
+            JavaUtil.handleWebviewDir(this)
+            WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
+
+            runOnDefaultDispatcher {
+                PackageCache.register()
+                cleanWebview()
+            }
+        }
+
+        DataStore.init()
         Seq.setContext(this)
 
         // matsuri: init core (sn: extract v2ray assets
@@ -97,14 +106,15 @@ class SagerNet : Application(),
             Toast.makeText(this, it, Toast.LENGTH_LONG).show()
         })
 
-        runOnDefaultDispatcher {
-            PackageCache.register()
+        if (isMainProcess) {
+            Theme.apply(this)
+            Theme.applyNightTheme()
+            updateNotificationChannels()
         }
 
-        Theme.apply(this)
-        Theme.applyNightTheme()
-
-        Libcore.setUidDumper(this, Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
+        if (isBgProcess) {
+            Libcore.setUidDumper(this, Build.VERSION.SDK_INT < Build.VERSION_CODES.Q)
+        }
 
         if (BuildConfig.DEBUG) StrictMode.setVmPolicy(
             StrictMode.VmPolicy.Builder()
@@ -120,7 +130,7 @@ class SagerNet : Application(),
     override fun dumpUid(
         ipProto: Int, srcIp: String, srcPort: Int, destIp: String, destPort: Int
     ): Int {
-        return SagerNet.connectivity.getConnectionOwnerUid(
+        return connectivity.getConnectionOwnerUid(
             ipProto, InetSocketAddress(srcIp, srcPort), InetSocketAddress(destIp, destPort)
         )
     }
@@ -165,9 +175,6 @@ class SagerNet : Application(),
     @SuppressLint("InlinedApi")
     companion object {
 
-        @Volatile
-        var started = false
-
         lateinit var application: SagerNet
 
         val isTv by lazy {
@@ -207,8 +214,6 @@ class SagerNet : Application(),
                 false
             }
         }
-
-        val currentProfile get() = SagerDatabase.proxyDao.getById(DataStore.selectedProxy)
 
         fun getClipboardText(): String {
             return clipboard.primaryClip?.takeIf { it.itemCount > 0 }

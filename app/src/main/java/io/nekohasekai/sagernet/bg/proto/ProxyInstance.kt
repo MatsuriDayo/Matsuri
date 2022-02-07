@@ -23,7 +23,6 @@ package io.nekohasekai.sagernet.bg.proto
 //import io.nekohasekai.sagernet.bg.test.DebugInstance
 import cn.hutool.core.util.NumberUtil
 import com.v2ray.core.app.observatory.OutboundStatus
-import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProxyEntity
@@ -68,8 +67,6 @@ class ProxyInstance(profile: ProxyEntity, val service: BaseService.Interface) : 
                  launch()
              }
          }*/
-
-        SagerNet.started = true
     }
 
     fun sendInitStatuses() {
@@ -155,8 +152,6 @@ class ProxyInstance(profile: ProxyEntity, val service: BaseService.Interface) : 
     }
 
     override fun close() {
-        SagerNet.started = false
-
         persistStats()
         super.close()
 
