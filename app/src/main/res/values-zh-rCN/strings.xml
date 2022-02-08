@@ -458,4 +458,8 @@
     <string name="action_switch">切换</string>
     <string name="enhance_resolve_server_domain">增强域名解析</string>
     <string name="enhance_resolve_server_domain_summary">使用多个境外 DNS 查询服务器地址，防止 DNS 污染造成无法连接服务器。</string>
+    <string name="acquire_wake_lock">获取唤醒锁</string>
+    <string name="release_wake_lock">释放唤醒锁</string>
+    <string name="acquire_wake_lock_summary">保持 CPU 开启</string>
+    <string name="neko_plugin_internal_error">%s 内部错误</string>
 </resources>

@@ -131,9 +131,6 @@ class MainActivity : ThemedActivity(),
                 }
             }
         }
-        CoroutineScope(Dispatchers.IO).launch {
-            NekoPluginManager.updateManagedPlugins()
-        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -262,10 +259,7 @@ class MainActivity : ThemedActivity(),
     override fun missingPlugin(profileName: String, pluginName: String) {
         val pluginId = if (pluginName.startsWith("shadowsocks-")) pluginName.substringAfter("shadowsocks-") else pluginName
         val pluginEntity = PluginEntry.find(pluginName)
-        if (pluginEntity == null) {
-            snackbar(getString(R.string.plugin_unknown, pluginName)).show()
-            return
-        }
+        val name = if (pluginEntity == null) pluginName else getString(pluginEntity.nameId)
 
         val existsButOnShitSystem = if (pluginName == pluginId) {
             PluginManager.fetchPlugins().map { it.id }.contains(pluginName)
@@ -276,15 +270,20 @@ class MainActivity : ThemedActivity(),
         if (existsButOnShitSystem) {
             MaterialAlertDialogBuilder(this).setTitle(R.string.missing_plugin).setMessage(
                 getString(
-                    R.string.plugin_exists_but_on_shit_system,
-                    profileName,
-                    getString(pluginEntity.nameId)
+                    R.string.plugin_exists_but_on_shit_system, profileName, name
                 )
             ).setPositiveButton(R.string.action_learn_more) { _, _ ->
                 launchCustomTab("https://sagernet.org/plugin/")
             }.show()
             return
         }
+
+        if (pluginEntity == null) {
+            snackbar(getString(R.string.plugin_unknown, pluginName)).show()
+            return
+        }
+
+        // official plugins
 
         MaterialAlertDialogBuilder(this).setTitle(R.string.missing_plugin)
             .setMessage(

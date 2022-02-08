@@ -24,10 +24,10 @@ object NekoPreferenceInflater {
                 category as JSONObject
 
                 val preferenceCategory = PreferenceCategory(context)
+                preferenceScreen.addPreference(preferenceCategory)
+
                 category.getStr("key")?.apply { preferenceCategory.key = this }
                 category.getStr("title")?.apply { preferenceCategory.title = this }
-
-                preferenceScreen.addPreference(preferenceCategory)
 
                 category.optJSONArray("preferences")?.forEach { _, any ->
                     if (any is JSONObject) {

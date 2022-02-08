@@ -1,8 +1,11 @@
 package moe.matsuri.nya.neko
 
-import android.annotation.SuppressLint
 import android.os.Bundle
+import android.view.View
+import androidx.core.view.isVisible
+import androidx.preference.PreferenceDataStore
 import com.takisoft.preferencex.PreferenceFragmentCompat
+import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.ktx.runOnIoDispatcher
@@ -16,6 +19,7 @@ class NekoSettingActivity : ProfileSettingsActivity<NekoBean>() {
     lateinit var jsip: NekoJSInterface.NekoProtocol
     lateinit var plgId: String
     lateinit var protocolId: String
+    var loaded = false
 
     override fun createEntity() = NekoBean()
 
@@ -41,7 +45,16 @@ class NekoSettingActivity : ProfileSettingsActivity<NekoBean>() {
         super.onCreate(savedInstanceState)
     }
 
-    @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
+    override fun PreferenceFragmentCompat.viewCreated(view: View, savedInstanceState: Bundle?) {
+        listView.isVisible = false
+    }
+
+    override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
+        if (loaded && key != Key.PROFILE_DIRTY) {
+            DataStore.dirty = true
+        }
+    }
+
     override fun PreferenceFragmentCompat.createPreferences(
         savedInstanceState: Bundle?,
         rootKey: String?,
@@ -62,9 +75,14 @@ class NekoSettingActivity : ProfileSettingsActivity<NekoBean>() {
 
                 val config = jsip.requirePreferenceScreenConfig()
                 val pref = JSONArray(config)
-                NekoPreferenceInflater.inflate(pref, preferenceScreen)
 
+                NekoPreferenceInflater.inflate(pref, preferenceScreen)
                 jsip.onPreferenceCreated()
+
+                runOnUiThread {
+                    loaded = true
+                    listView.isVisible = true
+                }
             } catch (e: Exception) {
                 Dialogs.logExceptionAndShow(this@NekoSettingActivity, e) { finish() }
             }

@@ -68,6 +68,8 @@ class NekoJSInterface(val plgId: String) {
             return@suspendCoroutine
         }
 
+        NekoPluginManager.extractPlugin(plgId)
+
         webView = WebView(SagerNet.application.applicationContext)
         webView!!.settings.javaScriptEnabled = true
         webView!!.addJavascriptInterface(jsObject, "neko")

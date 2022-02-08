@@ -1,12 +1,15 @@
 package moe.matsuri.nya.neko
 
+import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
+import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.ktx.forEach
 import io.nekohasekai.sagernet.utils.PackageCache
 import okhttp3.internal.closeQuietly
 import org.json.JSONObject
 import java.io.File
+import java.util.zip.CRC32
 import java.util.zip.ZipFile
 
 object NekoPluginManager {
@@ -64,10 +67,14 @@ object NekoPluginManager {
     }
 
     fun extractPlugin(plgId: String) {
-        val apkPath = PackageCache.installedApps[plgId]!!.publicSourceDir
-        val zipFile = ZipFile(File(apkPath))
+        val app = PackageCache.installedApps[plgId] ?: return
+        val apk = File(app.publicSourceDir)
+        if (!apk.exists()) {
+            return
+        }
+
+        val zipFile = ZipFile(apk)
         val unzipDir = File(SagerNet.application.filesDir.absolutePath + "/plugins/" + plgId)
-        if (unzipDir.exists()) unzipDir.deleteRecursively()
         unzipDir.mkdirs()
         for (entry in zipFile.entries()) {
             if (entry.name.startsWith("assets/")) {
@@ -77,6 +84,17 @@ object NekoPluginManager {
                     outFile.mkdirs()
                     continue
                 }
+
+                if (outFile.isDirectory) {
+                    outFile.delete()
+                } else if (outFile.exists()) {
+                    val checksum = CRC32()
+                    checksum.update(outFile.readBytes())
+                    if (checksum.value == entry.crc) {
+                        continue
+                    }
+                }
+
                 val input = zipFile.getInputStream(entry)
                 outFile.outputStream().use {
                     input.copyTo(it)
@@ -87,21 +105,9 @@ object NekoPluginManager {
     }
 
     suspend fun installPlugin(plgId: String) {
-        extractPlugin(plgId)
         NekoJSInterface.Default.destroyJsi(plgId)
         NekoJSInterface.Default.requireJsi(plgId).init()
         NekoJSInterface.Default.destroyJsi(plgId)
-    }
-
-    // reinstall plugin when it's versionCode changed
-    suspend fun updateManagedPlugins() {
-        getManagedPlugins().forEach { (t, u) ->
-            val appVer = PackageCache.installedPackages[t]!!.versionCode
-            val managedVer = u.optInt(PLUGIN_APP_VERSION)
-            if (appVer != managedVer) {
-                installPlugin(t)
-            }
-        }
     }
 
     const val PLUGIN_APP_VERSION = "_appVersionCode"
@@ -116,13 +122,21 @@ object NekoPluginManager {
     }
 
     fun updatePlgConfig(plgId: String, plgConfig: JSONObject) {
-        plgConfig.put(PLUGIN_APP_VERSION, PackageCache.installedPackages[plgId]!!.versionCode)
+        PackageCache.installedPackages[plgId]?.apply {
+            plgConfig.put(PLUGIN_APP_VERSION, versionCode)
+        }
         DataStore.configurationStore.putString(plgId, plgConfig.toString())
     }
 
     fun htmlPath(plgId: String): String {
         val htmlFile = File(SagerNet.application.filesDir.absolutePath + "/plugins/" + plgId)
         return htmlFile.absolutePath
+    }
+
+    class PluginInternalException(val protocolId: String) : Exception(),
+        BaseService.ExpectedException {
+        override fun getLocalizedMessage() =
+            SagerNet.application.getString(R.string.neko_plugin_internal_error, protocolId)
     }
 
 }

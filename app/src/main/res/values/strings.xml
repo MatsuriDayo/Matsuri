@@ -487,8 +487,7 @@
 
     <string name="packet_encoding">Packet Encoding</string>
     <string name="wireguard_provider">Wireguard Provider</string>
-    <string name="experimental_reduced_iv_head_entropy">This is GFWReport\'s proposal for a countermeasure for the random stream like protocol blocking behaviour observed on GFW.
-\n\nThis option remap the first 6 bytes of IV to printable characters, it\'s possible for anyone on the privileged network path to identify the protocol when enabled.</string>
+    <string name="experimental_reduced_iv_head_entropy">This is GFWReport\'s proposal for a countermeasure for the random stream like protocol blocking behaviour observed on GFW.   This option remap the first 6 bytes of IV to printable characters, it\'s possible for anyone on the privileged network path to identify the protocol when enabled.</string>
     <string name="acquire_wake_lock">Acquire WakeLock</string>
     <string name="release_wake_lock">Release WakeLock</string>
     <string name="acquire_wake_lock_summary">Keep the CPU on</string>
@@ -500,5 +499,6 @@
     <string name="neko_plugin">Advanced plugin</string>
     <string name="neko_plugin_summary">Advanced plugins can provide protocols that are not originally supported.\n\n
 Anyone can write advanced plugins, which can control Matsuri. please download and install from trusted sources.</string>
+    <string name="neko_plugin_internal_error">%s internal error</string>
 
 </resources>

@@ -54,7 +54,9 @@ import libcore.Libcore
 import libcore.V2RayInstance
 import moe.matsuri.nya.neko.NekoBean
 import moe.matsuri.nya.neko.NekoJSInterface
+import moe.matsuri.nya.neko.NekoPluginManager
 import moe.matsuri.nya.neko.updateAllConfig
+import org.json.JSONObject
 import java.io.File
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -145,9 +147,13 @@ abstract class V2RayInstance(
                         }
                     }
                     is NekoBean -> {
+                        // check if plugin binary can be loaded
+                        initPlugin(bean.plgId)
+
+                        // build config and check if succeed
                         bean.updateAllConfig(port)
                         if (bean.allConfig == null) {
-                            throw PluginManager.PluginNotFoundException(bean.protocolId + "@" + bean.plgId)
+                            throw NekoPluginManager.PluginInternalException(bean.protocolId)
                         }
                     }
                 }
@@ -283,16 +289,22 @@ abstract class V2RayInstance(
                     }
                     bean is NekoBean -> {
                         // config built from JS
-                        val nekoRunConfig = bean.allConfig.optJSONObject("nekoRunConfig")
+                        val nekoRunConfigs = bean.allConfig.optJSONArray("nekoRunConfigs")
+                        val configs = mutableMapOf<String, String>()
 
-                        var configFile: File? = null
-                        if (nekoRunConfig != null) {
-                            configFile = File(cache, nekoRunConfig.getString("name"))
+                        nekoRunConfigs?.forEach { _, any ->
+                            any as JSONObject
+
+                            val name = any.getString("name")
+                            val configFile = File(cache, name)
                             configFile.parentFile?.mkdirs()
-                            val content = nekoRunConfig.getString("content")
+                            val content = any.getString("content")
                             configFile.writeText(content)
+
                             cacheFiles.add(configFile)
-                            Logs.d(content)
+                            configs[name] = configFile.absolutePath
+
+                            Logs.d(name + "\n\n" + content)
                         }
 
                         val nekoCommands = bean.allConfig.getJSONArray("nekoCommands")
@@ -300,8 +312,8 @@ abstract class V2RayInstance(
 
                         nekoCommands.forEach { _, any ->
                             if (any is String) {
-                                if (any == "%config%" && configFile != null) {
-                                    commands.add(configFile.absolutePath)
+                                if (configs.containsKey(any)) {
+                                    commands.add(configs[any]!!)
                                 } else if (any == "%exe%") {
                                     commands.add(initPlugin(bean.plgId).path)
                                 } else {
