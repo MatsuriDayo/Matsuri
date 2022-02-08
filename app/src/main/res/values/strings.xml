@@ -473,6 +473,7 @@
     <string name="nat_stun_server_hint">Stun server</string>
     <string name="nat_result_hint">NAT check result</string>
     <string name="tools_network">Network</string>
+    <string name="mtu" translatable="false">MTU</string>
 
     <string name="backup">Backup</string>
     <string name="backup_groups_and_configurations">Groups and configurations</string>

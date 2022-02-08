@@ -259,6 +259,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var serverDownloadSpeed by profileCacheStore.stringToInt(Key.SERVER_DOWNLOAD_SPEED)
     var serverStreamReceiveWindow by profileCacheStore.stringToIntIfExists(Key.SERVER_STREAM_RECEIVE_WINDOW)
     var serverConnectionReceiveWindow by profileCacheStore.stringToIntIfExists(Key.SERVER_CONNECTION_RECEIVE_WINDOW)
+    var serverMTU by profileCacheStore.stringToInt(Key.SERVER_MTU) { 1420 }
 
     var serverProtocolVersion by profileCacheStore.stringToInt(Key.SERVER_PROTOCOL)
     var serverPrivateKey by profileCacheStore.string(Key.SERVER_PRIVATE_KEY)
