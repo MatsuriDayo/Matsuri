@@ -102,9 +102,7 @@ class SagerNet : Application(),
         Libcore.setEnableLog(DataStore.enableLog, DataStore.logBufSize)
         Libcore.initCore(filesDir.absolutePath + "/", externalAssets.absolutePath + "/", "v2ray/", {
             DataStore.rulesProvider == 0
-        }, cacheDir.absolutePath, {
-            Toast.makeText(this, it, Toast.LENGTH_LONG).show()
-        })
+        }, cacheDir.absolutePath, isBgProcess)
 
         if (isMainProcess) {
             Theme.apply(this)

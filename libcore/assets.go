@@ -34,7 +34,7 @@ type BoolFunc interface {
 	Invoke() bool
 }
 
-func extractV2RayAssets(internalAssets string, externalAssets string, prefix string, useOfficial BoolFunc) error {
+func extractV2RayAssets(internalAssets string, externalAssets string, prefix string, useOfficial BoolFunc) {
 	assetsAccess = new(sync.Mutex)
 	assetsAccess.Lock()
 	extracted = make(map[string]bool)
@@ -110,8 +110,6 @@ func extractV2RayAssets(internalAssets string, externalAssets string, prefix str
 		extract(geositeDat)
 		extract(browserForwarder)
 	}()
-
-	return nil
 }
 
 func extractAssetName(name string, force bool) error {

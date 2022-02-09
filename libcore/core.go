@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
-	"strings"
 	"time"
 	_ "unsafe"
 
@@ -41,47 +40,29 @@ func closeIgnore(closer ...interface{}) {
 }
 
 func InitCore(internalAssets string, externalAssets string, prefix string, useOfficial BoolFunc,
-	cachePath string, errorHandler ErrorHandler,
+	cachePath string, isBgProcess bool,
 ) {
 	defer func() {
 		if r := recover(); r != nil {
 			s := fmt.Sprintln("InitCore panic", time.Now().Unix(), r, string(debug.Stack()))
-			if errorHandler != nil {
-				errorHandler.HandleError(s)
-			}
-			// Note: use _logfile in InitCore, bypassing the loglevel
-			_logfile.Write([]byte(s))
+			forceLog(s)
 		}
 	}()
 
-	// force update
 	if time.Now().Unix() >= GetExpireTime() {
 		outdated = "Your version is too old! Please update!! 版本太旧，请升级！"
 	} else if time.Now().Unix() < (GetBuildTime() - 86400) {
 		outdated = "Wrong system time! 系统时间错误！"
 	}
 
-	// Is background process
-	var processName string
-	var isBgProcess bool
-	f, _ := os.Open("/proc/self/cmdline")
-	if f != nil {
-		b, _ := ioutil.ReadAll(f)
-		processName = strings.Trim(string(b), "\x00")
-		isBgProcess = strings.HasSuffix(processName, ":bg")
-		f.Close()
-	} else {
-		processName = "(error)"
-		isBgProcess = true
-	}
-
 	// Set up log
-	s := fmt.Sprintln(time.Now().Unix(), "[Debug] InitCore called", externalAssets, cachePath, os.Getpid(), processName, isBgProcess)
+	s := fmt.Sprintln(time.Now().Unix(), "[Debug] InitCore called", externalAssets, cachePath, os.Getpid(), isBgProcess)
 	err := setupLogger(filepath.Join(cachePath, "neko.log"))
 	if err == nil {
-		_logfile.Write([]byte(s))
-	} else { // not fatal
-		errorHandler.HandleError(fmt.Sprintln("Log not inited:", s, err.Error()))
+		forceLog(s)
+	} else {
+		// not fatal
+		forceLog(fmt.Sprintln("Log not inited:", s, err.Error()))
 	}
 
 	// Set up some component
@@ -99,21 +80,20 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 	systemRoots = roots
 
 	// CA for other programs
-	f, err = os.OpenFile(filepath.Join(internalAssets, "ca.pem"), os.O_CREATE|os.O_RDWR, 0644)
-	if err != nil {
-		errorHandler.HandleError(err.Error())
-	} else {
-		if b, _ := ioutil.ReadAll(f); b == nil || string(b) != mozillaCA {
-			f.Truncate(0)
-			f.Seek(0, 0)
-			f.Write([]byte(mozillaCA))
+	go func() {
+		f, err := os.OpenFile(filepath.Join(internalAssets, "ca.pem"), os.O_CREATE|os.O_RDWR, 0644)
+		if err != nil {
+			forceLog("open ca.pem: " + err.Error())
+		} else {
+			if b, _ := ioutil.ReadAll(f); b == nil || string(b) != mozillaCA {
+				f.Truncate(0)
+				f.Seek(0, 0)
+				f.Write([]byte(mozillaCA))
+			}
+			f.Close()
 		}
-		f.Close()
-	}
+	}()
 
 	// nekomura end
-	err = extractV2RayAssets(internalAssets, externalAssets, prefix, useOfficial)
-	if err != nil {
-		errorHandler.HandleError(err.Error())
-	}
+	go extractV2RayAssets(internalAssets, externalAssets, prefix, useOfficial)
 }

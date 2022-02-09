@@ -167,6 +167,10 @@ func (lp *logfile) init(path string) (err error) {
 	return
 }
 
+func forceLog(str string) {
+	_logfile.Write([]byte(str + "\n"))
+}
+
 func NekoLogWrite(level int32, tag, str string) {
 	logrus.StandardLogger().WithField("tag", tag).Log(logrus.Level(level), strings.Trim(str, "\n"))
 }
