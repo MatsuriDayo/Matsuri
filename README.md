@@ -14,15 +14,9 @@ A proxy toolchain for Android, written in Kotlin.
 
 ## 喵 Nya
 
-这是 SagerNet 的一个分支，改进了部分情况下的体验。相较于 SagerNet 本软件的功能更少。
+这是 SagerNet 的一个分支，部分功能不同，改进了部分情况下的体验。支持高级插件。
 
-This is a fork of SagerNet, which improves the experience in some cases. Compared with SagerNet, this software has fewer functions.
-
-其他介绍和APP截图
-
-Other introductions and APP screenshots
-
-https://nekoquq.github.io/posts/0009.html
+This is a fork of SagerNet with different features and improved experience in some situations. With "advanced plugin" support.
 
 ## 更改记录和发布频道 Changelog and Telegram channel
 
