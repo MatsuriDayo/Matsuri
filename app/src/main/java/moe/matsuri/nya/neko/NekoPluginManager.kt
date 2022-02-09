@@ -66,10 +66,13 @@ object NekoPluginManager {
         }
     }
 
-    fun extractPlugin(plgId: String) {
+    fun extractPlugin(plgId: String, install: Boolean) {
         val app = PackageCache.installedApps[plgId] ?: return
         val apk = File(app.publicSourceDir)
         if (!apk.exists()) {
+            return
+        }
+        if (!install && !plugins.contains(plgId)) {
             return
         }
 
@@ -105,6 +108,7 @@ object NekoPluginManager {
     }
 
     suspend fun installPlugin(plgId: String) {
+        extractPlugin(plgId, true)
         NekoJSInterface.Default.destroyJsi(plgId)
         NekoJSInterface.Default.requireJsi(plgId).init()
         NekoJSInterface.Default.destroyJsi(plgId)

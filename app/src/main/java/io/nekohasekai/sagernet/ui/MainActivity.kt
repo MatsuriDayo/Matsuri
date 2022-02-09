@@ -273,7 +273,7 @@ class MainActivity : ThemedActivity(),
                     R.string.plugin_exists_but_on_shit_system, profileName, name
                 )
             ).setPositiveButton(R.string.action_learn_more) { _, _ ->
-                launchCustomTab("https://sagernet.org/plugin/")
+                launchCustomTab("https://matsuridayo.github.io/plugin/#faq")
             }.show()
             return
         }

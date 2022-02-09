@@ -37,6 +37,5 @@ fun WireGuardBean.buildWireGuardUapiConf(): String {
     conf += "\nendpoint=${wrapUri()}"
     conf += "\nallowed_ip=0.0.0.0/0"
     conf += "\nallowed_ip=::/0"
-    conf += "\nmtu=$mtu"
     return conf
 }
