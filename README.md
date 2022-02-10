@@ -2,11 +2,13 @@
 
 <img align="right" style="width: 20%" src="https://avatars.githubusercontent.com/u/95122236"/>
 
-[Releases](https://github.com/MatsuriDayo/Matsuri/releases)
+[![API](https://img.shields.io/badge/API-21%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=21)
+[![Releases](https://img.shields.io/github/v/release/MatsuriDayo/Matsuri)](https://github.com/MatsuriDayo/Matsuri/releases)
+[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-orange.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-[Language: Kotlin](https://github.com/MatsuriDayo/Matsuri/search?l=kotlin)
-
-[License: GPL-3.0](https://www.gnu.org/licenses/gpl-3.0)
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+    alt="Get it on F-Droid"
+    height="80">](https://f-droid.org/packages/moe.matsuri.lite)
 
 适用于 Android 的代理工具链，用 Kotlin 编写。
 
