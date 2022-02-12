@@ -36,8 +36,6 @@ import android.os.Build
 import android.os.PowerManager
 import android.os.StrictMode
 import android.os.UserManager
-import android.webkit.WebView
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
@@ -86,7 +84,6 @@ class SagerNet : Application(),
         if (isMainProcess || isBgProcess) {
             // fix multi process issue in Android 9+
             JavaUtil.handleWebviewDir(this)
-            WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
 
             runOnDefaultDispatcher {
                 PackageCache.register()
@@ -99,10 +96,9 @@ class SagerNet : Application(),
 
         // matsuri: init core (sn: extract v2ray assets
         externalAssets.mkdirs()
-        Libcore.setEnableLog(DataStore.enableLog, DataStore.logBufSize)
         Libcore.initCore(filesDir.absolutePath + "/", externalAssets.absolutePath + "/", "v2ray/", {
             DataStore.rulesProvider == 0
-        }, cacheDir.absolutePath, isBgProcess)
+        }, cacheDir.absolutePath, process, DataStore.enableLog, DataStore.logBufSize)
 
         if (isMainProcess) {
             Theme.apply(this)

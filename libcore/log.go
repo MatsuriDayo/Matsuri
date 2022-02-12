@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/sirupsen/logrus"
 
@@ -17,6 +18,8 @@ import (
 )
 
 type logrusFormatter struct{}
+
+var _logrusFormatter = &logrusFormatter{}
 
 func (f *logrusFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	msg := fmt.Sprint("[", entry.Time.Format("2006-01-02 15:04:05"), "] ")
@@ -168,7 +171,13 @@ func (lp *logfile) init(path string) (err error) {
 }
 
 func forceLog(str string) {
-	_logfile.Write([]byte(str + "\n"))
+	entry := &logrus.Entry{
+		Time:    time.Now(),
+		Level:   logrus.DebugLevel,
+		Message: str,
+	}
+	b, _ := _logrusFormatter.Format(entry)
+	_logfile.Write(b)
 }
 
 func NekoLogWrite(level int32, tag, str string) {
@@ -200,7 +209,7 @@ func SetEnableLog(enableLog bool, maxKB int32) {
 
 func setupLogger(path string) (err error) {
 	//init neko logger
-	logrus.SetFormatter(&logrusFormatter{})
+	logrus.SetFormatter(_logrusFormatter)
 	err = _logfile.init(path)
 	logrus.SetOutput(_logfile)
 

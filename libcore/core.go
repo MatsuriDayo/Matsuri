@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
+	"strings"
 	"time"
 	_ "unsafe"
 
@@ -39,8 +40,9 @@ func closeIgnore(closer ...interface{}) {
 	}
 }
 
-func InitCore(internalAssets string, externalAssets string, prefix string, useOfficial BoolFunc,
-	cachePath string, isBgProcess bool,
+func InitCore(internalAssets string, externalAssets string, prefix string, useOfficial BoolFunc, // extractV2RayAssets
+	cachePath string, process string, //InitCore
+	enableLog bool, maxKB int32, //SetEnableLog
 ) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -49,35 +51,41 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 		}
 	}()
 
-	if time.Now().Unix() >= GetExpireTime() {
-		outdated = "Your version is too old! Please update!! 版本太旧，请升级！"
-	} else if time.Now().Unix() < (GetBuildTime() - 86400) {
-		outdated = "Wrong system time! 系统时间错误！"
-	}
+	isBgProcess := strings.HasSuffix(process, ":bg")
 
 	// Set up log
-	s := fmt.Sprintln(time.Now().Unix(), "[Debug] InitCore called", externalAssets, cachePath, os.Getpid(), isBgProcess)
+	SetEnableLog(enableLog, maxKB)
+	s := fmt.Sprintln("[Debug] InitCore called", externalAssets, cachePath, process, isBgProcess)
 	err := setupLogger(filepath.Join(cachePath, "neko.log"))
+
 	if err == nil {
-		forceLog(s)
+		go forceLog(s)
 	} else {
 		// not fatal
 		forceLog(fmt.Sprintln("Log not inited:", s, err.Error()))
 	}
 
 	// Set up some component
-	setupResolvers()
-	Setenv("v2ray.conf.geoloader", "memconservative")
+	go func() {
+		setupResolvers()
+		Setenv("v2ray.conf.geoloader", "memconservative")
+
+		if time.Now().Unix() >= GetExpireTime() {
+			outdated = "Your version is too old! Please update!! 版本太旧，请升级！"
+		} else if time.Now().Unix() < (GetBuildTime() - 86400) {
+			outdated = "Wrong system time! 系统时间错误！"
+		}
+
+		// Setup CA Certs
+		x509.SystemCertPool()
+		roots := x509.NewCertPool()
+		roots.AppendCertsFromPEM([]byte(mozillaCA))
+		systemRoots = roots
+	}()
 
 	if !isBgProcess {
 		return
 	}
-
-	// Set up CA for the bg process
-	x509.SystemCertPool()
-	roots := x509.NewCertPool()
-	roots.AppendCertsFromPEM([]byte(mozillaCA))
-	systemRoots = roots
 
 	// CA for other programs
 	go func() {

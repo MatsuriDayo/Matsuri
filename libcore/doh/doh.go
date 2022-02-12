@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"sync/atomic"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 var dohs = []string{
@@ -50,6 +52,8 @@ func LookupManyDoH(domain string, queryType int) ([]net.IP, error) {
 
 	if ips == nil {
 		err = errors.New("LookupManyDoH: all tries failed")
+	} else {
+		logrus.Debugln("LookupManyDoH:", domain, queryType, ips)
 	}
 
 	return ips, err

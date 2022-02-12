@@ -68,6 +68,7 @@ class NekoJSInterface(val plgId: String) {
             return@suspendCoroutine
         }
 
+        WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
         NekoPluginManager.extractPlugin(plgId, false)
 
         webView = WebView(SagerNet.application.applicationContext)
