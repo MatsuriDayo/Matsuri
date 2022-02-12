@@ -1581,9 +1581,10 @@ class ConfigurationFragment @JvmOverloads constructor(
                     undoManager.remove(index to proxyEntity)
                 }
 
-                shareLayout.isGone = proxyEntity.type == ProxyEntity.TYPE_CHAIN
+                val selectOrChain = select || proxyEntity.type == ProxyEntity.TYPE_CHAIN
+                shareLayout.isGone = selectOrChain
                 editButton.isGone = select
-                removeButton.visibility = View.VISIBLE
+                removeButton.isGone = selectOrChain
 
                 proxyEntity.nekoBean?.apply {
                     shareLayout.isGone = !canShare()
