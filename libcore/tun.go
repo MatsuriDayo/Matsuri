@@ -3,10 +3,11 @@ package libcore
 import (
 	"context"
 	"io"
-	"libcore/gvisor"
-	"libcore/nat"
 	"libcore/protect"
 	"libcore/tun"
+	"libcore/tun/gvisor"
+	"libcore/tun/system"
+	"libcore/tun/tun2socket"
 	"math"
 	"net"
 	"os"
@@ -32,7 +33,6 @@ var _ tun.Handler = (*Tun2ray)(nil)
 type Tun2ray struct {
 	access              sync.Mutex
 	dev                 tun.Tun
-	router              string
 	v2ray               *V2RayInstance
 	udpTable            *natTable
 	fakedns             bool
@@ -50,7 +50,6 @@ type TunConfig struct {
 	FileDescriptor      int32
 	MTU                 int32
 	V2Ray               *V2RayInstance
-	VLAN4Router         string
 	IPv6Mode            int32
 	Implementation      int32
 	Sniffing            bool
@@ -80,7 +79,6 @@ type LocalResolver interface {
 
 func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
 	t := &Tun2ray{
-		router:              config.VLAN4Router,
 		v2ray:               config.V2Ray,
 		udpTable:            &natTable{},
 		sniffing:            config.Sniffing,
@@ -116,7 +114,9 @@ func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
 
 		t.dev, err = gvisor.New(config.FileDescriptor, config.MTU, t, gvisor.DefaultNIC, config.PCap, pcapFile, math.MaxUint32, config.IPv6Mode)
 	} else if config.Implementation == 1 { // SYSTEM
-		t.dev, err = nat.New(config.FileDescriptor, config.MTU, t, config.IPv6Mode, config.ErrorHandler.HandleError)
+		t.dev, err = system.New(config.FileDescriptor, config.MTU, t, config.IPv6Mode, config.ErrorHandler.HandleError)
+	} else if config.Implementation == 2 { // Tun2Socket
+		t.dev, err = tun2socket.New(config.FileDescriptor, t)
 	} else {
 		err = newError("Not supported")
 	}
@@ -144,7 +144,7 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 		Tag:    "socks",
 	}
 
-	isDns := destination.Address.String() == t.router && destination.Port.Value() == 53
+	isDns := destination.Address.String() == tun.PRIVATE_VLAN4_ROUTER && destination.Port.Value() == 53
 	if isDns {
 		inbound.Tag = "dns-in"
 	}
@@ -298,7 +298,7 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 	destination2 := destination
 
 	// dns to router
-	isDns := destination.Address.String() == t.router
+	isDns := destination.Address.String() == tun.PRIVATE_VLAN4_ROUTER
 
 	// dns to all
 	dnsMsg := dns.Msg{}

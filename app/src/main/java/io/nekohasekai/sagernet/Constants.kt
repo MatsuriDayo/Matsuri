@@ -200,6 +200,7 @@ object Key {
 object TunImplementation {
     const val GVISOR = 0
     const val SYSTEM = 1
+    const val TUN2SOCKET = 2
 }
 
 object TrojanProvider {

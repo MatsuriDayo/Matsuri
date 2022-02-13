@@ -655,6 +655,7 @@
     <string-array name="tun_implementation">
         <item>gVisor</item>
         <item>System NAT</item>
+        <item>Tun2Socket</item>
     </string-array>
 
     <string-array name="hysteria_protocol">

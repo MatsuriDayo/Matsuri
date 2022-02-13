@@ -1,4 +1,4 @@
-package nat
+package system
 
 import (
 	"libcore/tun"
@@ -17,8 +17,8 @@ import (
 var _ tun.Tun = (*SystemTun)(nil)
 
 var (
-	vlanClient4 = net.IPv4(172, 19, 0, 1)
-	vlanClient6 = net.IP{0xfd, 0xfe, 0xdc, 0xba, 0x98, 0x76, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x1}
+	vlanClient4 = net.ParseIP(tun.PRIVATE_VLAN4_CLIENT).To4()
+	vlanClient6 = net.ParseIP(tun.PRIVATE_VLAN6_CLIENT)
 )
 
 type SystemTun struct {

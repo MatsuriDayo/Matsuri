@@ -1,4 +1,4 @@
-package nat
+package system
 
 import (
 	"gvisor.dev/gvisor/pkg/tcpip"
@@ -27,7 +27,7 @@ type IPv4Header struct {
 }
 
 func (h *IPv4Header) Device() tcpip.Address {
-	return tcpip.Address([]uint8{172, 19, 0, 1})
+	return tcpip.Address(vlanClient4)
 }
 
 func (h *IPv4Header) Packet() *stack.PacketBuffer {

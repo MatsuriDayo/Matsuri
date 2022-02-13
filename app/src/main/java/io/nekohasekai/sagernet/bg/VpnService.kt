@@ -283,7 +283,6 @@ class VpnService : BaseVpnService(),
             fileDescriptor = conn.fd
             mtu = VPN_MTU
             v2Ray = data.proxy!!.v2rayPoint
-            vlaN4Router = PRIVATE_VLAN4_ROUTER
             iPv6Mode = ipv6Mode
             implementation = DataStore.tunImplementation
             sniffing = DataStore.trafficSniffing
