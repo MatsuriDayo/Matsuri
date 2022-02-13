@@ -2,7 +2,6 @@ package tun2socket
 
 import (
 	"io"
-	"net"
 
 	"libcore/tun/tun2socket/nat"
 )
@@ -14,8 +13,8 @@ type Tun2Socket struct {
 }
 
 //noinspection GoUnusedExportedFunction
-func StartTun2Socket(device io.ReadWriteCloser, gateway net.IP, portal net.IP) (*Tun2Socket, error) {
-	tcp, udp, err := nat.Start(device, gateway, portal)
+func StartTun2Socket(device io.ReadWriteCloser) (*Tun2Socket, error) {
+	tcp, udp, err := nat.Start(device)
 	if err != nil {
 		return nil, err
 	}

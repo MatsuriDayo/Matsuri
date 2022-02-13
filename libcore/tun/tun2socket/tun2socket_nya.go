@@ -25,7 +25,7 @@ func New(fd int32, handler tun.Handler) (*Tun2Socket, error) {
 	var stack *Tun2Socket
 
 	device := os.NewFile(uintptr(fd), "/dev/tun")
-	stack, err := StartTun2Socket(device, net.ParseIP(tun.PRIVATE_VLAN4_CLIENT), net.ParseIP(tun.PRIVATE_VLAN4_ROUTER))
+	stack, err := StartTun2Socket(device)
 	if err != nil {
 		return nil, err
 	}
@@ -73,8 +73,6 @@ func New(fd int32, handler tun.Handler) (*Tun2Socket, error) {
 			raw := buf[:n]
 			lAddr := lRAddr.(*net.UDPAddr)
 			rAddr := rRAddr.(*net.UDPAddr)
-
-			logrus.Debugln("UDP", lAddr.String(), rAddr.String(), len(raw))
 
 			if rAddr.IP.IsLoopback() {
 				pool.Put(buf)

@@ -1,7 +1,7 @@
 package nat
 
 import (
-	"encoding/binary"
+	"libcore/tun"
 	"net"
 	"syscall"
 	"time"
@@ -9,7 +9,6 @@ import (
 
 type TCP struct {
 	listener *net.TCPListener
-	portal   net.IP
 	table    *table
 }
 
@@ -27,7 +26,7 @@ func (t *TCP) Accept() (net.Conn, error) {
 
 	addr := c.RemoteAddr().(*net.TCPAddr)
 	tup := t.table.tupleOf(uint16(addr.Port))
-	if !addr.IP.Equal(t.portal) || tup == zeroTuple {
+	if (!addr.IP.Equal(tun.PRIVATE_VLAN4_ROUTER_IP) && !addr.IP.Equal(tun.PRIVATE_VLAN6_ROUTER_IP)) || tup == zeroTuple {
 		_ = c.Close()
 
 		return nil, net.InvalidAddrError("unknown remote addr")
@@ -61,23 +60,15 @@ func (t *TCP) SetDeadline(time time.Time) error {
 }
 
 func (c *conn) LocalAddr() net.Addr {
-	ip := make(net.IP, 4)
-
-	binary.LittleEndian.PutUint32(ip, c.tuple.SourceIP)
-
 	return &net.TCPAddr{
-		IP:   ip,
+		IP:   c.tuple.SourceIP[:],
 		Port: int(c.tuple.SourcePort),
 	}
 }
 
 func (c *conn) RemoteAddr() net.Addr {
-	ip := make(net.IP, 4)
-
-	binary.LittleEndian.PutUint32(ip, c.tuple.DestinationIP)
-
 	return &net.TCPAddr{
-		IP:   ip,
+		IP:   c.tuple.DestinationIP[:],
 		Port: int(c.tuple.DestinationPort),
 	}
 }

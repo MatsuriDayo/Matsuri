@@ -412,9 +412,6 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 		if err != nil {
 			break
 		}
-		if isDns {
-			addr = nil
-		}
 		if addr, ok := addr.(*net.UDPAddr); ok {
 			_, err = writeBack(buffer, addr)
 		} else {

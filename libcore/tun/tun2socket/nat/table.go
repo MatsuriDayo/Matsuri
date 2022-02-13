@@ -12,8 +12,8 @@ const (
 var zeroTuple = tuple{}
 
 type tuple struct {
-	SourceIP        uint32
-	DestinationIP   uint32
+	SourceIP        [16]byte
+	DestinationIP   [16]byte
 	SourcePort      uint16
 	DestinationPort uint16
 }

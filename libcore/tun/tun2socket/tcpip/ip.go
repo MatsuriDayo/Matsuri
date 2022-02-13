@@ -9,9 +9,8 @@ type IPProtocol = byte
 
 // IPProtocol type
 const (
-	ICMP IPProtocol = 0x01
-	TCP             = 0x06
-	UDP             = 0x11
+	TCP = 0x06
+	UDP = 0x11
 )
 
 const (
@@ -20,6 +19,111 @@ const (
 )
 
 const IPv4HeaderSize = 20
+const IPv6HeaderSize = 40
+
+type IPPacket interface {
+	Valid() bool
+	Flags() byte
+	SetFlags(flags byte)
+	Offset() uint16
+	Protocol() IPProtocol
+	Payload() []byte
+	SetSourceIP(ip net.IP)
+	SourceIP() net.IP
+	DestinationIP() net.IP
+	SetDestinationIP(ip net.IP)
+	PseudoSum() uint32
+	ResetChecksum()
+	SetTotalLength(length uint16)
+	SetHeaderLen(length uint16)
+	SetFragmentOffset(offset uint32)
+	SetTypeOfService(tos byte)
+	SetIdentification(id uint16)
+	SetProtocol(protocol IPProtocol)
+	SetTimeToLive(ttl byte)
+	TotalLen() uint16
+}
+
+// IPv6
+
+type IPv6Packet []byte
+
+func (p IPv6Packet) TotalLen() uint16 {
+	return uint16(len(p))
+}
+
+func (p IPv6Packet) Valid() bool {
+	return len(p) >= IPv6HeaderSize && uint16(len(p)) >= p.TotalLen()
+}
+
+func (p IPv6Packet) Protocol() IPProtocol {
+	return p[6]
+}
+
+func (p IPv6Packet) SetProtocol(protocol IPProtocol) {
+	p[6] = protocol
+}
+
+func (p IPv6Packet) Payload() []byte {
+	return p[40:]
+}
+
+func (p IPv6Packet) SourceIP() net.IP {
+	return append(net.IP{}, p[8:24]...)
+}
+
+func (p IPv6Packet) SetSourceIP(ip net.IP) {
+	copy(p[8:24], ip)
+}
+
+func (p IPv6Packet) DestinationIP() net.IP {
+	return append(net.IP{}, p[24:40]...)
+}
+
+func (p IPv6Packet) SetDestinationIP(ip net.IP) {
+	copy(p[24:40], ip)
+}
+
+func (p IPv6Packet) PseudoSum() uint32 {
+	sum := Sum(p[8:40])
+	sum += uint32(p.Protocol())
+	sum += uint32(p.DataLen())
+	return sum
+}
+
+func (p IPv6Packet) DataLen() uint16 {
+	return binary.BigEndian.Uint16(p[4:])
+}
+
+func (p IPv6Packet) SetTimeToLive(ttl byte) {
+	p[7] = ttl
+}
+
+//Deleted in IPv6
+
+func (p IPv6Packet) SetHeaderLen(length uint16) {}
+
+func (p IPv6Packet) SetTotalLength(length uint16) {}
+
+func (p IPv6Packet) SetIdentification(id uint16) {}
+
+func (p IPv6Packet) ResetChecksum() {}
+
+func (p IPv6Packet) Flags() byte {
+	return 0
+}
+
+func (p IPv6Packet) SetFlags(flags byte) {}
+
+func (p IPv6Packet) Offset() uint16 {
+	return 0
+}
+
+func (p IPv6Packet) SetFragmentOffset(offset uint32) {}
+
+func (p IPv6Packet) SetTypeOfService(tos byte) {}
+
+// IPv4
 
 type IPv4Packet []byte
 
