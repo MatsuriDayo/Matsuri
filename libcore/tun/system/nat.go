@@ -228,8 +228,7 @@ func (n *SystemTun) processICMPv6(hdr *ICMPv6Header) {
 	n.dispatcher.writePacket(hdr.Packet())
 }
 
-func (n *SystemTun) Close() error {
+func (n *SystemTun) Stop() {
 	n.dispatcher.stop()
 	n.tcpForwarder.Close()
-	return nil
 }

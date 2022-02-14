@@ -23,7 +23,6 @@ import (
 	"github.com/v2fly/v2ray-core/v5/common/buf"
 	v2rayNet "github.com/v2fly/v2ray-core/v5/common/net"
 	"github.com/v2fly/v2ray-core/v5/common/session"
-	"github.com/v2fly/v2ray-core/v5/common/task"
 	"github.com/v2fly/v2ray-core/v5/transport"
 	"github.com/v2fly/v2ray-core/v5/transport/pipe"
 )
@@ -134,7 +133,7 @@ func (t *Tun2ray) Close() {
 	androidUnderlyingResolver.sekaiResolver = nil
 	protect.FdProtector = nil
 
-	closeIgnore(t.dev)
+	t.dev.Stop()
 }
 
 //TCP
@@ -224,19 +223,19 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 
 	defer closeIgnore(conn)
 
+	//这个 DispatchLink 是 outbound link reader 是上行流量
 	upLinkReader, upLinkWriter := pipe.New()
 	link := &transport.Link{Reader: upLinkReader, Writer: connWriter{conn, buf.NewWriter(conn)}}
 	err := t.v2ray.dispatcher.DispatchLink(ctx, destination, link)
+
 	if err != nil {
 		logrus.Errorf("[TCP] dispatchLink failed: %s", err.Error())
 		closeIgnore(link.Reader, link.Writer)
 		return
 	}
 
-	err = task.Run(ctx, func() error {
-		// copy uplink traffic
-		return buf.Copy(buf.NewReader(conn), upLinkWriter)
-	})
+	// copy uplink traffic
+	buf.Copy(buf.NewReader(conn), upLinkWriter)
 
 	// connection ends
 	// Interrupt link.Reader breaks mux?
@@ -254,9 +253,10 @@ type connWriter struct {
 }
 
 //UDP
-func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.Destination, data []byte, writeBack func([]byte, *net.UDPAddr) (int, error), closer io.Closer) {
+func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.Destination, data []byte, writeBack tun.WriteBack, closer io.Closer) {
 	natKey := source.NetAddr()
 
+	//TODO refactor & see fullcone
 	sendTo := func() bool {
 		conn := t.udpTable.Get(natKey)
 		if conn == nil {
@@ -374,7 +374,7 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 		})
 	}
 
-	conn, err := t.v2ray.dialUDP(ctx, destination, destination2, time.Minute*5)
+	conn, err := t.v2ray.newDispatcherConn(ctx, destination, destination2, time.Minute*5, writeBack)
 
 	if err != nil {
 		logrus.Errorf("[UDP] dial failed: %s", err.Error())
@@ -400,62 +400,42 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 				atomic.StoreInt64(&stats.deactivateAt, time.Now().Unix())
 			}
 		}()
-		conn = &statsPacketConn{conn, &stats.uplink, &stats.downlink}
+		conn.stats = &myStats{
+			uplink:   &stats.uplink,
+			downlink: &stats.downlink,
+		}
 	}
 
 	t.udpTable.Set(natKey, conn)
 
+	//uplink(?
 	go sendTo()
 
-	for {
-		buffer, addr, err := conn.readFrom()
-		if err != nil {
-			break
-		}
-		if addr, ok := addr.(*net.UDPAddr); ok {
-			_, err = writeBack(buffer, addr)
-		} else {
-			_, err = writeBack(buffer, nil)
-		}
-		if err != nil {
-			break
-		}
+	//downlink (moved to handleDownlink)
+
+	select {
+	case <-conn.ctx.Done():
 	}
+
 	// close
 	closeIgnore(conn, closer)
 	t.udpTable.Delete(natKey)
-}
-
-type wrappedConn struct {
-	net.Conn
-}
-
-func (c wrappedConn) ReadFrom(p []byte) (n int, addr net.Addr, err error) {
-	n, err = c.Conn.Read(p)
-	if err == nil {
-		addr = c.Conn.RemoteAddr()
-	}
-	return
-}
-
-func (c wrappedConn) WriteTo(p []byte, _ net.Addr) (n int, err error) {
-	return c.Conn.Write(p)
 }
 
 type natTable struct {
 	mapping sync.Map
 }
 
-func (t *natTable) Set(key string, pc net.PacketConn) {
+func (t *natTable) Set(key string, pc *dispatcherConn) {
 	t.mapping.Store(key, pc)
 }
 
-func (t *natTable) Get(key string) net.PacketConn {
+func (t *natTable) Get(key string) *dispatcherConn {
 	item, exist := t.mapping.Load(key)
 	if !exist {
 		return nil
 	}
-	return item.(net.PacketConn)
+	return item.(*dispatcherConn)
 }
 
 func (t *natTable) GetOrCreateLock(key string) (*sync.Cond, bool) {

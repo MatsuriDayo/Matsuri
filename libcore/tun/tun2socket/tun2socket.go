@@ -7,9 +7,8 @@ import (
 )
 
 type Tun2Socket struct {
-	device io.Closer
-	tcp    *nat.TCP
-	udp    *nat.UDP
+	tcp *nat.TCP
+	udp *nat.UDP
 }
 
 //noinspection GoUnusedExportedFunction
@@ -20,17 +19,16 @@ func StartTun2Socket(device io.ReadWriteCloser) (*Tun2Socket, error) {
 	}
 
 	return &Tun2Socket{
-		device: device,
-		tcp:    tcp,
-		udp:    udp,
+		tcp: tcp,
+		udp: udp,
 	}, nil
 }
 
-func (t *Tun2Socket) Close() error {
+func (t *Tun2Socket) Stop() {
 	_ = t.tcp.Close()
 	_ = t.udp.Close()
 
-	return t.device.Close()
+	// Note: SagerNet close tun fd at VPNService.kt
 }
 
 func (t *Tun2Socket) TCP() *nat.TCP {

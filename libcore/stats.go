@@ -120,32 +120,7 @@ func (c *statsConn) Write(b []byte) (n int, err error) {
 	return
 }
 
-type statsPacketConn struct {
-	packetConn
+type myStats struct {
 	uplink   *uint64
 	downlink *uint64
-}
-
-func (c statsPacketConn) ReadFrom(p []byte) (n int, addr net.Addr, err error) {
-	n, addr, err = c.packetConn.ReadFrom(p)
-	if err == nil {
-		atomic.AddUint64(c.downlink, uint64(n))
-	}
-	return
-}
-
-func (c statsPacketConn) readFrom() (p []byte, addr net.Addr, err error) {
-	p, addr, err = c.packetConn.readFrom()
-	if err == nil {
-		atomic.AddUint64(c.downlink, uint64(len(p)))
-	}
-	return
-}
-
-func (c statsPacketConn) WriteTo(p []byte, addr net.Addr) (n int, err error) {
-	n, err = c.packetConn.WriteTo(p, addr)
-	if err == nil {
-		atomic.AddUint64(c.uplink, uint64(n))
-	}
-	return
 }

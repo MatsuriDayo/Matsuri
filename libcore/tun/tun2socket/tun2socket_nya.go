@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/Dreamacro/clash/common/pool"
-	"github.com/sirupsen/logrus"
 	v2rayNet "github.com/v2fly/v2ray-core/v5/common/net"
 )
 
@@ -36,7 +35,6 @@ func New(fd int32, handler tun.Handler) (*Tun2Socket, error) {
 		for stack.TCP().SetDeadline(time.Time{}) == nil {
 			conn, err := stack.TCP().Accept()
 			if err != nil {
-				logrus.Debugln("Accept TCP error:", err)
 				continue
 			}
 
@@ -66,7 +64,6 @@ func New(fd int32, handler tun.Handler) (*Tun2Socket, error) {
 
 			n, lRAddr, rRAddr, err := stack.UDP().ReadFrom(buf)
 			if err != nil {
-				logrus.Debugln("ReadFrom UDP error:", err)
 				return
 			}
 
@@ -91,12 +88,16 @@ func New(fd int32, handler tun.Handler) (*Tun2Socket, error) {
 			}
 
 			go handler.NewPacket(source, destination, raw, func(b []byte, addr *net.UDPAddr) (int, error) {
+				// this is downlink
 				return stack.UDP().WriteTo(b, addr, lAddr)
 			}, &udpCloser{buf})
 		}
 	}
 
 	go tcp()
+
+	// how many uplink worker?
+	go udp()
 	go udp()
 
 	return stack, nil

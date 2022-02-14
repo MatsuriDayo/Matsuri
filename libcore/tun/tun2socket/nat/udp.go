@@ -67,34 +67,32 @@ func (u *UDP) WriteTo(buf []byte, local net.Addr, remote net.Addr) (int, error) 
 		return 0, net.InvalidAddrError("invalid addr")
 	}
 
-	srcIP := srcAddr.IP
-	dstIP := dstAddr.IP
-
 	var ip tcpip.IPPacket
-	var version uint8
+	var srcIP net.IP
+	var dstIP net.IP
 
-	if dstIP.To4() == nil { //ipv6
+	if dst4 := dstAddr.IP.To4(); dst4 == nil { //ipv6
 		ip6 := tcpip.IPv6Packet(u.buf[:])
 		tcpip.SetIPv6(ip6)
 		ip = ip6
-		version = 6
-	} else {
+
+		srcIP = srcAddr.IP
+		dstIP = dstAddr.IP
+	} else { //ipv4
 		ip4 := tcpip.IPv4Packet(u.buf[:])
 		tcpip.SetIPv4(ip4)
 		ip = ip4
-		version = 4
-		srcIP = srcIP.To4()
-		dstIP = dstIP.To4()
-	}
 
-	if version == 4 {
+		srcIP = srcAddr.IP.To4()
+		dstIP = dst4
+
 		ip.SetHeaderLen(tcpip.IPv4HeaderSize)
 		ip.SetTotalLength(tcpip.IPv4HeaderSize + tcpip.UDPHeaderSize + uint16(len(buf)))
+		ip.SetTypeOfService(0)
+		ip.SetIdentification(uint16(rand.Uint32()))
+		ip.SetFragmentOffset(0)
 	}
 
-	ip.SetTypeOfService(0)
-	ip.SetIdentification(uint16(rand.Uint32()))
-	ip.SetFragmentOffset(0)
 	ip.SetTimeToLive(64)
 	ip.SetProtocol(tcpip.UDP)
 	ip.SetSourceIP(srcIP)

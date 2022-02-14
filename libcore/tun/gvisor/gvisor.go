@@ -1,6 +1,10 @@
 package gvisor
 
 import (
+	"io"
+	"libcore/tun"
+	"os"
+
 	"github.com/sirupsen/logrus"
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/header"
@@ -11,9 +15,6 @@ import (
 	"gvisor.dev/gvisor/pkg/tcpip/transport/icmp"
 	"gvisor.dev/gvisor/pkg/tcpip/transport/tcp"
 	"gvisor.dev/gvisor/pkg/tcpip/transport/udp"
-	"io"
-	"libcore/tun"
-	"os"
 )
 
 var _ tun.Tun = (*GVisor)(nil)
@@ -24,12 +25,11 @@ type GVisor struct {
 	Stack    *stack.Stack
 }
 
-func (t *GVisor) Close() error {
+func (t *GVisor) Stop() {
 	t.Stack.Close()
 	if t.PcapFile != nil {
 		_ = t.PcapFile.Close()
 	}
-	return nil
 }
 
 const DefaultNIC tcpip.NICID = 0x01

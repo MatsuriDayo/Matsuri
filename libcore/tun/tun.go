@@ -8,12 +8,15 @@ import (
 )
 
 type Tun interface {
-	io.Closer
+	Stop() //Should stop goroutines but not close the tun fd
 }
+
+// For UDP downlink
+type WriteBack func([]byte, *net.UDPAddr) (int, error)
 
 type Handler interface {
 	NewConnection(source v2rayNet.Destination, destination v2rayNet.Destination, conn net.Conn)
-	NewPacket(source v2rayNet.Destination, destination v2rayNet.Destination, data []byte, writeBack func([]byte, *net.UDPAddr) (int, error), closer io.Closer)
+	NewPacket(source v2rayNet.Destination, destination v2rayNet.Destination, data []byte, writeBack WriteBack, closer io.Closer)
 }
 
 const PRIVATE_VLAN4_CLIENT = "172.19.0.1"

@@ -4,6 +4,7 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
+	"libcore/device"
 	"os"
 	"path/filepath"
 	"runtime/debug"
@@ -86,6 +87,9 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 	if !isBgProcess {
 		return
 	}
+
+	device.AutoGoMaxProcs()
+	device.GoDebug()
 
 	// CA for other programs
 	go func() {

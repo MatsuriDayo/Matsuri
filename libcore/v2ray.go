@@ -4,9 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
+	"libcore/device"
 	"libcore/doh"
 	"libcore/protect"
+	"libcore/tun"
 	gonet "net"
 	"strconv"
 	"strings"
@@ -16,10 +17,8 @@ import (
 	core "github.com/v2fly/v2ray-core/v5"
 	"github.com/v2fly/v2ray-core/v5/app/dispatcher"
 	"github.com/v2fly/v2ray-core/v5/app/observatory"
-	"github.com/v2fly/v2ray-core/v5/common"
 	"github.com/v2fly/v2ray-core/v5/common/buf"
 	"github.com/v2fly/v2ray-core/v5/common/net"
-	"github.com/v2fly/v2ray-core/v5/common/protocol/udp"
 	"github.com/v2fly/v2ray-core/v5/common/signal"
 	"github.com/v2fly/v2ray-core/v5/features/dns"
 	dns_feature "github.com/v2fly/v2ray-core/v5/features/dns"
@@ -31,7 +30,6 @@ import (
 	"github.com/v2fly/v2ray-core/v5/infra/conf/serial"
 	_ "github.com/v2fly/v2ray-core/v5/main/distro/all"
 	"github.com/v2fly/v2ray-core/v5/nekoutils"
-	"github.com/v2fly/v2ray-core/v5/transport"
 	"github.com/v2fly/v2ray-core/v5/transport/internet"
 )
 
@@ -147,7 +145,8 @@ func (instance *V2RayInstance) dialContext(ctx context.Context, destination net.
 	return buf.NewConnection(buf.ConnectionInputMulti(r.Writer), readerOpt), nil
 }
 
-func (instance *V2RayInstance) dialUDP(ctx context.Context, destinationConn net.Destination, destinationV2ray net.Destination, timeout time.Duration) (packetConn, error) {
+// for udp
+func (instance *V2RayInstance) newDispatcherConn(ctx context.Context, destinationConn net.Destination, destinationV2ray net.Destination, timeout time.Duration, writeBack tun.WriteBack) (*dispatcherConn, error) {
 	ctx, cancel := context.WithCancel(core.WithContext(ctx, instance.core))
 	link, err := instance.dispatcher.Dispatch(ctx, destinationV2ray)
 	if err != nil {
@@ -155,145 +154,21 @@ func (instance *V2RayInstance) dialUDP(ctx context.Context, destinationConn net.
 		return nil, err
 	}
 	c := &dispatcherConn{
-		dest:   destinationConn,
-		link:   link,
-		ctx:    ctx,
-		cancel: cancel,
-		cache:  make(chan *udp.Packet, 16),
+		dest:      destinationConn,
+		link:      link,
+		ctx:       ctx,
+		cancel:    cancel,
+		writeBack: writeBack,
 	}
 	c.timer = signal.CancelAfterInactivity(ctx, func() {
 		closeIgnore(c)
 	}, timeout)
-	go c.handleInput()
+
+	for i := 0; i < device.NumUDPWorkers(); i++ {
+		go c.handleDownlink()
+	}
+
 	return c, nil
-}
-
-var _ packetConn = (*dispatcherConn)(nil)
-
-type dispatcherConn struct {
-	access sync.Mutex
-	dest   net.Destination
-	link   *transport.Link
-	timer  *signal.ActivityTimer
-
-	ctx    context.Context
-	cancel context.CancelFunc
-
-	cache chan *udp.Packet
-}
-
-func (c *dispatcherConn) handleInput() {
-	defer closeIgnore(c)
-	for {
-		select {
-		case <-c.ctx.Done():
-			return
-		default:
-		}
-
-		mb, err := c.link.Reader.ReadMultiBuffer()
-		if err != nil {
-			buf.ReleaseMulti(mb)
-			return
-		}
-		c.timer.Update()
-		for _, buffer := range mb {
-			if buffer.Len() <= 0 {
-				continue
-			}
-			packet := udp.Packet{
-				Payload: buffer,
-			}
-			if buffer.Endpoint == nil {
-				packet.Source = c.dest
-			} else {
-				packet.Source = *buffer.Endpoint
-			}
-			if packet.Source.Address.Family().IsDomain() {
-				packet.Source.Address = net.AnyIP
-			}
-			select {
-			case c.cache <- &packet:
-				continue
-			case <-c.ctx.Done():
-			default:
-			}
-			buffer.Release()
-		}
-	}
-}
-
-func (c *dispatcherConn) ReadFrom(p []byte) (n int, addr net.Addr, err error) {
-	select {
-	case <-c.ctx.Done():
-		return 0, nil, io.EOF
-	case packet := <-c.cache:
-		n := copy(p, packet.Payload.Bytes())
-		return n, &net.UDPAddr{
-			IP:   packet.Source.Address.IP(),
-			Port: int(packet.Source.Port),
-		}, nil
-	}
-}
-
-func (c *dispatcherConn) readFrom() (p []byte, addr net.Addr, err error) {
-	select {
-	case <-c.ctx.Done():
-		return nil, nil, io.EOF
-	case packet := <-c.cache:
-		return packet.Payload.Bytes(), &net.UDPAddr{
-			IP:   packet.Source.Address.IP(),
-			Port: int(packet.Source.Port),
-		}, nil
-	}
-}
-
-func (c *dispatcherConn) WriteTo(p []byte, addr net.Addr) (n int, err error) {
-	buffer := buf.FromBytes(p)
-	endpoint := net.DestinationFromAddr(addr)
-	buffer.Endpoint = &endpoint
-	err = c.link.Writer.WriteMultiBuffer(buf.MultiBuffer{buffer})
-	if err == nil {
-		c.timer.Update()
-	}
-	return
-}
-
-func (c *dispatcherConn) LocalAddr() net.Addr {
-	return &net.UDPAddr{
-		IP:   []byte{0, 0, 0, 0},
-		Port: 0,
-	}
-}
-
-func (c *dispatcherConn) Close() error {
-	c.access.Lock()
-	defer c.access.Unlock()
-
-	select {
-	case <-c.ctx.Done():
-		return nil
-	default:
-	}
-
-	c.cancel()
-	_ = common.Interrupt(c.link.Reader)
-	_ = common.Interrupt(c.link.Writer)
-	close(c.cache)
-
-	return nil
-}
-
-func (c *dispatcherConn) SetDeadline(t time.Time) error {
-	return nil
-}
-
-func (c *dispatcherConn) SetReadDeadline(t time.Time) error {
-	return nil
-}
-
-func (c *dispatcherConn) SetWriteDeadline(t time.Time) error {
-	return nil
 }
 
 // Nekomura
