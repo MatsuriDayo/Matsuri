@@ -84,6 +84,7 @@ object Key {
     const val RULES_PROVIDER = "rulesProvider"
     const val ENABLE_LOG = "enableLog"
     const val LOG_BUF_SIZE = "logBufSize"
+    const val MTU = "mtu"
 
     const val ALWAYS_SHOW_ADDRESS = "alwaysShowAddress"
 

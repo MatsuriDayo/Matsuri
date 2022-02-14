@@ -114,6 +114,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var resolveDestination by configurationStore.boolean(Key.RESOLVE_DESTINATION)
 
     var tcpKeepAliveInterval by configurationStore.stringToInt(Key.TCP_KEEP_ALIVE_INTERVAL) { 15 }
+    var mtu by configurationStore.stringToInt(Key.MTU) { 9000 }
 
     var bypassLan by configurationStore.boolean(Key.BYPASS_LAN)
     var bypassLanInCoreOnly by configurationStore.boolean(Key.BYPASS_LAN_IN_CORE_ONLY)

@@ -44,6 +44,7 @@ import io.nekohasekai.sagernet.widget.AppListPreference
 import libcore.Libcore
 import moe.matsuri.nya.ui.ColorPickerPreference
 import moe.matsuri.nya.ui.LongClickSwitchPreference
+import moe.matsuri.nya.ui.MTUPreference
 import java.io.File
 
 class SettingsPreferenceFragment : PreferenceFragmentCompat() {
@@ -173,6 +174,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         val transproxyPort = findPreference<EditTextPreference>(Key.TRANSPROXY_PORT)!!
         val transproxyMode = findPreference<SimpleMenuPreference>(Key.TRANSPROXY_MODE)!!
         val enableLog = findPreference<LongClickSwitchPreference>(Key.ENABLE_LOG)!!
+        val mtu = findPreference<MTUPreference>(Key.MTU)!!
 
         enableLog.setOnPreferenceChangeListener { _, newValue ->
             Libcore.setEnableLog(newValue as Boolean, DataStore.logBufSize)
@@ -266,6 +268,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         muxConcurrency.onPreferenceChangeListener = reloadListener
         tcpKeepAliveInterval.onPreferenceChangeListener = reloadListener
         bypassLanInCoreOnly.onPreferenceChangeListener = reloadListener
+        mtu.onPreferenceChangeListener = reloadListener
 
         remoteDns.onPreferenceChangeListener = reloadListener
         directDns.onPreferenceChangeListener = reloadListener

@@ -670,4 +670,9 @@
         <item>XUDP</item>
     </string-array>
 
+    <string-array name="mtu_select">
+        <item>1500</item>
+        <item>9000</item>
+    </string-array>
+
 </resources>

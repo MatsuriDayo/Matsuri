@@ -66,7 +66,6 @@ class VpnService : BaseVpnService(),
     companion object {
         var instance: VpnService? = null
 
-        const val VPN_MTU = 1500
         const val PRIVATE_VLAN4_CLIENT = "172.19.0.1"
         const val PRIVATE_VLAN4_ROUTER = "172.19.0.2"
         const val FAKEDNS_VLAN4_CLIENT = "198.18.0.0"
@@ -168,7 +167,7 @@ class VpnService : BaseVpnService(),
         val profile = data.proxy!!.profile
         val builder = Builder().setConfigureIntent(SagerNet.configureIntent(this))
             .setSession(profile.displayName())
-            .setMtu(VPN_MTU)
+            .setMtu(DataStore.mtu)
         val useFakeDns = DataStore.enableFakeDns
         val ipv6Mode = DataStore.ipv6Mode
 
@@ -281,7 +280,7 @@ class VpnService : BaseVpnService(),
 
         val config = TunConfig().apply {
             fileDescriptor = conn.fd
-            mtu = VPN_MTU
+            mtu = DataStore.mtu
             v2Ray = data.proxy!!.v2rayPoint
             iPv6Mode = ipv6Mode
             implementation = DataStore.tunImplementation
