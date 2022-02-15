@@ -24,6 +24,7 @@ import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.getStr
 import io.nekohasekai.sagernet.ktx.runOnIoDispatcher
 import libcore.Libcore
+import moe.matsuri.nya.Protocols
 import org.json.JSONObject
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -82,7 +83,7 @@ suspend fun NekoBean.updateAllConfig(port: Int) = suspendCoroutine<Unit> {
             val otherArgs = mutableMapOf<String, Any>()
             otherArgs["finalAddress"] = finalAddress
             otherArgs["finalPort"] = finalPort
-            otherArgs["muxEnabled"] = DataStore.enableMux
+            otherArgs["muxEnabled"] = Protocols.shouldEnableMux(protocolId)
             otherArgs["muxConcurrency"] = DataStore.muxConcurrency
 
             val ret = jsip.buildAllConfig(port, this@updateAllConfig, otherArgs)

@@ -350,6 +350,7 @@ fun buildV2RayConfig(
 
             // chainOutboundTag: v2ray outbound tag for this chain
             var chainOutboundTag = chainTag
+            var muxApplied = false // nekobean 的算吗？
 
             profileList.forEachIndexed { index, proxyEntity ->
                 val bean = proxyEntity.requireBean()
@@ -415,6 +416,7 @@ fun buildV2RayConfig(
                     currentOutbound.apply {
                         val keepAliveInterval = DataStore.tcpKeepAliveInterval
                         val needKeepAliveInterval = keepAliveInterval !in intArrayOf(0, 15)
+
                         if (bean is StandardV2RayBean) {
                             when (bean) {
                                 is SOCKSBean -> {
@@ -771,7 +773,9 @@ fun buildV2RayConfig(
                                 }
                             }
                         }
-                        if ((index == 0) && proxyEntity.needCoreMux() && DataStore.enableMux) {
+
+                        if (!muxApplied && proxyEntity.needCoreMux()) {
+                            muxApplied = true
                             mux = OutboundObject.MuxObject().apply {
                                 enabled = true
                                 concurrency = DataStore.muxConcurrency

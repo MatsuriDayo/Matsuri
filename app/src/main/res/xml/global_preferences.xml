@@ -43,7 +43,7 @@
             app:title="@string/service_mode"
             app:useSimpleSummaryProvider="true" />
         <com.takisoft.preferencex.SimpleMenuPreference
-            app:defaultValue="1"
+            app:defaultValue="2"
             app:entries="@array/tun_implementation"
             app:entryValues="@array/int_array_3"
             app:icon="@drawable/ic_baseline_flip_camera_android_24"
@@ -53,6 +53,7 @@
         <moe.matsuri.nya.ui.MTUPreference
             app:icon="@drawable/baseline_public_24"
             app:key="mtu"
+            app:defaultValue="9000"
             app:title="@string/mtu"
             app:entries="@array/mtu_select"
             app:entryValues="@array/mtu_select" />
@@ -180,6 +181,20 @@
             app:key="providerWireguard"
             app:title="@string/wireguard_provider"
             app:useSimpleSummaryProvider="true" />
+        <MultiSelectListPreference
+            app:icon="@drawable/ic_baseline_compare_arrows_24"
+            app:entries="@array/mux_select_init"
+            app:entryValues="@array/mux_select_init"
+            app:defaultValue="@array/mux_select_init"
+            app:key="mux"
+            app:summary="@string/mux_sum"
+            app:title="@string/enable_mux" />
+        <EditTextPreference
+            app:defaultValue="8"
+            app:icon="@drawable/ic_baseline_low_priority_24"
+            app:key="muxConcurrency"
+            app:title="@string/mux_concurrency"
+            app:useSimpleSummaryProvider="true" />
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/cag_dns">
@@ -267,24 +282,6 @@
             app:icon="@drawable/ic_baseline_cast_connected_24"
             app:key="connectionTestURL"
             app:title="@string/connection_test_url"
-            app:useSimpleSummaryProvider="true" />
-        <SwitchPreference
-            app:defaultValue="true"
-            app:icon="@drawable/ic_baseline_compare_arrows_24"
-            app:key="enableMux"
-            app:summary="@string/mux_sum"
-            app:title="@string/enable_mux" />
-        <SwitchPreference
-            app:defaultValue="false"
-            app:icon="@drawable/ic_baseline_multiline_chart_24"
-            app:key="enableMuxForAll"
-            app:summary="@string/mux_for_all_sum"
-            app:title="@string/mux_for_all" />
-        <EditTextPreference
-            app:defaultValue="8"
-            app:icon="@drawable/ic_baseline_low_priority_24"
-            app:key="muxConcurrency"
-            app:title="@string/mux_concurrency"
             app:useSimpleSummaryProvider="true" />
         <EditTextPreference
             app:defaultValue="15"

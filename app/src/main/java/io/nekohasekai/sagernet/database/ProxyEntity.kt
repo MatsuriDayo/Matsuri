@@ -55,6 +55,7 @@ import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
 import io.nekohasekai.sagernet.ktx.isTLS
 import io.nekohasekai.sagernet.ui.profile.*
+import moe.matsuri.nya.Protocols
 import moe.matsuri.nya.neko.*
 
 @Entity(
@@ -279,14 +280,12 @@ data class ProxyEntity(
                     name = "profiles.txt"
                 }
 
-                val enableMux = DataStore.enableMux
                 for ((chain) in config.index) {
                     chain.entries.forEachIndexed { index, (port, profile) ->
-                        val needMux = enableMux && (index == chain.size - 1)
                         when (val bean = profile.requireBean()) {
                             is TrojanGoBean -> {
                                 append("\n\n")
-                                append(bean.buildTrojanGoConfig(port, needMux))
+                                append(bean.buildTrojanGoConfig(port))
                             }
                             is NaiveBean -> {
                                 append("\n\n")
@@ -324,11 +323,11 @@ data class ProxyEntity(
     }
 
     fun needCoreMux(): Boolean {
-        val enableMuxForAll by lazy { DataStore.enableMuxForAll }
         return when (type) {
-            TYPE_VMESS -> isV2RayNetworkTcp()
+            TYPE_VMESS -> Protocols.shouldEnableMux("vmess") && isV2RayNetworkTcp()
+            TYPE_TROJAN -> Protocols.shouldEnableMux("trojan")
             TYPE_TROJAN_GO -> false
-            else -> enableMuxForAll
+            else -> false
         }
     }
 

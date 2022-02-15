@@ -184,9 +184,6 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var proxyApps by configurationStore.boolean(Key.PROXY_APPS)
     var bypass by configurationStore.boolean(Key.BYPASS_MODE) { true }
     var individual by configurationStore.string(Key.INDIVIDUAL)
-    var enableMux by configurationStore.boolean(Key.ENABLE_MUX) { true }
-    var enableMuxForAll by configurationStore.boolean(Key.ENABLE_MUX_FOR_ALL)
-    var muxConcurrency by configurationStore.stringToInt(Key.MUX_CONCURRENCY) { 8 }
     var showDirectSpeed by configurationStore.boolean(Key.SHOW_DIRECT_SPEED) { true }
 
     val persistAcrossReboot by configurationStore.boolean(Key.PERSIST_ACROSS_REBOOT) { false }
@@ -209,6 +206,9 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     var providerTrojan by configurationStore.stringToInt(Key.PROVIDER_TROJAN)
     var providerWireguard by configurationStore.stringToInt(Key.PROVIDER_WIREGUARD)
+
+    var muxProtocols by configurationStore.stringSet(Key.MUX_PROTOCOLS) { setOf("vmess") }
+    var muxConcurrency by configurationStore.stringToInt(Key.MUX_CONCURRENCY) { 8 }
 
     // cache
 

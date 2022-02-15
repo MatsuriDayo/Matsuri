@@ -27,6 +27,7 @@ import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import androidx.core.app.ActivityCompat
 import androidx.preference.EditTextPreference
+import androidx.preference.MultiSelectListPreference
 import androidx.preference.Preference
 import androidx.preference.SwitchPreference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -42,6 +43,7 @@ import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.utils.Theme
 import io.nekohasekai.sagernet.widget.AppListPreference
 import libcore.Libcore
+import moe.matsuri.nya.Protocols
 import moe.matsuri.nya.ui.ColorPickerPreference
 import moe.matsuri.nya.ui.LongClickSwitchPreference
 import moe.matsuri.nya.ui.MTUPreference
@@ -129,15 +131,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         val ipv6Mode = findPreference<Preference>(Key.IPV6_MODE)!!
         val domainStrategy = findPreference<Preference>(Key.DOMAIN_STRATEGY)!!
         val trafficSniffing = findPreference<Preference>(Key.TRAFFIC_SNIFFING)!!
-        val enableMux = findPreference<Preference>(Key.ENABLE_MUX)!!
-        val enableMuxForAll = findPreference<Preference>(Key.ENABLE_MUX_FOR_ALL)!!
-        enableMuxForAll.isEnabled = DataStore.enableMux
-
-        enableMux.setOnPreferenceChangeListener { _, newValue ->
-            enableMuxForAll.isEnabled = newValue as Boolean
-            needReload()
-            true
-        }
 
         val muxConcurrency = findPreference<EditTextPreference>(Key.MUX_CONCURRENCY)!!
         val tcpKeepAliveInterval = findPreference<EditTextPreference>(Key.TCP_KEEP_ALIVE_INTERVAL)!!
@@ -216,6 +209,13 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
 
         val providerTrojan = findPreference<SimpleMenuPreference>(Key.PROVIDER_TROJAN)!!
         val providerWireguard = findPreference<SimpleMenuPreference>(Key.PROVIDER_WIREGUARD)!!
+        val muxProtocols = findPreference<MultiSelectListPreference>(Key.MUX_PROTOCOLS)!!
+
+        muxProtocols.apply {
+            val e = Protocols.getCanMuxList().toTypedArray()
+            entries = e
+            entryValues = e
+        }
 
         val dnsHosts = findPreference<EditTextPreference>(Key.DNS_HOSTS)!!
 
@@ -254,7 +254,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         val destinationOverride = findPreference<SwitchPreference>(Key.DESTINATION_OVERRIDE)!!
         val resolveDestination = findPreference<SwitchPreference>(Key.RESOLVE_DESTINATION)!!
         val enablePcap = findPreference<SwitchPreference>(Key.ENABLE_PCAP)!!
-
         val acquireWakeLock = findPreference<SwitchPreference>(Key.ACQUIRE_WAKE_LOCK)!!
 
         speedInterval.onPreferenceChangeListener = reloadListener
@@ -264,7 +263,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         showDirectSpeed.onPreferenceChangeListener = reloadListener
         domainStrategy.onPreferenceChangeListener = reloadListener
         trafficSniffing.onPreferenceChangeListener = reloadListener
-        enableMuxForAll.onPreferenceChangeListener = reloadListener
         muxConcurrency.onPreferenceChangeListener = reloadListener
         tcpKeepAliveInterval.onPreferenceChangeListener = reloadListener
         bypassLanInCoreOnly.onPreferenceChangeListener = reloadListener

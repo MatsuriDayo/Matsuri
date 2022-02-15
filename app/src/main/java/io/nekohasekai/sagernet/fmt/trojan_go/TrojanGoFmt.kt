@@ -27,6 +27,7 @@ import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.fmt.LOCALHOST
 import io.nekohasekai.sagernet.fmt.shadowsocks.fixInvalidParams
 import io.nekohasekai.sagernet.ktx.*
+import moe.matsuri.nya.Protocols
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.json.JSONArray
 import org.json.JSONObject
@@ -103,7 +104,7 @@ fun TrojanGoBean.toUri(): String {
     return builder.toLink("trojan-go")
 }
 
-fun TrojanGoBean.buildTrojanGoConfig(port: Int, mux: Boolean): String {
+fun TrojanGoBean.buildTrojanGoConfig(port: Int): String {
     return JSONObject().apply {
         put("run_type", "client")
         put("local_addr", LOCALHOST)
@@ -114,7 +115,7 @@ fun TrojanGoBean.buildTrojanGoConfig(port: Int, mux: Boolean): String {
             put(password)
         })
         put("log_level", if (DataStore.enableLog) 0 else 2)
-        if (mux) put("mux", JSONObject().apply {
+        if (Protocols.shouldEnableMux("trojan-go")) put("mux", JSONObject().apply {
             put("enabled", true)
             put("concurrency", DataStore.muxConcurrency)
         })

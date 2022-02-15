@@ -73,23 +73,21 @@ object Key {
     const val REQUIRE_TRANSPROXY = "requireTransproxy"
     const val TRANSPROXY_MODE = "transproxyMode"
     const val TRANSPROXY_PORT = "transproxyPort"
-
     const val CONNECTION_TEST_URL = "connectionTestURL"
 
-    const val ENABLE_MUX = "enableMux"
-    const val ENABLE_MUX_FOR_ALL = "enableMuxForAll"
-    const val MUX_CONCURRENCY = "muxConcurrency"
     const val SECURITY_ADVISORY = "securityAdvisory"
     const val TCP_KEEP_ALIVE_INTERVAL = "tcpKeepAliveInterval"
     const val RULES_PROVIDER = "rulesProvider"
     const val ENABLE_LOG = "enableLog"
     const val LOG_BUF_SIZE = "logBufSize"
     const val MTU = "mtu"
-
     const val ALWAYS_SHOW_ADDRESS = "alwaysShowAddress"
 
+    // Protocol Settings
     const val PROVIDER_TROJAN = "providerTrojan"
     const val PROVIDER_WIREGUARD = "providerWireguard"
+    const val MUX_PROTOCOLS = "mux"
+    const val MUX_CONCURRENCY = "muxConcurrency"
 
     const val TUN_IMPLEMENTATION = "tunImplementation"
     const val ENABLE_PCAP = "enablePcap"
