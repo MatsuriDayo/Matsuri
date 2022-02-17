@@ -39,6 +39,7 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.*
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceDataStore
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -53,6 +54,7 @@ import io.nekohasekai.sagernet.aidl.TrafficStats
 import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.bg.test.UrlTest
 import io.nekohasekai.sagernet.database.*
+import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
 import io.nekohasekai.sagernet.databinding.LayoutAppsItemBinding
 import io.nekohasekai.sagernet.databinding.LayoutProfileBinding
 import io.nekohasekai.sagernet.databinding.LayoutProfileListBinding
@@ -87,7 +89,8 @@ class ConfigurationFragment @JvmOverloads constructor(
     val select: Boolean = false, val selectedItem: ProxyEntity? = null, val titleRes: Int = 0
 ) : ToolbarFragment(R.layout.layout_group_list),
     PopupMenu.OnMenuItemClickListener,
-    Toolbar.OnMenuItemClickListener {
+    Toolbar.OnMenuItemClickListener,
+    OnPreferenceDataStoreChangeListener {
 
     interface SelectCallback {
         fun returnProfile(profileId: Long)
@@ -96,18 +99,6 @@ class ConfigurationFragment @JvmOverloads constructor(
     lateinit var adapter: GroupPagerAdapter
     lateinit var tabLayout: TabLayout
     lateinit var groupPager: ViewPager2
-
-    // TODO crash
-    val selectedGroup: ProxyGroup
-        get() = try {
-            if (tabLayout.isGone) {
-                adapter.groupList[0]
-            } else {
-                adapter.groupList[tabLayout.selectedTabPosition]
-            }
-        } catch (e: Exception) {
-            ProxyGroup(0)
-        }
 
     val alwaysShowAddress by lazy { DataStore.alwaysShowAddress }
     val securityAdvisory by lazy { DataStore.securityAdvisory }
@@ -167,7 +158,7 @@ class ConfigurationFragment @JvmOverloads constructor(
 
         toolbar.setOnClickListener {
 
-            val fragment = (childFragmentManager.findFragmentByTag("f" + selectedGroup.id) as GroupFragment?)
+            val fragment = (childFragmentManager.findFragmentByTag("f" + DataStore.selectedGroup) as GroupFragment?)
 
             if (fragment != null) {
                 val selectedProxy = selectedItem?.id ?: DataStore.selectedProxy
@@ -190,9 +181,31 @@ class ConfigurationFragment @JvmOverloads constructor(
             }
 
         }
+
+        DataStore.profileCacheStore.registerChangeListener(this)
+    }
+
+    override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
+        runOnMainDispatcher {
+            // editingGroup
+            if (key == Key.PROFILE_GROUP) {
+                val targetId = DataStore.editingGroup
+                if (targetId > 0 && targetId != DataStore.selectedGroup) {
+                    DataStore.selectedGroup = targetId
+                    val targetIndex = adapter.groupList.indexOfFirst { it.id == targetId }
+                    if (targetIndex >= 0) {
+                        groupPager.setCurrentItem(targetIndex, false)
+                    } else {
+                        adapter.reload()
+                    }
+                }
+            }
+        }
     }
 
     override fun onDestroy() {
+        DataStore.profileCacheStore.unregisterChangeListener(this)
+
         if (::adapter.isInitialized) {
             GroupManager.removeListener(adapter)
             ProfileManager.removeListener(adapter)
@@ -202,7 +215,7 @@ class ConfigurationFragment @JvmOverloads constructor(
     }
 
     override fun onKeyDown(ketCode: Int, event: KeyEvent): Boolean {
-        val fragment = (childFragmentManager.findFragmentByTag("f" + selectedGroup.id) as GroupFragment?)
+        val fragment = (childFragmentManager.findFragmentByTag("f" + DataStore.selectedGroup) as GroupFragment?)
         fragment?.configurationListView?.apply {
             if (!hasFocus()) requestFocus()
         }
@@ -256,21 +269,11 @@ class ConfigurationFragment @JvmOverloads constructor(
 
     suspend fun import(proxies: List<AbstractBean>) {
         val targetId = DataStore.selectedGroupForImport()
-        val targetIndex = adapter.groupList.indexOfFirst { it.id == targetId }
-
         for (proxy in proxies) {
             ProfileManager.createProfile(targetId, proxy)
         }
         onMainDispatcher {
-            if (adapter.groupList.isEmpty() || selectedGroup.id != targetId) {
-                if (targetIndex != -1) {
-                    tabLayout.getTabAt(targetIndex)?.select()
-                } else {
-                    DataStore.selectedGroup = targetId
-                    adapter.reload()
-                }
-            }
-
+            DataStore.editingGroup = targetId
             snackbar(
                 requireContext().resources.getQuantityString(
                     R.plurals.added, proxies.size, proxies.size
@@ -424,7 +427,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                                 .setMessage(R.string.delete_confirm_prompt)
                                 .setPositiveButton(R.string.yes) { _, _ ->
                                     for (profile in toClear) {
-                                        adapter.groupFragments[selectedGroup.id]?.adapter?.apply {
+                                        adapter.groupFragments[DataStore.selectedGroup]?.adapter?.apply {
                                             val index = configurationIdList.indexOf(profile.id)
                                             if (index >= 0) {
                                                 configurationIdList.removeAt(index)

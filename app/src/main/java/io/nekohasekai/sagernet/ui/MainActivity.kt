@@ -59,7 +59,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import libcore.Libcore
-import moe.matsuri.nya.neko.NekoPluginManager
 import moe.matsuri.nya.utils.NekomuraUtil
 import java.text.SimpleDateFormat
 import java.util.*

@@ -239,12 +239,8 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 
 	// connection ends
 	// Interrupt link.Reader breaks mux?
-	err = common.Close(link.Writer)
+	common.Close(link.Writer)
 	common.Close(link.Reader)
-
-	if err != nil {
-		logrus.Warnf("[TCP] Error closing link.Writer: %s", err.Error())
-	}
 }
 
 type connWriter struct {

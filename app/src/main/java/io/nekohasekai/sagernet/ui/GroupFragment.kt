@@ -170,10 +170,6 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
 
         suspend fun reload() {
             val groups = SagerDatabase.groupDao.allGroups().toMutableList()
-            val hideUngrouped =
-                SagerDatabase.proxyDao.countByGroup(groups.find { it.ungrouped }!!.id) == 0L
-            if (groups.size > 1 && hideUngrouped) groups.removeAll { it.ungrouped }
-
             groupList.clear()
             groupList.addAll(groups)
             groupListView.post {
@@ -253,13 +249,6 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
         }
 
         override suspend fun groupAdd(group: ProxyGroup) {
-            if (groupList.size == 1 && groupList[0].ungrouped) {
-                groupList.clear()
-                onMainDispatcher {
-                    notifyItemRemoved(0)
-                }
-            }
-
             groupList.add(group)
             delay(300L)
 
@@ -404,12 +393,6 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
                 GroupUpdater.startUpdate(proxyGroup, true)
             }
 
-            runOnDefaultDispatcher {
-                val showMenu = SagerDatabase.proxyDao.countByGroup(group.id) > 0
-                onMainDispatcher {
-                    optionsButton.isVisible = showMenu
-                }
-            }
             optionsButton.setOnClickListener {
                 selectedGroup = proxyGroup
 

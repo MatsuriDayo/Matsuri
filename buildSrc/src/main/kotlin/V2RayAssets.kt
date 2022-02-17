@@ -9,6 +9,10 @@ import java.io.File
 import java.util.*
 
 fun Project.downloadAssets() {
+    if (System.getenv("nkmr_assets") == "0") {
+        return
+    }
+
     val assets = File(projectDir, "src/main/assets")
     val downloader = OkHttpClient.Builder().followRedirects(true).followSslRedirects(true).build()
 

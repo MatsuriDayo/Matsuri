@@ -55,12 +55,10 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var currentProfile by configurationStore.long(Key.PROFILE_CURRENT)
 
     var selectedProxy by configurationStore.long(Key.PROFILE_ID)
-    var selectedGroup by configurationStore.long(Key.PROFILE_GROUP) {
-        SagerDatabase.proxyDao.getById(selectedProxy)?.groupId ?: 0L
-    }
+    var selectedGroup by configurationStore.long(Key.PROFILE_GROUP) { currentGroupId() } // "ungrouped" group id = 1
 
     fun currentGroupId(): Long {
-        val currentSelected = selectedGroup
+        val currentSelected = configurationStore.getLong(Key.PROFILE_GROUP, -1)
         if (currentSelected > 0L) return currentSelected
         val groups = SagerDatabase.groupDao.allGroups()
         if (groups.isNotEmpty()) {
@@ -75,7 +73,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     fun currentGroup(): ProxyGroup {
         var group: ProxyGroup? = null
-        val currentSelected = selectedGroup
+        val currentSelected = configurationStore.getLong(Key.PROFILE_GROUP, -1)
         if (currentSelected > 0L) {
             group = SagerDatabase.groupDao.getById(currentSelected)
         }
