@@ -24,7 +24,7 @@ package io.nekohasekai.sagernet.ktx
 import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.bg.VpnService
 import io.nekohasekai.sagernet.fmt.AbstractBean
-import moe.matsuri.nya.utils.NekomuraUtil
+import moe.matsuri.nya.utils.NGUtil
 import okhttp3.HttpUrl
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -46,11 +46,11 @@ fun HttpUrl.Builder.toLink(scheme: String, appendDefaultPort: Boolean = true): S
 }
 
 fun String.isIpAddress(): Boolean {
-    return NekomuraUtil.isIpv4(this) || NekomuraUtil.isIpv6(this)
+    return NGUtil.isIpv4Address(this) || NGUtil.isIpv6Address(this)
 }
 
 fun String.isIpAddressV6(): Boolean {
-    return NekomuraUtil.isIpv6(this)
+    return NGUtil.isIpv6Address(this)
 }
 
 // [2001:4860:4860::8888] -> 2001:4860:4860::8888
@@ -63,8 +63,12 @@ fun String.unwrapIPV6Host(): String {
 
 // [2001:4860:4860::8888] or 2001:4860:4860::8888 -> [2001:4860:4860::8888]
 fun String.wrapIPV6Host(): String {
-    if (!this.isIpAddressV6()) return this
-    return "[${this.unwrapIPV6Host()}]"
+    val unwrapped = this.unwrapIPV6Host()
+    if (unwrapped.isIpAddressV6()) {
+        return "[$unwrapped]"
+    } else {
+        return this
+    }
 }
 
 fun AbstractBean.wrapUri(): String {

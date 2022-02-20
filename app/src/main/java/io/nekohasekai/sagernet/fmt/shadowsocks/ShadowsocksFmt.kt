@@ -72,7 +72,7 @@ fun ShadowsocksBean.fixInvalidParams() {
 
 fun parseShadowsocks(url: String): ShadowsocksBean {
 
-    if (url.contains("@")) {
+    if (url.substringBefore("#").contains("@")) {
 
         var link = url.replace("ss://", "https://").toHttpUrlOrNull() ?: error(
             "invalid ss-android link $url"
@@ -122,7 +122,6 @@ fun parseShadowsocks(url: String): ShadowsocksBean {
         }
 
     } else {
-
         // v2rayN style
 
         var v2Url = url
@@ -139,10 +138,8 @@ fun parseShadowsocks(url: String): ShadowsocksBean {
             method = link.username
             password = link.password
             plugin = ""
-            if (url.contains("#")) {
-                name = url.substringAfter("#").unUrlSafe()
-            }
-
+            val remarks = url.substringAfter("#").unUrlSafe()
+            if (remarks.isNotBlank()) name = remarks
             fixInvalidParams()
 
         }

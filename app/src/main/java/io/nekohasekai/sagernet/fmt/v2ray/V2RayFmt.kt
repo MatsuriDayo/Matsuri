@@ -20,14 +20,28 @@
 package io.nekohasekai.sagernet.fmt.v2ray
 
 import io.nekohasekai.sagernet.ktx.*
-import moe.matsuri.nya.utils.NekomuraUtil
+import moe.matsuri.nya.utils.NGUtil
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.json.JSONObject
 
 fun parseV2Ray(link: String): StandardV2RayBean {
-    if (!link.contains("@")) {
-        return parseV2RayN(link)
+    // Try parse stupid formats first
+
+    if (!link.contains("?")) {
+        try {
+            return parseV2RayN(link)
+        } catch (e: Exception) {
+            Logs.i("try v2rayN: " + e.readableMessage)
+        }
     }
+
+    try {
+        return tryResolveVmess4Kitsunebi(link)
+    } catch (e: Exception) {
+        Logs.i("try Kitsunebi: " + e.readableMessage)
+    }
+
+    // SagerNet: parse standard format
 
     val bean = VMessBean()
     val url = link.replace("vmess://", "https://").toHttpUrl()
@@ -204,6 +218,59 @@ fun parseV2Ray(link: String): StandardV2RayBean {
     return bean
 }
 
+// 不确定是谁的格式
+private fun tryResolveVmess4Kitsunebi(server: String): VMessBean {
+    // vmess://YXV0bzo1YWY1ZDBlYy02ZWEwLTNjNDMtOTNkYi1jYTMwMDg1MDNiZGJAMTgzLjIzMi41Ni4xNjE6MTIwMg
+    // ?remarks=*%F0%9F%87%AF%F0%9F%87%B5JP%20-355%20TG@moon365free&obfsParam=%7B%22Host%22:%22183.232.56.161%22%7D&path=/v2ray&obfs=websocket&alterId=0
+
+    var result = server.replace("vmess://", "")
+    val indexSplit = result.indexOf("?")
+    if (indexSplit > 0) {
+        result = result.substring(0, indexSplit)
+    }
+    result = NGUtil.decode(result)
+
+    val arr1 = result.split('@')
+    if (arr1.count() != 2) {
+        throw IllegalStateException("invalid kitsunebi format")
+    }
+    val arr21 = arr1[0].split(':')
+    val arr22 = arr1[1].split(':')
+    if (arr21.count() != 2) {
+        throw IllegalStateException("invalid kitsunebi format")
+    }
+
+    return VMessBean().apply {
+        serverAddress = arr22[0]
+        serverPort = NGUtil.parseInt(arr22[1])
+        uuid = arr21[1]
+        encryption = arr21[0]
+        if (indexSplit < 0) return@apply
+
+        // nekomura
+        val url = ("https://localhost/path?" + server.substringAfter("?")).toHttpUrl()
+        url.queryParameter("remarks")?.apply { name = this }
+        url.queryParameter("alterId")?.apply { alterId = this.toInt() }
+        url.queryParameter("path")?.apply { path = this }
+        url.queryParameter("tls")?.apply { security = "tls" }
+        url.queryParameter("allowInsecure")?.apply { allowInsecure = true }
+        url.queryParameter("obfs")?.apply {
+            type = this.replace("websocket", "ws")
+            if (type == "ws") {
+                url.queryParameter("obfsParam")?.apply {
+                    if (this.startsWith("{")) {
+                        host = JSONObject(this).getStr("Host")
+                    } else if (security == "tls") {
+                        sni = this
+                    }
+                }
+            }
+        }
+    }
+}
+
+// SagerNet's
+// Do not support some format and then throw exception
 fun parseV2RayN(link: String): VMessBean {
     val result = link.substringAfter("vmess://").decodeBase64UrlSafe()
     if (result.contains("= vmess")) {
@@ -343,7 +410,7 @@ fun VMessBean.toV2rayN(): String {
         put("sni", sni)
         put("scy", encryption)
 
-    }.toStringPretty().let { NekomuraUtil.b64EncodeUrlSafe(it) }
+    }.toStringPretty().let { NGUtil.encode(it) }
 
 }
 

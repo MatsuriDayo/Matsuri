@@ -55,6 +55,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import moe.matsuri.nya.utils.NGUtil
 import sun.misc.Unsafe
 import java.io.FileDescriptor
 import java.net.*
@@ -183,7 +184,7 @@ fun String.urlSafe(): String {
 }
 
 fun String.unUrlSafe(): String {
-    return URLDecoder.decode(this, "UTF-8")
+    return NGUtil.urlDecode(this)
 }
 
 fun RecyclerView.scrollTo(index: Int, force: Boolean = false) {
