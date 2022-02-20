@@ -77,10 +77,16 @@ func (dialer ProtectedDialer) dial(ctx context.Context, source v2rayNet.Address,
 	destIp := destination.Address.IP()
 	ipv6 := len(destIp) != net.IPv4len
 	fd, err := getFd(destination.Network, ipv6)
-	defer syscall.Close(fd)
 	if err != nil {
 		return nil, err
 	}
+
+	defer func() {
+		// Close fd to stop the connection (e.g. TCP SYN) if failed
+		if err != nil {
+			syscall.Close(fd)
+		}
+	}()
 
 	if FdProtector != nil && !FdProtector.Protect(int32(fd)) {
 		return nil, newError("protect failed")
@@ -117,7 +123,6 @@ func (dialer ProtectedDialer) dial(ctx context.Context, source v2rayNet.Address,
 	if file == nil {
 		return nil, newError("failed to connect to fd")
 	}
-	defer file.Close()
 
 	switch destination.Network {
 	case v2rayNet.Network_UDP:

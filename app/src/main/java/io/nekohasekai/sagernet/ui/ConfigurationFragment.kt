@@ -19,15 +19,17 @@
 
 package io.nekohasekai.sagernet.ui
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.SystemClock
 import android.provider.OpenableColumns
+import android.text.SpannableStringBuilder
+import android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
 import android.text.format.Formatter
 import android.text.method.LinkMovementMethod
+import android.text.style.ForegroundColorSpan
 import android.text.util.Linkify
 import android.view.*
 import android.widget.ImageView
@@ -37,10 +39,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.*
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
+import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceDataStore
-import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -56,7 +59,6 @@ import io.nekohasekai.sagernet.bg.test.UrlTest
 import io.nekohasekai.sagernet.database.*
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
 import io.nekohasekai.sagernet.databinding.LayoutAppsItemBinding
-import io.nekohasekai.sagernet.databinding.LayoutProfileBinding
 import io.nekohasekai.sagernet.databinding.LayoutProfileListBinding
 import io.nekohasekai.sagernet.databinding.LayoutProgressListBinding
 import io.nekohasekai.sagernet.fmt.AbstractBean
@@ -83,7 +85,9 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.UnknownHostException
 import java.util.concurrent.ConcurrentLinkedQueue
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.zip.ZipInputStream
+import kotlin.collections.set
 
 class ConfigurationFragment @JvmOverloads constructor(
     val select: Boolean = false, val selectedItem: ProxyEntity? = null, val titleRes: Int = 0
@@ -102,6 +106,10 @@ class ConfigurationFragment @JvmOverloads constructor(
 
     val alwaysShowAddress by lazy { DataStore.alwaysShowAddress }
     val securityAdvisory by lazy { DataStore.securityAdvisory }
+
+    fun getCurrentGroupFragment(): GroupFragment? {
+        return childFragmentManager.findFragmentByTag("f" + DataStore.selectedGroup) as GroupFragment?
+    }
 
     val updateSelectedCallback = object : ViewPager2.OnPageChangeCallback() {
         override fun onPageScrolled(
@@ -158,7 +166,7 @@ class ConfigurationFragment @JvmOverloads constructor(
 
         toolbar.setOnClickListener {
 
-            val fragment = (childFragmentManager.findFragmentByTag("f" + DataStore.selectedGroup) as GroupFragment?)
+            val fragment = getCurrentGroupFragment()
 
             if (fragment != null) {
                 val selectedProxy = selectedItem?.id ?: DataStore.selectedProxy
@@ -215,7 +223,7 @@ class ConfigurationFragment @JvmOverloads constructor(
     }
 
     override fun onKeyDown(ketCode: Int, event: KeyEvent): Boolean {
-        val fragment = (childFragmentManager.findFragmentByTag("f" + DataStore.selectedGroup) as GroupFragment?)
+        val fragment = getCurrentGroupFragment()
         fragment?.configurationListView?.apply {
             if (!hasFocus()) requestFocus()
         }
@@ -598,87 +606,70 @@ class ConfigurationFragment @JvmOverloads constructor(
         val binding = LayoutProgressListBinding.inflate(layoutInflater)
         val builder = MaterialAlertDialogBuilder(requireContext()).setView(binding.root)
             .setNegativeButton(android.R.string.cancel) { _, _ ->
-                cancel()
+                cancel(results)
+            }
+            .setOnDismissListener {
+                cancel(results)
             }
             .setCancelable(false)
-        lateinit var cancel: () -> Unit
+        lateinit var cancel: (ArrayList<ProxyEntity>) -> Unit
+        val fragment by lazy { getCurrentGroupFragment() }
+
         val results = ArrayList<ProxyEntity>()
-        val adapter = TestAdapter()
+        var proxyN = 0
+        val finishedN = AtomicInteger(0)
 
         suspend fun insert(profile: ProxyEntity) {
-            binding.listView.post {
-                results.add(profile)
-                adapter.notifyItemInserted(results.size - 1)
-                binding.listView.scrollToPosition(results.size - 1)
-            }
+            results.add(profile)
         }
 
         suspend fun update(profile: ProxyEntity) {
-            binding.listView.post {
-                val index = results.indexOf(profile)
-                adapter.notifyItemChanged(index)
-            }
-        }
-
-        init {
-            binding.listView.layoutManager = FixedLinearLayoutManager(binding.listView)
-            binding.listView.itemAnimator = DefaultItemAnimator()
-            binding.listView.adapter = adapter
-        }
-
-        inner class TestAdapter : RecyclerView.Adapter<TestResultHolder>() {
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-                TestResultHolder(LayoutProfileBinding.inflate(layoutInflater, parent, false))
-
-            override fun onBindViewHolder(holder: TestResultHolder, position: Int) {
-                holder.bind(results[position])
-            }
-
-            override fun getItemCount() = results.size
-        }
-
-        inner class TestResultHolder(val binding: LayoutProfileBinding) : RecyclerView.ViewHolder(
-            binding.root
-        ) {
-            init {
-                binding.edit.isGone = true
-                binding.share.isGone = true
-            }
-
-            fun bind(profile: ProxyEntity) {
-                binding.profileName.text = profile.displayName()
-                binding.profileType.text = profile.displayType()
+            fragment?.configurationListView?.post {
+                var profileStatusText: String? = null
+                var profileStatusColor = 0
 
                 when (profile.status) {
                     -1 -> {
-                        binding.profileStatus.text = profile.error
-                        binding.profileStatus.setTextColor(requireContext().getColorAttr(android.R.attr.textColorSecondary))
+                        profileStatusText = profile.error
+                        profileStatusColor = requireContext().getColorAttr(android.R.attr.textColorSecondary)
                     }
                     0 -> {
-                        binding.profileStatus.setText(R.string.connection_test_testing)
-                        binding.profileStatus.setTextColor(requireContext().getColorAttr(android.R.attr.textColorSecondary))
+                        profileStatusText = getString(R.string.connection_test_testing)
+                        profileStatusColor = requireContext().getColorAttr(android.R.attr.textColorSecondary)
                     }
                     1 -> {
-                        binding.profileStatus.text = getString(R.string.available, profile.ping)
-                        binding.profileStatus.setTextColor(requireContext().getColour(R.color.material_green_500))
+                        profileStatusText = getString(R.string.available, profile.ping)
+                        profileStatusColor = requireContext().getColour(R.color.material_green_500)
                     }
                     2 -> {
-                        binding.profileStatus.text = profile.error
-                        binding.profileStatus.setTextColor(requireContext().getColour(R.color.material_red_500))
+                        profileStatusText = profile.error
+                        profileStatusColor = requireContext().getColour(R.color.material_red_500)
                     }
                     3 -> {
-                        binding.profileStatus.setText(R.string.unavailable)
-                        binding.profileStatus.setTextColor(requireContext().getColour(R.color.material_red_500))
+                        profileStatusText = getString(R.string.unavailable)
+                        profileStatusColor = requireContext().getColour(R.color.material_red_500)
                     }
                 }
 
-                if (profile.status == 3) {
-                    binding.content.setOnClickListener {
-                        alert(profile.error ?: "<?>").show()
-                    }
-                } else {
-                    binding.content.setOnClickListener {}
+                val text = SpannableStringBuilder().apply {
+                    append("\n" + profile.displayName())
+                    append("\n")
+                    append(
+                        profile.displayType(),
+                        ForegroundColorSpan(requireContext().getColorAttr(R.attr.accentOrTextSecondary)),
+                        SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    append(" ")
+                    append(
+                        profileStatusText,
+                        ForegroundColorSpan(profileStatusColor),
+                        SPAN_EXCLUSIVE_EXCLUSIVE
+                    )
+                    append("\n")
                 }
+
+                binding.nowTesting.text = text
+                binding.progress.text = "${finishedN.addAndGet(1)} / $proxyN"
             }
         }
 
@@ -714,6 +705,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                     }
                 }
             }
+            test.proxyN = profilesUnfiltered.size
             val profiles = ConcurrentLinkedQueue(profilesUnfiltered)
             val testPool = newFixedThreadPoolContext(5, "Connection test pool")
             repeat(5) {
@@ -760,7 +752,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                         try {
                             if (icmpPing) {
                                 val result = Libcore.icmpPing(
-                                    address, 5000
+                                    address, 3000
                                 )
                                 if (!isActive) break
                                 if (result != -1) {
@@ -774,14 +766,14 @@ class ConfigurationFragment @JvmOverloads constructor(
                             } else {
                                 val socket = Socket()
                                 try {
-                                    socket.soTimeout = 5000
+                                    socket.soTimeout = 3000
                                     socket.bind(InetSocketAddress(0))
                                     protectFromVpn(socket.fileDescriptor.int)
                                     val start = SystemClock.elapsedRealtime()
                                     socket.connect(
                                         InetSocketAddress(
                                             address, profile.requireBean().serverPort
-                                        ), 5000
+                                        ), 3000
                                     )
                                     if (!isActive) break
                                     profile.status = 1
@@ -825,23 +817,20 @@ class ConfigurationFragment @JvmOverloads constructor(
             testJobs.joinAll()
             testPool.close()
 
-            ProfileManager.updateProfile(test.results.filter { it.status != 0 })
-
             onMainDispatcher {
-                test.binding.progressCircular.isGone = true
-                dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText(android.R.string.ok)
+                dialog.dismiss()
             }
         }
         test.cancel = {
-            mainJob.cancel()
-            testJobs.forEach { it.cancel() }
             runOnDefaultDispatcher {
-                ProfileManager.updateProfile(test.results.filter { it.status != 0 })
+                ProfileManager.updateProfile(it)
+                GroupManager.postReload(DataStore.currentGroupId())
+                mainJob.cancel()
+                testJobs.forEach { it.cancel() }
             }
         }
     }
 
-    @Suppress("EXPERIMENTAL_API_USAGE")
     fun urlTest() {
         stopService()
 
@@ -868,6 +857,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                     }
                 }
             }
+            test.proxyN = profilesUnfiltered.size
             val profiles = ConcurrentLinkedQueue(profilesUnfiltered)
             val urlTest = UrlTest() // note: this is NOT in bg process
 
@@ -891,22 +881,23 @@ class ConfigurationFragment @JvmOverloads constructor(
                         }
 
                         test.update(profile)
-                        ProfileManager.updateProfile(profile)
                     }
                 })
             }
 
             testJobs.joinAll()
+
             onMainDispatcher {
-                test.binding.progressCircular.isGone = true
-                dialog.getButton(DialogInterface.BUTTON_NEGATIVE).setText(android.R.string.ok)
+                dialog.dismiss()
             }
         }
         test.cancel = {
-            mainJob.cancel()
             runOnDefaultDispatcher {
+                ProfileManager.updateProfile(it)
                 GroupManager.postReload(DataStore.currentGroupId())
                 NekoJSInterface.Default.destroyAllJsi()
+                mainJob.cancel()
+                testJobs.forEach { it.cancel() }
             }
         }
     }
