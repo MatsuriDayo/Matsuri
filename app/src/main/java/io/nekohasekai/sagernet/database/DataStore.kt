@@ -32,6 +32,7 @@ import io.nekohasekai.sagernet.database.preference.RoomPreferenceDataStore
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.utils.DirectBoot
 import moe.matsuri.nya.TempDatabase
+import moe.matsuri.nya.utils.NekomuraUtil
 
 object DataStore : OnPreferenceDataStoreChangeListener {
 
@@ -97,7 +98,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
         return groups.find { it.type == GroupType.BASIC }!!.id
     }
 
-    var adurl = ""
+    var ad: NekomuraUtil.AdObject? = null
 
     var nekoPlugins by configurationStore.string(Key.NEKO_PLUGIN_MANAGED)
 

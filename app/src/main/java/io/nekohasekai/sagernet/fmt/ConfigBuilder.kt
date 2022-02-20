@@ -19,7 +19,6 @@
 
 package io.nekohasekai.sagernet.fmt
 
-import cn.hutool.core.util.NumberUtil
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginManager
 import io.nekohasekai.sagernet.IPv6Mode
@@ -466,7 +465,7 @@ fun buildV2RayConfig(
                                                         port = bean.serverPort
                                                         users = listOf(VMessOutboundConfigurationObject.ServerObject.UserObject()
                                                             .apply {
-                                                                id = bean.uuidOrGenerate()
+                                                                id = bean.uuid
                                                                 alterId = bean.alterId
                                                                 security = bean.encryption.takeIf { it.isNotBlank() }
                                                                     ?: "auto"
@@ -1018,9 +1017,7 @@ fun buildV2RayConfig(
                         if (dns.contains(":")) {
                             val lPort = dns.substringAfterLast(":")
                             dns = dns.substringBeforeLast(":")
-                            if (NumberUtil.isInteger(lPort)) {
-                                port = lPort.toInt()
-                            }
+                            lPort.toIntOrNull()?.apply { port = this }
                         }
                         if (dns.isIpAddress()) {
                             address = dns

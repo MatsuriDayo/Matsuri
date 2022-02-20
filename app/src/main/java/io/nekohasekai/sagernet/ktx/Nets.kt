@@ -21,10 +21,10 @@
 
 package io.nekohasekai.sagernet.ktx
 
-import cn.hutool.core.lang.Validator
 import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.bg.VpnService
 import io.nekohasekai.sagernet.fmt.AbstractBean
+import moe.matsuri.nya.utils.NekomuraUtil
 import okhttp3.HttpUrl
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -46,11 +46,11 @@ fun HttpUrl.Builder.toLink(scheme: String, appendDefaultPort: Boolean = true): S
 }
 
 fun String.isIpAddress(): Boolean {
-    return Validator.isIpv4(this) || Validator.isIpv6(this)
+    return NekomuraUtil.isIpv4(this) || NekomuraUtil.isIpv6(this)
 }
 
 fun String.isIpAddressV6(): Boolean {
-    return Validator.isIpv6(this.unwrapIPV6Host())
+    return NekomuraUtil.isIpv6(this)
 }
 
 // [2001:4860:4860::8888] -> 2001:4860:4860::8888
@@ -68,11 +68,7 @@ fun String.wrapIPV6Host(): String {
 }
 
 fun AbstractBean.wrapUri(): String {
-    return if (Validator.isIpv6(finalAddress)) {
-        "[$finalAddress]:$finalPort"
-    } else {
-        "$finalAddress:$finalPort"
-    }
+    return "${finalAddress.wrapIPV6Host()}:$finalPort"
 }
 
 fun parseAddress(addressArray: ByteArray) = InetAddress.getByAddress(addressArray)

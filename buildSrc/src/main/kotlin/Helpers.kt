@@ -1,19 +1,22 @@
-import cn.hutool.core.codec.Base64
-import cn.hutool.crypto.digest.DigestUtil
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
 import com.github.triplet.gradle.play.PlayPublisherExtension
-import org.apache.tools.ant.filters.StringInputStream
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
-import org.gradle.api.tasks.Exec
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 import java.io.File
+import java.security.MessageDigest
 import java.util.*
 import kotlin.system.exitProcess
+
+fun sha256Hex(bytes: ByteArray): String {
+    val md = MessageDigest.getInstance("SHA-256")
+    val digest = md.digest(bytes)
+    return digest.fold("") { str, it -> str + "%02x".format(it) }
+}
 
 private val Project.android get() = extensions.getByName<BaseExtension>("android")
 
@@ -62,7 +65,7 @@ fun Project.requireLocalProperties(): Properties {
         val base64 = System.getenv("LOCAL_PROPERTIES")
         if (!base64.isNullOrBlank()) {
 
-            localProperties.load(StringInputStream(Base64.decodeStr(base64)))
+            localProperties.load(Base64.getDecoder().decode(base64).inputStream())
         } else if (project.rootProject.file("local.properties").exists()) {
             localProperties.load(rootProject.file("local.properties").inputStream())
         }
@@ -274,7 +277,7 @@ fun Project.setupAppCommon() {
                     applicationVariants.all {
                         if (name.equals(requireFlavor(), ignoreCase = true)) outputs.all {
                             if (outputFile.isFile) {
-                                val sha256 = DigestUtil.sha256Hex(outputFile)
+                                val sha256 = sha256Hex(outputFile.readBytes())
                                 val sum = File(
                                     outputFile.parentFile,
                                     outputFile.nameWithoutExtension + ".sha256sum.txt"

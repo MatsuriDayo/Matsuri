@@ -20,8 +20,6 @@
 package io.nekohasekai.sagernet.ktx
 
 import androidx.annotation.RawRes
-import cn.hutool.core.lang.Validator
-import cn.hutool.core.net.NetUtil.isInnerIP
 import com.github.shadowsocks.plugin.PluginConfiguration
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.fmt.AbstractBean
@@ -42,11 +40,10 @@ class ResultInsecure(@RawRes val textRes: Int) : ValidateResult
 val ssSecureList = "(gcm|poly1305)".toRegex()
 
 fun AbstractBean.isInsecure(): ValidateResult {
-    if (Validator.isIpv4(serverAddress) && isInnerIP(serverAddress) || serverAddress in arrayOf(
-            "localhost", "::"
-        )
-    ) {
-        return ResultLocal
+    if (serverAddress.isIpAddress()) {
+        if (serverAddress.startsWith("127.") || serverAddress.startsWith("::")) {
+            return ResultLocal
+        }
     }
     if (this is ShadowsocksBean) {
         if (plugin.isBlank() || PluginConfiguration(plugin).selected == "obfs-local") {
@@ -77,7 +74,7 @@ fun AbstractBean.isInsecure(): ValidateResult {
     return ResultSecure
 }
 
-fun StandardV2RayBean.isTLS() : Boolean {
+fun StandardV2RayBean.isTLS(): Boolean {
     return security == "tls"
 }
 

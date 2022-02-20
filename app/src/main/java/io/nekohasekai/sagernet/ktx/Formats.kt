@@ -19,7 +19,6 @@
 
 package io.nekohasekai.sagernet.ktx
 
-import cn.hutool.core.codec.Base64
 import com.google.gson.JsonParser
 import io.nekohasekai.sagernet.fmt.AbstractBean
 import io.nekohasekai.sagernet.fmt.Serializable
@@ -37,6 +36,7 @@ import io.nekohasekai.sagernet.fmt.v2ray.parseV2Ray
 import moe.matsuri.nya.neko.NekoJSInterface
 import moe.matsuri.nya.neko.NekoPluginManager
 import moe.matsuri.nya.neko.parseShareLink
+import moe.matsuri.nya.utils.NekomuraUtil
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -51,7 +51,7 @@ fun JSONObject.toStringPretty(): String {
     return gson.toJson(JsonParser.parseString(this.toString()))
 }
 
-inline fun <reified T:Any> JSONArray.filterIsInstance() :List<T> {
+inline fun <reified T : Any> JSONArray.filterIsInstance(): List<T> {
     val list = mutableListOf<T>()
     for (i in 0 until this.length()) {
         if (this[i] is T) list.add(this[i] as T)
@@ -71,7 +71,7 @@ inline fun JSONObject.forEach(action: (String, Any) -> Unit) {
     }
 }
 
-fun isJsonObjectValid(j :Any):Boolean {
+fun isJsonObjectValid(j: Any): Boolean {
     if (j is JSONObject) return true
     if (j is JSONArray) return true
     try {
@@ -87,7 +87,7 @@ fun isJsonObjectValid(j :Any):Boolean {
 }
 
 // wtf hutool
-fun JSONObject.getStr(name: String):String? {
+fun JSONObject.getStr(name: String): String? {
     val obj = this.opt(name) ?: return null
     if (obj is String) {
         if (obj.isBlank()) {
@@ -99,7 +99,7 @@ fun JSONObject.getStr(name: String):String? {
     }
 }
 
-fun JSONObject.getBool(name: String):Boolean? {
+fun JSONObject.getBool(name: String): Boolean? {
     return try {
         getBoolean(name)
     } catch (ignored: Exception) {
@@ -109,7 +109,7 @@ fun JSONObject.getBool(name: String):Boolean? {
 
 
 // 重名了喵
-fun JSONObject.getIntNya(name: String):Int? {
+fun JSONObject.getIntNya(name: String): Int? {
     return try {
         getInt(name)
     } catch (ignored: Exception) {
@@ -119,9 +119,7 @@ fun JSONObject.getIntNya(name: String):Int? {
 
 
 fun String.decodeBase64UrlSafe(): String {
-    return Base64.decodeStr(
-        replace(' ', '-').replace('/', '_').replace('+', '-').replace("=", "")
-    )
+    return String(NekomuraUtil.b64Decode(this))
 }
 
 // Sub
@@ -220,9 +218,7 @@ suspend fun parseProxies(text: String): List<AbstractBean> {
                         runCatching {
                             entities.add(
                                 parseShareLink(
-                                    obj.plgId,
-                                    obj.protocolId,
-                                    this@parseLink
+                                    obj.plgId, obj.protocolId, this@parseLink
                                 )
                             )
                         }.onFailure {

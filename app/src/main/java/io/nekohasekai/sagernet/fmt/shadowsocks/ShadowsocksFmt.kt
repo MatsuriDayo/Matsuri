@@ -19,10 +19,10 @@
 
 package io.nekohasekai.sagernet.fmt.shadowsocks
 
-import cn.hutool.core.codec.Base64
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginOptions
 import io.nekohasekai.sagernet.ktx.*
+import moe.matsuri.nya.utils.NekomuraUtil
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.json.JSONObject
 
@@ -153,7 +153,7 @@ fun parseShadowsocks(url: String): ShadowsocksBean {
 
 fun ShadowsocksBean.toUri(): String {
 
-    val builder = linkBuilder().username(Base64.encodeUrlSafe("$method:$password"))
+    val builder = linkBuilder().username(NekomuraUtil.b64EncodeUrlSafe("$method:$password"))
         .host(serverAddress)
         .port(serverPort)
 

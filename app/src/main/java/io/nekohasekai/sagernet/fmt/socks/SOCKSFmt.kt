@@ -19,8 +19,8 @@
 
 package io.nekohasekai.sagernet.fmt.socks
 
-import cn.hutool.core.codec.Base64
 import io.nekohasekai.sagernet.ktx.*
+import moe.matsuri.nya.utils.NekomuraUtil
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
@@ -86,7 +86,7 @@ fun SOCKSBean.toV2rayN(): String {
         link += username.urlSafe() + ":" + password.urlSafe() + "@"
     }
     link += "$serverAddress:$serverPort"
-    link = "socks://" + Base64.encode(link)
+    link = "socks://" + NekomuraUtil.b64EncodeUrlSafe(link)
     if (name.isNotBlank()) {
         link += "#" + name.urlSafe()
     }

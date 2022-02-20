@@ -30,14 +30,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import cn.hutool.core.clone.Cloneable;
-import cn.hutool.core.util.StrUtil;
 import io.nekohasekai.sagernet.ExtraType;
 import io.nekohasekai.sagernet.fmt.gson.GsonsKt;
 import io.nekohasekai.sagernet.ktx.KryosKt;
 import io.nekohasekai.sagernet.ktx.NetsKt;
+import moe.matsuri.nya.utils.JavaUtil;
 
-public abstract class AbstractBean extends Serializable implements Cloneable<AbstractBean> {
+public abstract class AbstractBean extends Serializable {
 
     public String serverAddress;
     public Integer serverPort;
@@ -54,7 +53,7 @@ public abstract class AbstractBean extends Serializable implements Cloneable<Abs
     public List<String> tags;
 
     public String displayName() {
-        if (StrUtil.isNotBlank(name)) {
+        if (JavaUtil.isNotBlank(name)) {
             return name;
         } else {
             return displayAddress();
@@ -83,7 +82,7 @@ public abstract class AbstractBean extends Serializable implements Cloneable<Abs
 
     @Override
     public void initializeDefaultValues() {
-        if (StrUtil.isBlank(serverAddress)) {
+        if (JavaUtil.isNullOrBlank(serverAddress)) {
             serverAddress = "127.0.0.1";
         } else if (serverAddress.startsWith("[") && serverAddress.endsWith("]")) {
             serverAddress = NetsKt.unwrapIPV6Host(serverAddress);

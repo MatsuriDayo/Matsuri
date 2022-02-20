@@ -22,7 +22,6 @@ package io.nekohasekai.sagernet.widget
 import android.content.Context
 import android.util.AttributeSet
 import androidx.core.widget.addTextChangedListener
-import cn.hutool.core.util.CharUtil
 import com.google.android.material.textfield.TextInputLayout
 import com.takisoft.preferencex.EditTextPreference
 import io.nekohasekai.sagernet.R
@@ -106,13 +105,7 @@ class OOCv1TokenPreference : EditTextPreference {
                             when {
                                 certSha256.length != 64 -> {
                                     isValid = false
-                                    linkLayout.error =
-                                        "certSha256 must be a SHA-256 hexadecimal string"
-                                }
-                                !certSha256.all { CharUtil.isLetterLower(it) || CharUtil.isNumber(it) } -> {
-                                    isValid = false
-                                    linkLayout.error =
-                                        "certSha256 must be a hexadecimal string with lowercase letters"
+                                    linkLayout.error = "certSha256 must be a SHA-256 hexadecimal string"
                                 }
                             }
                         }

@@ -19,7 +19,6 @@
 
 package io.nekohasekai.sagernet.group
 
-import cn.hutool.core.util.CharUtil
 import com.github.shadowsocks.plugin.PluginConfiguration
 import com.github.shadowsocks.plugin.PluginOptions
 import io.nekohasekai.sagernet.ExtraType
@@ -84,9 +83,6 @@ object OpenOnlineConfigUpdater : GroupUpdater() {
                 when {
                     certSha256.length != 64 -> {
                         error("certSha256 must be a SHA-256 hexadecimal string")
-                    }
-                    !certSha256.all { CharUtil.isLetterLower(it) || CharUtil.isNumber(it) } -> {
-                        error("certSha256 must be a hexadecimal string with lowercase letters")
                     }
                 }
             }

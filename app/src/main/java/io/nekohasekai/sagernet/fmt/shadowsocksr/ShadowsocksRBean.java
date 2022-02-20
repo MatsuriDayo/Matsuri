@@ -26,9 +26,9 @@ import com.esotericsoftware.kryo.io.ByteBufferOutput;
 
 import org.jetbrains.annotations.NotNull;
 
-import cn.hutool.core.util.StrUtil;
 import io.nekohasekai.sagernet.fmt.AbstractBean;
 import io.nekohasekai.sagernet.fmt.KryoConverters;
+import moe.matsuri.nya.utils.JavaUtil;
 
 public class ShadowsocksRBean extends AbstractBean {
 
@@ -44,10 +44,10 @@ public class ShadowsocksRBean extends AbstractBean {
         super.initializeDefaultValues();
 
         if (password == null) password = "";
-        if (StrUtil.isBlank(method)) method = "aes-256-cfb";
-        if (StrUtil.isBlank(protocol)) protocol = "origin";
+        if (JavaUtil.isNullOrBlank(method)) method = "aes-256-cfb";
+        if (JavaUtil.isNullOrBlank(protocol)) protocol = "origin";
         if (protocolParam == null) protocolParam = "";
-        if (StrUtil.isBlank(obfs)) obfs = "plain";
+        if (JavaUtil.isNullOrBlank(obfs)) obfs = "plain";
         if (obfsParam == null) obfsParam = "";
 
     }

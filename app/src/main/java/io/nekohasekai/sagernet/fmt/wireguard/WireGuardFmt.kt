@@ -19,10 +19,10 @@
 
 package io.nekohasekai.sagernet.fmt.wireguard
 
-import cn.hutool.core.codec.Base64
-import cn.hutool.core.util.HexUtil
 import com.wireguard.crypto.Key
 import io.nekohasekai.sagernet.ktx.wrapUri
+import moe.matsuri.nya.utils.JavaUtil
+import moe.matsuri.nya.utils.NekomuraUtil
 
 fun WireGuardBean.buildWireGuardUapiConf(): String {
 
@@ -32,7 +32,7 @@ fun WireGuardBean.buildWireGuardUapiConf(): String {
     conf += Key.fromBase64(peerPublicKey).toHex()
     if (peerPreSharedKey.isNotBlank()) {
         conf += "\npreshared_key="
-        conf += HexUtil.encodeHexStr(Base64.decode(peerPreSharedKey))
+        conf += JavaUtil.bytesToHex(NekomuraUtil.b64Decode(peerPreSharedKey))
     }
     conf += "\nendpoint=${wrapUri()}"
     conf += "\nallowed_ip=0.0.0.0/0"

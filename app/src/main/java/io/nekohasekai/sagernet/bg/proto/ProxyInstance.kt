@@ -19,9 +19,6 @@
 
 package io.nekohasekai.sagernet.bg.proto
 
-//import io.nekohasekai.sagernet.BuildConfig
-//import io.nekohasekai.sagernet.bg.test.DebugInstance
-import cn.hutool.core.util.NumberUtil
 import com.v2ray.core.app.observatory.OutboundStatus
 import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.database.DataStore
@@ -73,7 +70,7 @@ class ProxyInstance(profile: ProxyEntity, val service: BaseService.Interface) : 
         val time = (System.currentTimeMillis() / 1000) - 300
         for (observatoryTag in config.observatoryTags) {
             val profileId = observatoryTag.substringAfter("global-")
-            if (NumberUtil.isLong(profileId)) {
+            if (profileId.toLongOrNull() != null) {
                 val id = profileId.toLong()
                 val profile = when {
                     id == profile.id -> profile
@@ -105,7 +102,7 @@ class ProxyInstance(profile: ProxyEntity, val service: BaseService.Interface) : 
         }
         val status = OutboundStatus.parseFrom(statusPb)
         val profileId = status.outboundTag.substringAfter("global-")
-        if (NumberUtil.isLong(profileId)) {
+        if (profileId.toLongOrNull() != null) {
             val id = profileId.toLong()
             val profile = when {
                 id == profile.id -> profile

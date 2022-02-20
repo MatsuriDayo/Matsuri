@@ -28,7 +28,6 @@ import android.text.style.ForegroundColorSpan
 import android.view.*
 import android.widget.ScrollView
 import androidx.appcompat.widget.Toolbar
-import cn.hutool.core.util.RuntimeUtil
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.databinding.LayoutLogcatBinding
 import io.nekohasekai.sagernet.ktx.*
@@ -94,7 +93,7 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
                 runOnDefaultDispatcher {
                     try {
                         Libcore.nekoLogClear()
-                        RuntimeUtil.exec("/system/bin/logcat", "-c").waitFor()
+                        Runtime.getRuntime().exec("/system/bin/logcat -c")
                     } catch (e: Exception) {
                         onMainDispatcher {
                             snackbar(e.readableMessage).show()

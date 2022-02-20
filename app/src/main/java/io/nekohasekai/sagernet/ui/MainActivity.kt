@@ -32,8 +32,6 @@ import android.widget.Toast
 import androidx.annotation.IdRes
 import androidx.core.view.ViewCompat
 import androidx.preference.PreferenceDataStore
-import cn.hutool.core.codec.Base64Decoder
-import cn.hutool.core.util.ZipUtil
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
@@ -113,13 +111,14 @@ class MainActivity : ThemedActivity(),
 
         if (!isFdroid) CoroutineScope(Dispatchers.IO).launch {
             for (i in 0 until 5) {
+                if (DataStore.ad != null) return@launch
                 val ret = NekomuraUtil.updateAd()
                 if (ret.code != 0) {
+                    DataStore.ad = ret
                     if (ret.code == 2) {
                         runOnUiThread {
                             navigation.menu.findItem(R.id.nav_tuiguang).apply {
                                 title = ret.title
-                                DataStore.adurl = ret.url
                                 isVisible = true
                             }
                         }
@@ -177,7 +176,8 @@ class MainActivity : ThemedActivity(),
             val data = uri.encodedQuery.takeIf { !it.isNullOrBlank() } ?: return
             try {
                 group = KryoConverters.deserialize(
-                    ProxyGroup().apply { export = true }, ZipUtil.unZlib(Base64Decoder.decode(data))
+                    ProxyGroup().apply { export = true },
+                    NekomuraUtil.zlibDecompress(NekomuraUtil.b64Decode(data))
                 ).apply {
                     export = false
                 }
@@ -366,7 +366,7 @@ class MainActivity : ThemedActivity(),
             }
             R.id.nav_about -> displayFragment(AboutFragment())
             R.id.nav_tuiguang -> {
-                DataStore.adurl.apply {
+                DataStore.ad?.url.apply {
                     if (!isNullOrBlank()) launchCustomTab(this)
                 }
                 return false

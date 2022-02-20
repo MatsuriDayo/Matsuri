@@ -45,9 +45,6 @@ import androidx.fragment.app.FragmentManager
 import androidx.preference.Preference
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
-import cn.hutool.core.net.URLDecoder
-import cn.hutool.core.net.URLEncoder
-import cn.hutool.core.util.CharsetUtil
 import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
@@ -60,9 +57,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import sun.misc.Unsafe
 import java.io.FileDescriptor
-import java.net.HttpURLConnection
-import java.net.InetAddress
-import java.net.Socket
+import java.net.*
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicLong
@@ -178,27 +173,17 @@ fun DialogFragment.showAllowingStateLoss(fragmentManager: FragmentManager, tag: 
     if (!fragmentManager.isStateSaved) show(fragmentManager, tag)
 }
 
-private val encoder = URLEncoder().apply {
-
-    addSafeCharacter('*')
-    addSafeCharacter('-')
-    addSafeCharacter('.')
-    addSafeCharacter('_')
-    addSafeCharacter('&')
-    addSafeCharacter('/')
-
-}
-
 fun String.pathSafe(): String {
-    return encoder.encode(this, CharsetUtil.CHARSET_UTF_8)
+    // " " encoded as +
+    return URLEncoder.encode(this, "UTF-8")
 }
 
 fun String.urlSafe(): String {
-    return URLEncoder.ALL.encode(this, CharsetUtil.CHARSET_UTF_8)
+    return URLEncoder.encode(this, "UTF-8").replace("+", "%20")
 }
 
 fun String.unUrlSafe(): String {
-    return URLDecoder.decode(this, CharsetUtil.CHARSET_UTF_8)
+    return URLDecoder.decode(this, "UTF-8")
 }
 
 fun RecyclerView.scrollTo(index: Int, force: Boolean = false) {
@@ -304,8 +289,8 @@ var isExpert: Boolean
     get() = BuildConfig.DEBUG || DataStore.isExpert
     set(value) = TODO()
 
-const val isOss  = BuildConfig.FLAVOR == "oss"
-const val isFdroid  = BuildConfig.FLAVOR == "fdroid"
+const val isOss = BuildConfig.FLAVOR == "oss"
+const val isFdroid = BuildConfig.FLAVOR == "fdroid"
 
 val LAUNCH_DELAY = System.currentTimeMillis() - SystemClock.elapsedRealtime()
 

@@ -10,7 +10,10 @@ import io.nekohasekai.sagernet.ktx.Logs
 import libcore.HTTPResponse
 import libcore.Libcore
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.util.zip.Deflater
+import java.util.zip.Inflater
 import kotlin.math.roundToInt
 
 fun SagerNet.cleanWebview() {
@@ -103,7 +106,6 @@ object NekomuraUtil {
      * @return 返回 String
      */
     fun getSubString(text: String, left: String?, right: String?): String {
-        var result: String
         var zLen: Int
         if (left == null || left.isEmpty()) {
             zLen = 0
@@ -119,18 +121,82 @@ object NekomuraUtil {
         if (yLen < 0 || right == null || right.isEmpty()) {
             yLen = text.length
         }
-        result = text.substring(zLen, yLen)
-        return result
+        return text.substring(zLen, yLen)
     }
 
-    // Base64 for JS
+    // Base64 for all
 
-    fun b64Encode(b: ByteArray): String {
+    fun b64EncodeUrlSafe(s: String): String {
+        return b64EncodeUrlSafe(s.toByteArray())
+    }
+
+    fun b64EncodeUrlSafe(b: ByteArray): String {
         return String(Base64.encode(b, Base64.NO_PADDING or Base64.NO_WRAP or Base64.URL_SAFE))
     }
 
+    // v2rayN Style
+    fun b64EncodeOneLine(b: ByteArray): String {
+        return String(Base64.encode(b, Base64.NO_WRAP))
+    }
+
+    fun b64EncodeDefault(b: ByteArray): String {
+        return String(Base64.encode(b, Base64.DEFAULT))
+    }
+
     fun b64Decode(b: String): ByteArray {
-        return Base64.decode(b, Base64.NO_PADDING or Base64.NO_WRAP or Base64.URL_SAFE)
+        var ret: ByteArray? = null
+
+        // padding 自动处理，不用理
+        // URLSafe 需要替换这两个，不要用 URL_SAFE 否则处理非 Safe 的时候会乱码
+        val str = b.replace("-", "+").replace("_", "/")
+
+        val flags = listOf(
+            Base64.DEFAULT, // 多行
+            Base64.NO_WRAP, // 单行
+        )
+
+        for (flag in flags) {
+            try {
+                ret = Base64.decode(str, flag)
+            } catch (e: Exception) {
+            }
+            if (ret != null) return ret
+        }
+
+        throw IllegalStateException("Cannot decode base64")
+    }
+
+    fun zlibCompress(input: ByteArray, level: Int): ByteArray {
+        // Compress the bytes
+        // 1 to 4 bytes/char for UTF-8
+        val output = ByteArray(input.size * 4)
+        val compressor = Deflater(level).apply {
+            setInput(input)
+            finish()
+        }
+        val compressedDataLength: Int = compressor.deflate(output)
+        compressor.end()
+        return output.copyOfRange(0, compressedDataLength)
+    }
+
+    fun zlibDecompress(input: ByteArray): ByteArray {
+        val inflater = Inflater()
+        val outputStream = ByteArrayOutputStream()
+
+        return outputStream.use {
+            val buffer = ByteArray(1024)
+
+            inflater.setInput(input)
+
+            var count = -1
+            while (count != 0) {
+                count = inflater.inflate(buffer)
+                outputStream.write(buffer, 0, count)
+            }
+
+            inflater.end()
+            outputStream.toByteArray()
+        }
     }
 
 }

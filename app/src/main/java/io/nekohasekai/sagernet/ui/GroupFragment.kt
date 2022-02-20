@@ -81,8 +81,7 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
             ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.START
         ) {
             override fun getSwipeDirs(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder
+                recyclerView: RecyclerView, viewHolder: RecyclerView.ViewHolder
             ): Int {
                 val proxyGroup = (viewHolder as GroupHolder).proxyGroup
                 if (proxyGroup.ungrouped || proxyGroup.id in GroupUpdater.updating) {
@@ -337,8 +336,7 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
             when (item.itemId) {
                 R.id.action_universal_qr -> {
                     QRCodeDialog(
-                        proxyGroup.toUniversalLink(),
-                        proxyGroup.displayName()
+                        proxyGroup.toUniversalLink(), proxyGroup.displayName()
                     ).showAllowingStateLoss(parentFragmentManager)
                 }
                 R.id.action_universal_clipboard -> {

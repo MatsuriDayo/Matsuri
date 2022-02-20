@@ -19,22 +19,20 @@
 
 package io.nekohasekai.sagernet.fmt
 
-import cn.hutool.core.codec.Base64Decoder
-import cn.hutool.core.codec.Base64Encoder
-import cn.hutool.core.util.ZipUtil
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.database.ProxyGroup
+import moe.matsuri.nya.utils.NekomuraUtil
 
 fun parseUniversal(link: String): AbstractBean {
     return if (link.contains("?")) {
         val type = link.substringAfter("sn://").substringBefore("?")
         ProxyEntity(type = TypeMap[type] ?: error("Type $type not found")).apply {
-            putByteArray(ZipUtil.unZlib(Base64Decoder.decode(link.substringAfter("?"))))
+            putByteArray(NekomuraUtil.zlibDecompress(NekomuraUtil.b64Decode(link.substringAfter("?"))))
         }.requireBean()
     } else {
         val type = link.substringAfter("sn://").substringBefore(":")
         ProxyEntity(type = TypeMap[type] ?: error("Type $type not found")).apply {
-            putByteArray(Base64Decoder.decode(link.substringAfter(":").substringAfter(":")))
+            putByteArray(NekomuraUtil.b64Decode(link.substringAfter(":").substringAfter(":")))
         }.requireBean()
     }
 }
@@ -43,7 +41,7 @@ fun AbstractBean.toUniversalLink(): String {
     var link = "sn://"
     link += TypeMap.reversed[ProxyEntity().putBean(this).type]
     link += "?"
-    link += Base64Encoder.encodeUrlSafe(ZipUtil.zlib(KryoConverters.serialize(this), 9))
+    link += NekomuraUtil.b64EncodeUrlSafe(NekomuraUtil.zlibCompress(KryoConverters.serialize(this), 9))
     return link
 }
 
@@ -51,7 +49,7 @@ fun AbstractBean.toUniversalLink(): String {
 fun ProxyGroup.toUniversalLink(): String {
     var link = "sn://subscription?"
     export = true
-    link += Base64Encoder.encodeUrlSafe(ZipUtil.zlib(KryoConverters.serialize(this), 9))
+    link += NekomuraUtil.b64EncodeUrlSafe(NekomuraUtil.zlibCompress(KryoConverters.serialize(this), 9))
     export = false
     return link
 }

@@ -29,8 +29,6 @@ android {
 
 dependencies {
 
-    val hutoolVersion = rootProject.extra["hutoolVersion"].toString()
-
     implementation(fileTree("libs"))
     compileOnly(project(":library:stub"))
     implementation(project(":library:include"))
@@ -53,7 +51,6 @@ dependencies {
     implementation(project(":external:preferencex:preferencex-simplemenu"))
 
     implementation("com.google.android.material:material:1.5.0")
-    implementation("cn.hutool:hutool-core:$hutoolVersion")
     implementation("com.google.code.gson:gson:2.8.9")
     implementation("com.google.zxing:core:3.4.1")
 

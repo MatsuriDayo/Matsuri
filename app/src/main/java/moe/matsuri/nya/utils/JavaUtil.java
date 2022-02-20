@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 import io.nekohasekai.sagernet.BuildConfig;
 import io.nekohasekai.sagernet.ktx.Logs;
+import kotlin.text.StringsKt;
 
 public class JavaUtil {
 
@@ -154,6 +155,32 @@ public class JavaUtil {
         } catch (Exception e) {
             return BuildConfig.APPLICATION_ID;
         }
+    }
+
+    // Old hutool Utils
+
+    public static boolean isNullOrBlank(String str) {
+        return str == null || StringsKt.isBlank(str);
+    }
+
+    public static boolean isNotBlank(String str) {
+        return !isNullOrBlank(str);
+    }
+
+    private static final char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
+
+    public static String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
+
+    public static boolean isEmpty(byte[] array) {
+        return array == null || array.length == 0;
     }
 
 }

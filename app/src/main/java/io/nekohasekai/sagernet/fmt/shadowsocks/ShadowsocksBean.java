@@ -26,9 +26,9 @@ import com.esotericsoftware.kryo.io.ByteBufferOutput;
 
 import org.jetbrains.annotations.NotNull;
 
-import cn.hutool.core.util.StrUtil;
 import io.nekohasekai.sagernet.fmt.AbstractBean;
 import io.nekohasekai.sagernet.fmt.KryoConverters;
+import moe.matsuri.nya.utils.JavaUtil;
 
 public class ShadowsocksBean extends AbstractBean {
 
@@ -42,7 +42,7 @@ public class ShadowsocksBean extends AbstractBean {
     public void initializeDefaultValues() {
         super.initializeDefaultValues();
 
-        if (StrUtil.isBlank(method)) method = "aes-256-gcm";
+        if (JavaUtil.isNullOrBlank(method)) method = "aes-256-gcm";
         if (method == null) method = "";
         if (password == null) password = "";
         if (plugin == null) plugin = "";

@@ -29,8 +29,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.hutool.core.util.StrUtil;
 import io.nekohasekai.sagernet.fmt.KryoConverters;
+import moe.matsuri.nya.utils.JavaUtil;
 
 public class ChainBean extends InternalBean {
 
@@ -38,7 +38,7 @@ public class ChainBean extends InternalBean {
 
     @Override
     public String displayName() {
-        if (StrUtil.isNotBlank(name)) {
+        if (JavaUtil.isNotBlank(name)) {
             return name;
         } else {
             return "Chain " + Math.abs(hashCode());

@@ -26,9 +26,9 @@ import com.esotericsoftware.kryo.io.ByteBufferOutput;
 
 import org.jetbrains.annotations.NotNull;
 
-import cn.hutool.core.util.StrUtil;
 import io.nekohasekai.sagernet.fmt.AbstractBean;
 import io.nekohasekai.sagernet.fmt.KryoConverters;
+import moe.matsuri.nya.utils.JavaUtil;
 
 public class TrojanBean extends AbstractBean {
 
@@ -47,7 +47,7 @@ public class TrojanBean extends AbstractBean {
         super.initializeDefaultValues();
 
         if (password == null) password = "";
-        if (StrUtil.isBlank(security)) security = "tls";
+        if (JavaUtil.isNullOrBlank(security)) security = "tls";
         if (sni == null) sni = "";
         if (alpn == null) alpn = "";
         if (allowInsecure == null) allowInsecure = false;

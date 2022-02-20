@@ -1,4 +1,3 @@
-import cn.hutool.crypto.digest.DigestUtil
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.gradle.api.Project
@@ -60,7 +59,7 @@ fun Project.downloadAssets() {
                     geoipFile.outputStream().use { out -> it.copyTo(out) }
                 }
 
-            val fileSha256 = DigestUtil.sha256Hex(geoipFile).toUpperCase(Locale.ROOT)
+            val fileSha256 = sha256Hex(geoipFile.readBytes()).toUpperCase(Locale.ROOT)
             if (fileSha256 != checksum) {
                 System.err.println(
                     "Error verifying ${geoipFile.name}: \nLocal: ${
@@ -121,7 +120,7 @@ fun Project.downloadAssets() {
                     geositeFile.outputStream().use { out -> it.copyTo(out) }
                 }
 
-            val fileSha256 = DigestUtil.sha256Hex(geositeFile).toUpperCase(Locale.ROOT)
+            val fileSha256 = sha256Hex(geositeFile.readBytes()).toUpperCase(Locale.ROOT)
             if (fileSha256 != checksum) {
                 System.err.println(
                     "Error verifying ${geositeFile.name}: \nLocal: ${

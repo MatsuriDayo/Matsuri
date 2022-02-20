@@ -19,7 +19,6 @@
 
 package io.nekohasekai.sagernet.fmt.hysteria
 
-import cn.hutool.core.util.NumberUtil
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.fmt.LOCALHOST
 import io.nekohasekai.sagernet.ktx.*
@@ -115,9 +114,7 @@ fun HysteriaBean.toUri(): String {
 fun JSONObject.parseHysteria(): HysteriaBean {
     return HysteriaBean().apply {
         serverAddress = optString("server").substringBeforeLast(":")
-        serverPort = optString("server").substringAfterLast(":")
-            .takeIf { NumberUtil.isInteger(it) }
-            ?.toInt() ?: 443
+        serverPort = optString("server").substringAfterLast(":").toIntOrNull() ?: 443
         uploadMbps = getIntNya("up_mbps")
         downloadMbps = getIntNya("down_mbps")
         obfuscation = getStr("obfs")

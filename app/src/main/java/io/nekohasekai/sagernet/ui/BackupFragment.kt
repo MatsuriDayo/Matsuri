@@ -29,8 +29,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.FileProvider
 import androidx.core.view.isVisible
-import cn.hutool.core.codec.Base64Decoder
-import cn.hutool.core.codec.Base64Encoder
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jakewharton.processphoenix.ProcessPhoenix
 import io.nekohasekai.sagernet.BuildConfig
@@ -43,6 +41,7 @@ import io.nekohasekai.sagernet.databinding.LayoutBackupBinding
 import io.nekohasekai.sagernet.databinding.LayoutImportBinding
 import io.nekohasekai.sagernet.databinding.LayoutProgressBinding
 import io.nekohasekai.sagernet.ktx.*
+import moe.matsuri.nya.utils.NekomuraUtil
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -133,7 +132,7 @@ class BackupFragment : NamedFragment(R.layout.layout_backup) {
         val parcel = Parcel.obtain()
         writeToParcel(parcel, 0)
         try {
-            return Base64Encoder.encodeStr(parcel.marshall(), false, false)
+            return NekomuraUtil.b64EncodeUrlSafe(parcel.marshall())
         } finally {
             parcel.recycle()
         }
@@ -170,7 +169,7 @@ class BackupFragment : NamedFragment(R.layout.layout_backup) {
                 })
             }
         }
-        return out.toString()
+        return out.toStringPretty()
     }
 
     val importFile = registerForActivityResult(ActivityResultContracts.GetContent()) { file ->
@@ -276,7 +275,7 @@ class BackupFragment : NamedFragment(R.layout.layout_backup) {
             val profiles = mutableListOf<ProxyEntity>()
             val jsonProfiles = content.getJSONArray("profiles")
             for (i in 0 until jsonProfiles.length()) {
-                val data = Base64Decoder.decode(jsonProfiles[i] as String)
+                val data = NekomuraUtil.b64Decode(jsonProfiles[i] as String)
                 val parcel = Parcel.obtain()
                 parcel.unmarshall(data, 0, data.size)
                 parcel.setDataPosition(0)
@@ -289,7 +288,7 @@ class BackupFragment : NamedFragment(R.layout.layout_backup) {
             val groups = mutableListOf<ProxyGroup>()
             val jsonGroups = content.getJSONArray("groups")
             for (i in 0 until jsonGroups.length()) {
-                val data = Base64Decoder.decode(jsonGroups[i] as String)
+                val data = NekomuraUtil.b64Decode(jsonGroups[i] as String)
                 val parcel = Parcel.obtain()
                 parcel.unmarshall(data, 0, data.size)
                 parcel.setDataPosition(0)
@@ -303,7 +302,7 @@ class BackupFragment : NamedFragment(R.layout.layout_backup) {
             val rules = mutableListOf<RuleEntity>()
             val jsonRules = content.getJSONArray("rules")
             for (i in 0 until jsonRules.length()) {
-                val data = Base64Decoder.decode(jsonRules[i] as String)
+                val data = NekomuraUtil.b64Decode(jsonRules[i] as String)
                 val parcel = Parcel.obtain()
                 parcel.unmarshall(data, 0, data.size)
                 parcel.setDataPosition(0)
@@ -317,7 +316,7 @@ class BackupFragment : NamedFragment(R.layout.layout_backup) {
             val settings = mutableListOf<KeyValuePair>()
             val jsonSettings = content.getJSONArray("settings")
             for (i in 0 until jsonSettings.length()) {
-                val data = Base64Decoder.decode(jsonSettings[i] as String)
+                val data = NekomuraUtil.b64Decode(jsonSettings[i] as String)
                 val parcel = Parcel.obtain()
                 parcel.unmarshall(data, 0, data.size)
                 parcel.setDataPosition(0)

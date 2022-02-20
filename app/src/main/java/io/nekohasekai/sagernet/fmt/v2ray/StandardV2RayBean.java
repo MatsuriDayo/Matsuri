@@ -22,10 +22,8 @@ package io.nekohasekai.sagernet.fmt.v2ray;
 import com.esotericsoftware.kryo.io.ByteBufferInput;
 import com.esotericsoftware.kryo.io.ByteBufferOutput;
 
-import cn.hutool.core.lang.UUID;
-import cn.hutool.core.util.StrUtil;
 import io.nekohasekai.sagernet.fmt.AbstractBean;
-import io.nekohasekai.sagernet.ktx.UUIDsKt;
+import moe.matsuri.nya.utils.JavaUtil;
 
 /**
  * https://github.com/XTLS/Xray-core/issues/91
@@ -164,23 +162,23 @@ public abstract class StandardV2RayBean extends AbstractBean {
     public void initializeDefaultValues() {
         super.initializeDefaultValues();
 
-        if (StrUtil.isBlank(uuid)) uuid = "";
+        if (JavaUtil.isNullOrBlank(uuid)) uuid = "";
 
-        if (StrUtil.isBlank(type)) type = "tcp";
+        if (JavaUtil.isNullOrBlank(type)) type = "tcp";
         else if ("h2".equals(type)) type = "http";
 
-        if (StrUtil.isBlank(host)) host = "";
-        if (StrUtil.isBlank(path)) path = "";
-        if (StrUtil.isBlank(headerType)) headerType = "";
-        if (StrUtil.isBlank(mKcpSeed)) mKcpSeed = "";
-        if (StrUtil.isBlank(quicSecurity)) quicSecurity = "";
-        if (StrUtil.isBlank(quicKey)) quicKey = "";
+        if (JavaUtil.isNullOrBlank(host)) host = "";
+        if (JavaUtil.isNullOrBlank(path)) path = "";
+        if (JavaUtil.isNullOrBlank(headerType)) headerType = "";
+        if (JavaUtil.isNullOrBlank(mKcpSeed)) mKcpSeed = "";
+        if (JavaUtil.isNullOrBlank(quicSecurity)) quicSecurity = "";
+        if (JavaUtil.isNullOrBlank(quicKey)) quicKey = "";
 
-        if (StrUtil.isBlank(security)) security = "";
-        if (StrUtil.isBlank(sni)) sni = "";
-        if (StrUtil.isBlank(alpn)) alpn = "";
+        if (JavaUtil.isNullOrBlank(security)) security = "";
+        if (JavaUtil.isNullOrBlank(sni)) sni = "";
+        if (JavaUtil.isNullOrBlank(alpn)) alpn = "";
 
-        if (StrUtil.isBlank(grpcServiceName)) grpcServiceName = "";
+        if (JavaUtil.isNullOrBlank(grpcServiceName)) grpcServiceName = "";
         if (wsMaxEarlyData == null) wsMaxEarlyData = 0;
         if (wsUseBrowserForwarder == null) wsUseBrowserForwarder = false;
         if (certificates == null) certificates = "";
@@ -335,14 +333,6 @@ public abstract class StandardV2RayBean extends AbstractBean {
         StandardV2RayBean bean = ((StandardV2RayBean) other);
         bean.wsUseBrowserForwarder = wsUseBrowserForwarder;
         bean.allowInsecure = allowInsecure;
-    }
-
-    public String uuidOrGenerate() {
-        try {
-            return UUID.fromString(uuid).toString(false);
-        } catch (Exception ignored) {
-            return UUIDsKt.uuid5(uuid);
-        }
     }
 
 }

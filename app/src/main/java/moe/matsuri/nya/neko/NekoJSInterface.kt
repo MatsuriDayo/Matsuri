@@ -167,7 +167,7 @@ class NekoJSInterface(val plgId: String) {
 
         return callJS(
             "nekoInit(\"${
-                NekomuraUtil.b64Encode(
+                NekomuraUtil.b64EncodeUrlSafe(
                     sendData.toString().toByteArray()
                 )
             }\")"
@@ -201,12 +201,12 @@ class NekoJSInterface(val plgId: String) {
             val sendData = JSONObject()
             sendData.put("port", port)
             sendData.put(
-                "sharedStorage", NekomuraUtil.b64Encode(bean.sharedStorage.toString().toByteArray())
+                "sharedStorage", NekomuraUtil.b64EncodeUrlSafe(bean.sharedStorage.toString().toByteArray())
             )
             otherArgs?.forEach { (t, u) -> sendData.put(t, u) }
 
             return callProtocol(
-                "buildAllConfig", NekomuraUtil.b64Encode(sendData.toString().toByteArray())
+                "buildAllConfig", NekomuraUtil.b64EncodeUrlSafe(sendData.toString().toByteArray())
             )
         }
 
@@ -215,14 +215,14 @@ class NekoJSInterface(val plgId: String) {
             sendData.put("shareLink", shareLink)
 
             return callProtocol(
-                "parseShareLink", NekomuraUtil.b64Encode(sendData.toString().toByteArray())
+                "parseShareLink", NekomuraUtil.b64EncodeUrlSafe(sendData.toString().toByteArray())
             )
         }
 
         // UI Interface
 
         suspend fun setSharedStorage(sharedStorage: String) {
-            callProtocol("setSharedStorage", NekomuraUtil.b64Encode(sharedStorage.toByteArray()))
+            callProtocol("setSharedStorage", NekomuraUtil.b64EncodeUrlSafe(sharedStorage.toByteArray()))
         }
 
         suspend fun requireSetProfileCache() {
@@ -247,7 +247,7 @@ class NekoJSInterface(val plgId: String) {
             sendData.put("newValue", v)
 
             callProtocol(
-                "onPreferenceChanged", NekomuraUtil.b64Encode(sendData.toString().toByteArray())
+                "onPreferenceChanged", NekomuraUtil.b64EncodeUrlSafe(sendData.toString().toByteArray())
             )
         }
 

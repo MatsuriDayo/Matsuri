@@ -19,8 +19,8 @@
 
 package io.nekohasekai.sagernet.fmt.v2ray
 
-import cn.hutool.core.codec.Base64
 import io.nekohasekai.sagernet.ktx.*
+import moe.matsuri.nya.utils.NekomuraUtil
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.json.JSONObject
 
@@ -343,7 +343,7 @@ fun VMessBean.toV2rayN(): String {
         put("sni", sni)
         put("scy", encryption)
 
-    }.toStringPretty().let { Base64.encodeUrlSafe(it) }
+    }.toStringPretty().let { NekomuraUtil.b64EncodeUrlSafe(it) }
 
 }
 
