@@ -4,13 +4,10 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strconv"
-	"sync"
 
 	"github.com/sagernet/gomobile/asset"
 	"github.com/sirupsen/logrus"
-	"github.com/v2fly/v2ray-core/v5/common/platform/filesystem"
 )
 
 const (
@@ -26,99 +23,31 @@ var assetsPrefix string
 var internalAssetsPath string
 var externalAssetsPath string
 
-var useOfficialAssets bool
-var extracted map[string]bool
-var assetsAccess *sync.Mutex
-
 type BoolFunc interface {
 	Invoke() bool
 }
 
-func extractV2RayAssets(internalAssets string, externalAssets string, prefix string, useOfficial BoolFunc) {
-	assetsAccess = new(sync.Mutex)
-	assetsAccess.Lock()
-	extracted = make(map[string]bool)
-
-	assetsPrefix = prefix
-	internalAssetsPath = internalAssets
-	externalAssetsPath = externalAssets
-
-	filesystem.NewFileSeeker = func(path string) (io.ReadSeekCloser, error) {
-		_, fileName := filepath.Split(path)
-
-		if !extracted[fileName] {
-			assetsAccess.Lock()
-			assetsAccess.Unlock()
-		}
-
-		paths := []string{
-			internalAssetsPath + fileName,
-			externalAssetsPath + fileName,
-		}
-
-		var err error
-
-		for _, path = range paths {
-			_, err = os.Stat(path)
-			if err == nil {
-				return os.Open(path)
-			}
-		}
-
-		file, err := asset.Open(assetsPrefix + fileName)
-		if err == nil {
-			extracted[fileName] = true
-			return file, nil
-		}
-
-		err = extractAssetName(fileName, false)
-		if err != nil {
-			return nil, err
-		}
-
-		for _, path = range paths {
-			_, err = os.Stat(path)
-			if err == nil {
-				return os.Open(path)
-			}
-			if !os.IsNotExist(err) {
-				return nil, err
-			}
-		}
-
-		return nil, err
-	}
-
-	filesystem.NewFileReader = func(path string) (io.ReadCloser, error) {
-		return filesystem.NewFileSeeker(path)
-	}
+func extractV2RayAssets(useOfficial BoolFunc) {
+	useOfficialAssets := useOfficial.Invoke()
 
 	extract := func(name string) {
-		err := extractAssetName(name, false)
+		err := extractAssetName(name, false, useOfficialAssets)
 		if err != nil {
 			logrus.Warnf("Extract %s failed: %v", geoipDat, err)
-		} else {
-			extracted[name] = true
 		}
 	}
 
-	go func() {
-		defer assetsAccess.Unlock()
-		useOfficialAssets = useOfficial.Invoke()
-
-		extract(geoipDat)
-		extract(geositeDat)
-		extract(browserForwarder)
-	}()
+	extract(geoipDat)
+	extract(geositeDat)
+	extract(browserForwarder)
 }
 
-func extractAssetName(name string, force bool) error {
-	var dir string
-	if name == browserForwarder {
-		dir = internalAssetsPath
-	} else {
-		dir = externalAssetsPath
-	}
+// 这里解压的是 apk 里面的
+func extractAssetName(name string, force bool, useOfficialAssets bool) error {
+	// 支持非官方源的，就是 replaceable，放 Android 目录
+	// 不支持非官方源的，就放 file 目录
+	replaceable := true
+
 	var version string
 	switch name {
 	case geoipDat:
@@ -127,6 +56,14 @@ func extractAssetName(name string, force bool) error {
 		version = geositeVersion
 	case browserForwarder:
 		version = coreVersion
+		replaceable = false
+	}
+
+	var dir string
+	if !replaceable {
+		dir = internalAssetsPath
+	} else {
+		dir = externalAssetsPath
 	}
 
 	var localVersion string
@@ -151,9 +88,11 @@ func extractAssetName(name string, force bool) error {
 	// check version
 
 	if _, versionNotFoundError := os.Stat(dir + version); versionNotFoundError != nil {
+		// 没有文件，自动解压
 		_, assetNotFoundError := os.Stat(dir + name)
 		doExtract = assetNotFoundError != nil || force
-	} else if useOfficialAssets {
+	} else if useOfficialAssets || !replaceable {
+		// 官方源升级
 		b, err := ioutil.ReadFile(dir + version)
 		if err != nil {
 			doExtract = true
@@ -173,6 +112,7 @@ func extractAssetName(name string, force bool) error {
 			}
 		}
 	} else {
+		//非官方源不升级
 		doExtract = force
 	}
 

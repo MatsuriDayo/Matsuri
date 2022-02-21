@@ -29,6 +29,7 @@ fun SagerNet.cleanWebview() {
 }
 
 fun File.recreate(dir: Boolean) {
+    if (parentFile?.isDirectory != true) return
     if (dir && !isFile) {
         if (exists()) deleteRecursively()
         createNewFile()

@@ -60,6 +60,9 @@ class V2RayTestInstance(profile: ProxyEntity, val link: String, val timeout: Int
 
     override suspend fun loadConfig() {
         // don't call destroyAllJsi here
+        Libcore.setConfig(
+            config.tryDomains.joinToString(","), true
+        )
         v2rayPoint.loadConfig(config.config)
     }
 

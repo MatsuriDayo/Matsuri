@@ -41,16 +41,22 @@ func closeIgnore(closer ...interface{}) {
 	}
 }
 
+func initCoreDefer() {
+	allDefer("InitCore")
+}
+
+func allDefer(name string) {
+	if r := recover(); r != nil {
+		s := fmt.Sprintln(name+" panic", r, string(debug.Stack()))
+		forceLog(s)
+	}
+}
+
 func InitCore(internalAssets string, externalAssets string, prefix string, useOfficial BoolFunc, // extractV2RayAssets
 	cachePath string, process string, //InitCore
 	enableLog bool, maxKB int32, //SetEnableLog
 ) {
-	defer func() {
-		if r := recover(); r != nil {
-			s := fmt.Sprintln("InitCore panic", time.Now().Unix(), r, string(debug.Stack()))
-			forceLog(s)
-		}
-	}()
+	defer initCoreDefer()
 
 	isBgProcess := strings.HasSuffix(process, ":bg")
 
@@ -68,8 +74,15 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 
 	// Set up some component
 	go func() {
-		setupResolvers()
+		defer initCoreDefer()
+
+		externalAssetsPath = externalAssets
+		internalAssetsPath = internalAssets
+		assetsPrefix = prefix
 		Setenv("v2ray.conf.geoloader", "memconservative")
+
+		setupV2rayFileSystem(internalAssets, externalAssets)
+		setupResolvers()
 
 		if time.Now().Unix() >= GetExpireTime() {
 			outdated = "Your version is too old! Please update!! 版本太旧，请升级！"
@@ -82,6 +95,11 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 		roots := x509.NewCertPool()
 		roots.AppendCertsFromPEM([]byte(mozillaCA))
 		systemRoots = roots
+
+		// Extract assets
+		if isBgProcess {
+			extractV2RayAssets(useOfficial)
+		}
 	}()
 
 	if !isBgProcess {
@@ -93,6 +111,7 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 
 	// CA for other programs
 	go func() {
+		defer initCoreDefer()
 		f, err := os.OpenFile(filepath.Join(internalAssets, "ca.pem"), os.O_CREATE|os.O_RDWR, 0644)
 		if err != nil {
 			forceLog("open ca.pem: " + err.Error())
@@ -105,7 +124,4 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 			f.Close()
 		}
 	}()
-
-	// nekomura end
-	go extractV2RayAssets(internalAssets, externalAssets, prefix, useOfficial)
 }

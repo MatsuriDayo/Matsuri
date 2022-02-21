@@ -4,11 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"libcore/device"
 	"libcore/doh"
 	"libcore/protect"
 	"libcore/tun"
+	"log"
 	gonet "net"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -19,6 +23,7 @@ import (
 	"github.com/v2fly/v2ray-core/v5/app/observatory"
 	"github.com/v2fly/v2ray-core/v5/common/buf"
 	"github.com/v2fly/v2ray-core/v5/common/net"
+	"github.com/v2fly/v2ray-core/v5/common/platform/filesystem"
 	"github.com/v2fly/v2ray-core/v5/common/signal"
 	"github.com/v2fly/v2ray-core/v5/features/dns"
 	dns_feature "github.com/v2fly/v2ray-core/v5/features/dns"
@@ -61,16 +66,7 @@ func (instance *V2RayInstance) LoadConfig(content string) error {
 
 	config, err := serial.LoadJSONConfig(strings.NewReader(content))
 	if err != nil {
-		if strings.HasSuffix(err.Error(), "geoip.dat: no such file or directory") {
-			err = extractAssetName(geoipDat, true)
-		} else if strings.HasSuffix(err.Error(), "geosite.dat: no such file or directory") {
-			err = extractAssetName(geositeDat, true)
-		}
-		if err == nil {
-			config, err = serial.LoadJSONConfig(strings.NewReader(content))
-		}
-	}
-	if err != nil {
+		log.Println(content, err.Error())
 		return err
 	}
 
@@ -283,6 +279,28 @@ func setupResolvers() {
 	localdns.SetLookupFunc(androidUnderlyingResolver.LookupIP)
 }
 
-func SetTryDomains(a string) {
-	tryDomains = strings.Split(a, ",")
+func setupV2rayFileSystem(internalAssets, externalAssets string) {
+	filesystem.NewFileSeeker = func(path string) (io.ReadSeekCloser, error) {
+		_, fileName := filepath.Split(path)
+
+		paths := []string{
+			internalAssets + fileName,
+			externalAssets + fileName,
+		}
+
+		var err error
+
+		for _, path = range paths {
+			_, err = os.Stat(path)
+			if err == nil {
+				return os.Open(path)
+			}
+		}
+
+		return nil, err
+	}
+
+	filesystem.NewFileReader = func(path string) (io.ReadCloser, error) {
+		return filesystem.NewFileSeeker(path)
+	}
 }

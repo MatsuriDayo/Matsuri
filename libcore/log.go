@@ -35,6 +35,8 @@ func (f *logrusFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 type v2rayLogWriter struct {
 }
 
+var v2rayLogHook func(s string) string
+
 func (w *v2rayLogWriter) Write(s string) error {
 
 	var priority logrus.Level
@@ -55,6 +57,13 @@ func (w *v2rayLogWriter) Write(s string) error {
 		priority = logrus.ErrorLevel
 	} else {
 		priority = logrus.DebugLevel
+	}
+
+	if v2rayLogHook != nil {
+		s = v2rayLogHook(s)
+		if s == "" {
+			return nil
+		}
 	}
 
 	NekoLogWrite2(int32(priority), strings.Trim(s, " "))
