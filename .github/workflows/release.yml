@@ -36,11 +36,6 @@ jobs:
         run: find buildScript libcore/*.sh | xargs cat | sha1sum > golang_status
       - name: Libcore Status
         run: git ls-files libcore | xargs cat | sha1sum > libcore_status
-      - name: Golang Cache
-        uses: actions/cache@v2
-        with:
-          path: build/golang
-          key: go-${{ hashFiles('.github/workflows/*', 'golang_status') }}
       - name: LibCore Cache
         id: cache
         uses: actions/cache@v2
@@ -49,6 +44,12 @@ jobs:
             app/libs/libcore.aar
             build/v2ray-core
           key: ${{ hashFiles('.github/workflows/*', 'golang_status', 'libcore_status') }}
+      - name: Golang Cache
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v2
+        with:
+          path: build/golang
+          key: go-${{ hashFiles('.github/workflows/*', 'golang_status') }}
       - name: Native Build
         if: steps.cache.outputs.cache-hit != 'true'
         run: ./run init action go && ./run lib core

@@ -40,8 +40,8 @@ dependencies {
     implementation("androidx.browser:browser:1.4.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.4.0")
-    implementation("androidx.navigation:navigation-ui-ktx:2.4.0")
+    implementation("androidx.navigation:navigation-fragment-ktx:2.4.1")
+    implementation("androidx.navigation:navigation-ui-ktx:2.4.1")
     implementation("androidx.preference:preference-ktx:1.2.0")
     implementation("androidx.appcompat:appcompat:1.4.1")
     implementation("androidx.work:work-runtime-ktx:2.7.1")
@@ -52,7 +52,8 @@ dependencies {
 
     implementation("com.google.android.material:material:1.5.0")
     implementation("com.google.code.gson:gson:2.8.9")
-    implementation("com.google.zxing:core:3.4.1")
+
+    implementation("com.github.jenly1314:zxing-lite:2.1.1")
 
     implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.3")
     implementation("org.yaml:snakeyaml:1.30")
@@ -61,7 +62,6 @@ dependencies {
     implementation("com.jakewharton:process-phoenix:2.1.2")
     implementation("com.esotericsoftware:kryo:5.2.1")
     implementation("com.google.guava:guava:31.0.1-android")
-    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
     implementation("org.ini4j:ini4j:0.5.4")
 
     implementation("com.simplecityapps:recyclerview-fastscroll:2.0.1") {
