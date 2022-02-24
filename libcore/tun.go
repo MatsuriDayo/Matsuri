@@ -223,9 +223,9 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 
 	defer closeIgnore(conn)
 
-	//这个 DispatchLink 是 outbound link reader 是上行流量
-	upLinkReader, upLinkWriter := pipe.New()
-	link := &transport.Link{Reader: upLinkReader, Writer: connWriter{conn, buf.NewWriter(conn)}}
+	//这个 DispatchLink 是 outbound, link reader 是上行流量
+	reader, input := pipe.New()
+	link := &transport.Link{Reader: reader, Writer: connWriter{conn, buf.NewWriter(conn)}}
 	err := t.v2ray.dispatcher.DispatchLink(ctx, destination, link)
 
 	if err != nil {
@@ -235,12 +235,11 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 	}
 
 	// copy uplink traffic
-	buf.Copy(buf.NewReader(conn), upLinkWriter)
+	buf.Copy(buf.NewReader(conn), input)
 
 	// connection ends
-	// Interrupt link.Reader breaks mux?
-	common.Close(link.Writer)
-	common.Close(link.Reader)
+	// fuck v2ray pipe
+	common.Interrupt(input)
 }
 
 type connWriter struct {
@@ -370,7 +369,7 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 		})
 	}
 
-	conn, err := t.v2ray.newDispatcherConn(ctx, destination, destination2, time.Minute*5, writeBack)
+	conn, err := t.v2ray.newDispatcherConn(ctx, destination, destination2, time.Minute, writeBack)
 
 	if err != nil {
 		logrus.Errorf("[UDP] dial failed: %s", err.Error())

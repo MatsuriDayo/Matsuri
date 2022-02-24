@@ -62,7 +62,7 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 
 	// Set up log
 	SetEnableLog(enableLog, maxKB)
-	s := fmt.Sprintln("[Debug] InitCore called", externalAssets, cachePath, process, isBgProcess)
+	s := fmt.Sprintln("InitCore called", externalAssets, cachePath, process, isBgProcess)
 	err := setupLogger(filepath.Join(cachePath, "neko.log"))
 
 	if err == nil {

@@ -606,20 +606,20 @@ class ConfigurationFragment @JvmOverloads constructor(
         val binding = LayoutProgressListBinding.inflate(layoutInflater)
         val builder = MaterialAlertDialogBuilder(requireContext()).setView(binding.root)
             .setNegativeButton(android.R.string.cancel) { _, _ ->
-                cancel(results)
+                cancel()
             }
             .setOnDismissListener {
-                cancel(results)
+                cancel()
             }
             .setCancelable(false)
-        lateinit var cancel: (ArrayList<ProxyEntity>) -> Unit
-        val fragment by lazy { getCurrentGroupFragment() }
 
-        val results = ArrayList<ProxyEntity>()
+        lateinit var cancel: () -> Unit
+        val fragment by lazy { getCurrentGroupFragment() }
+        val results = mutableListOf<ProxyEntity?>()
         var proxyN = 0
         val finishedN = AtomicInteger(0)
 
-        suspend fun insert(profile: ProxyEntity) {
+        suspend fun insert(profile: ProxyEntity?) {
             results.add(profile)
         }
 
@@ -823,7 +823,13 @@ class ConfigurationFragment @JvmOverloads constructor(
         }
         test.cancel = {
             runOnDefaultDispatcher {
-                ProfileManager.updateProfile(it)
+                test.results.filterNotNull().forEach {
+                    try {
+                        ProfileManager.updateProfile(it)
+                    } catch (e: Exception) {
+                        Logs.w(e)
+                    }
+                }
                 GroupManager.postReload(DataStore.currentGroupId())
                 mainJob.cancel()
                 testJobs.forEach { it.cancel() }
@@ -893,7 +899,13 @@ class ConfigurationFragment @JvmOverloads constructor(
         }
         test.cancel = {
             runOnDefaultDispatcher {
-                ProfileManager.updateProfile(it)
+                test.results.filterNotNull().forEach {
+                    try {
+                        ProfileManager.updateProfile(it)
+                    } catch (e: Exception) {
+                        Logs.w(e)
+                    }
+                }
                 GroupManager.postReload(DataStore.currentGroupId())
                 NekoJSInterface.Default.destroyAllJsi()
                 mainJob.cancel()
@@ -1578,7 +1590,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                 val selectOrChain = select || proxyEntity.type == ProxyEntity.TYPE_CHAIN
                 shareLayout.isGone = selectOrChain
                 editButton.isGone = select
-                removeButton.isGone = selectOrChain
+                removeButton.isGone = select
 
                 proxyEntity.nekoBean?.apply {
                     shareLayout.isGone = !canShare()

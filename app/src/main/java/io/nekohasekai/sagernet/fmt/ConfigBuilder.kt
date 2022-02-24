@@ -87,7 +87,7 @@ fun buildV2RayConfig(
     val outboundTags = ArrayList<String>()
     val outboundTagsCurrent = ArrayList<String>()
     val outboundTagsAll = HashMap<String, ProxyEntity>()
-    val globalOutbounds = ArrayList<String>()
+    val globalOutbounds = ArrayList<Long>()
 
     fun ProxyEntity.resolveChain(): MutableList<ProxyEntity> {
         val bean = requireBean()
@@ -356,44 +356,54 @@ fun buildV2RayConfig(
                 currentOutbound = OutboundObject()
 
                 // tagOut: v2ray outbound tag for a profile
+                // profile1 (in)  tag=global-proxy-(id)
+                // profile2       tag=proxy-(id)
+                // profile3 (out) tag=proxy / proxy-(chainID)
+                // "proxy" is chainTag
+                var tagOut: String = if (index == 0) chainTag else "$chainTag-${proxyEntity.id}"
+
                 // needGlobal: can only contain one?
-                val tagOut: String
-                val needGlobal: Boolean
+                var needGlobal = false
 
-                // first profile needs global, tag=proxy-global-x
+                // first profile set as global
                 if (index == profileList.lastIndex) {
-                    tagOut = "$TAG_AGENT-global-${proxyEntity.id}"
-                    needGlobal = !pastExternal // why
                     bean.isFirstProfile = true
+                    needGlobal = true
+                    if (index != 0) tagOut = "global-" + proxyEntity.id
+                }
+
+                // chain rules
+                if (index > 0) {
+                    // chain route/proxy rules
+                    if (!pastExternal) {
+                        pastOutbound.proxySettings = OutboundObject.ProxySettingsObject().apply {
+                            tag = tagOut
+                            transportLayer = true
+                        }
+                    } else {
+                        routing.rules.add(RoutingObject.RuleObject().apply {
+                            type = "field"
+                            inboundTag = listOf(pastInboundTag)
+                            outboundTag = tagOut
+                        })
+                    }
                 } else {
-                    // chain proxy:
-                    // profile1 (in)  tag=proxy-global-x
-                    // profile2       tag=proxy-x
-                    // profile3 (out) tag=proxy
-                    tagOut = if (index == 0) chainTag else {
-                        "$chainTag-${proxyEntity.id}"
-                    }
-                    needGlobal = false
-                }
-
-                if (needGlobal) {
-                    if (globalOutbounds.contains(tagOut)) {
-                        return@forEachIndexed
-                    }
-                    globalOutbounds.add(tagOut)
-                }
-
-                outboundTagsAll[tagOut] = proxyEntity
-
-                // profileList.lastIndex is first profile object in UI and it means "front proxy"
-                // index == 0 means last profile in chain / not chain
-                if (index == 0) {
+                    // index == 0 means last profile in chain / not chain
                     chainOutboundTag = tagOut
                     outboundTags.add(tagOut)
                     if (chainTag == TAG_AGENT) {
                         outboundTagsCurrent.add(tagOut)
                     }
                 }
+
+                if (needGlobal) {
+                    if (globalOutbounds.contains(proxyEntity.id)) {
+                        return@forEachIndexed
+                    }
+                    globalOutbounds.add(proxyEntity.id)
+                }
+
+                outboundTagsAll[tagOut] = proxyEntity
 
                 // Chain outbound
                 if (proxyEntity.needExternal()) {
@@ -795,22 +805,6 @@ fun buildV2RayConfig(
 
                 currentOutbound.tag = tagOut
                 currentOutbound.domainStrategy = currentDomainStrategy
-
-                // chain rules
-                if (index > 0) {
-                    if (!pastExternal) {
-                        pastOutbound.proxySettings = OutboundObject.ProxySettingsObject().apply {
-                            tag = tagOut
-                            transportLayer = true
-                        }
-                    } else {
-                        routing.rules.add(RoutingObject.RuleObject().apply {
-                            type = "field"
-                            inboundTag = listOf(pastInboundTag)
-                            outboundTag = tagOut
-                        })
-                    }
-                }
 
                 // External proxy need a dokodemo-door inbound to forward the traffic
                 // For external proxy software, their traffic must goes to v2ray-core to use protected fd.

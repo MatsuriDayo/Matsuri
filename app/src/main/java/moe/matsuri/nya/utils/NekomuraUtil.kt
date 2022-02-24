@@ -68,20 +68,8 @@ object NekomuraUtil {
             val content = String(Base64.decode(json.getString("content"), Base64.DEFAULT));
 
             // v2: very simple URL & title with base64
-            val url = String(
-                Base64.decode(
-                    getSubString(
-                        content, "#UrlStart#", "#UrlEnd#"
-                    ), Base64.NO_PADDING
-                )
-            )
-            val title = String(
-                Base64.decode(
-                    getSubString(
-                        content, "#TitleStart#", "#TitleEnd#"
-                    ), Base64.NO_PADDING
-                )
-            )
+            val url = String(b64Decode(getSubString(content, "#UrlStart#", "#UrlEnd#")))
+            val title = String(b64Decode(getSubString(content, "#TitleStart#", "#TitleEnd#")))
 
             if (url.startsWith("https://")) {
                 ret.url = url

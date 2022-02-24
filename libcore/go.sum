@@ -502,8 +502,8 @@ github.com/russross/blackfriday/v2 v2.0.1/go.mod h1:+Rmxgy9KzJVeS9/2gXHxylqXiyQD
 github.com/ryanuber/columnize v0.0.0-20160712163229-9b3edd62028f/go.mod h1:sm1tb6uqfes/u+d4ooFouqFdy9/2g9QGwK3SQygK0Ts=
 github.com/sagernet/gomobile v0.0.0-20210905032500-701a995ff844 h1:o7izBZde2L5foPbQdYisY03y4+6T6UcUXOwR5MyQpUk=
 github.com/sagernet/gomobile v0.0.0-20210905032500-701a995ff844/go.mod h1:2Xj8wyq0y6G6B1gCNTzRcKqo+cyVKatMTNWUmxNYfI4=
-github.com/sagernet/gvisor v0.0.0-20211227140739-33ed11d8e732 h1:3NyKPLLv62WRCYc9ecYKnGUTUJm+m9b8L9WyTh0+OHQ=
-github.com/sagernet/gvisor v0.0.0-20211227140739-33ed11d8e732/go.mod h1:Pd3Ini/+F15mWIiBZQM0YFeIYsPYl1cV2PCdoFJVVYU=
+github.com/sagernet/gvisor v0.0.0-20220213143053-df431bee78e3 h1:WtSe/0yiD5nWtqUXdd4AXDLuZrQ5phm4vUQTjPb85Qk=
+github.com/sagernet/gvisor v0.0.0-20220213143053-df431bee78e3/go.mod h1:Pd3Ini/+F15mWIiBZQM0YFeIYsPYl1cV2PCdoFJVVYU=
 github.com/sagernet/libping v0.1.1 h1:uNMN/02fQmRbsgJ0EuxuM/Upq8FrVP4Xj2+LlYviIOs=
 github.com/sagernet/libping v0.1.1/go.mod h1:FhmyYM8L32JaKI08noqoS5cK+Gw/Q+4VDnI9WvP6Sp8=
 github.com/sean-/seed v0.0.0-20170313163322-e2103e2c3529/go.mod h1:DxrIzT+xaE7yg65j358z/aeFdxmN0P9QXhEzd20vsDc=

@@ -18,6 +18,7 @@ import (
 )
 
 var FdProtector Protector
+var v2rayDefaultDialer = &internet.DefaultSystemDialer{}
 
 type Protector interface {
 	Protect(fd int32) bool
@@ -51,7 +52,11 @@ func (dialer ProtectedDialer) Dial(ctx context.Context, source v2rayNet.Address,
 			return nil, err
 		}
 	} else {
-		ips = append(ips, destination.Address.IP())
+		ip := destination.Address.IP()
+		if ip.IsLoopback() { // is it more effective
+			return v2rayDefaultDialer.Dial(ctx, source, destination, sockopt)
+		}
+		ips = append(ips, ip)
 	}
 
 	for i, ip := range ips {
@@ -81,14 +86,10 @@ func (dialer ProtectedDialer) dial(ctx context.Context, source v2rayNet.Address,
 		return nil, err
 	}
 
-	defer func() {
-		// Close fd to stop the connection (e.g. TCP SYN) if failed
-		if err != nil {
-			syscall.Close(fd)
-		}
-	}()
+	// Close fd to stop the connection (e.g. TCP SYN) if failed
 
 	if FdProtector != nil && !FdProtector.Protect(int32(fd)) {
+		syscall.Close(fd)
 		return nil, newError("protect failed")
 	}
 
@@ -116,6 +117,7 @@ func (dialer ProtectedDialer) dial(ctx context.Context, source v2rayNet.Address,
 
 	err = unix.Connect(fd, sockaddr)
 	if err != nil {
+		syscall.Close(fd)
 		return nil, err
 	}
 
@@ -123,6 +125,7 @@ func (dialer ProtectedDialer) dial(ctx context.Context, source v2rayNet.Address,
 	if file == nil {
 		return nil, newError("failed to connect to fd")
 	}
+	defer file.Close() // old fd will closed
 
 	switch destination.Network {
 	case v2rayNet.Network_UDP:
@@ -145,7 +148,16 @@ func (dialer ProtectedDialer) dial(ctx context.Context, source v2rayNet.Address,
 		return nil, err
 	}
 
-	return conn, nil
+	return &fdCloser{Conn: conn}, nil
+}
+
+type fdCloser struct {
+	net.Conn
+}
+
+func (c *fdCloser) Close() error {
+	logrus.Debugln("protect: close", c.RemoteAddr())
+	return c.Conn.Close()
 }
 
 func getFd(network v2rayNet.Network, ipv6 bool) (fd int, err error) {

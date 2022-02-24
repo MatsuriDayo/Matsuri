@@ -13,6 +13,13 @@ func TestLookupManyDoH(t *testing.T) {
 		a, b = LookupManyDoH(domain, 28)
 		fmt.Println("AAAA", domain, a, b)
 	}
+	testTxt := func(domain string) {
+		a, b := LookupManyDoH(domain, 16)
+		fmt.Println("TXT", domain, a, b)
+	}
+
+	testTxt("nachonekodayo.sekai.icu")
+
 	test("pixiv.net")
 	test("google.com")
 	test("youtube.com")

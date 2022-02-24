@@ -24,12 +24,14 @@ var dohs = []string{
 	"https://9.9.9.9:5053/dns-query",
 }
 
-func LookupManyDoH(domain string, queryType int) ([]net.IP, error) {
+// Return net.IP for A&AAAA
+// Return string for other
+func LookupManyDoH(domain string, queryType int) (interface{}, error) {
 	var good, bad int32
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	in := make(chan string, len(dohs))
-	out := make(chan []net.IP, 0)
+	out := make(chan interface{}, 0)
 
 	defer func() {
 		cancel()
@@ -59,7 +61,7 @@ func LookupManyDoH(domain string, queryType int) ([]net.IP, error) {
 	return ips, err
 }
 
-func manyWorker(ctx context.Context, domain string, queryType int, in chan string, out chan []net.IP, cancel context.CancelFunc, good, bad *int32) {
+func manyWorker(ctx context.Context, domain string, queryType int, in chan string, out chan interface{}, cancel context.CancelFunc, good, bad *int32) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -100,7 +102,7 @@ var client = &http.Client{
 	},
 }
 
-func lookupDoH(ctx context.Context, doh, domain string, queryType int) []net.IP {
+func lookupDoH(ctx context.Context, doh, domain string, queryType int) interface{} {
 	dohURL := doh + "?name=" + domain + "&type=" + strconv.Itoa(queryType)
 
 	req, _ := http.NewRequestWithContext(ctx, "GET", dohURL, nil)
@@ -127,7 +129,11 @@ func lookupDoH(ctx context.Context, doh, domain string, queryType int) []net.IP 
 
 	for _, a := range v.Answer {
 		if a.Type == queryType {
-			ips = append(ips, net.ParseIP(a.Data))
+			if queryType == 1 || queryType == 28 {
+				ips = append(ips, net.ParseIP(a.Data))
+			} else {
+				return a.Data
+			}
 		}
 	}
 

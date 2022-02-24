@@ -244,14 +244,15 @@ func (v2ray *V2RayInstance) setupDialer() {
 				// server domain
 				if nekoutils.In(tryDomains, domain) {
 					// first try A
-					ips, err := doh.LookupManyDoH(domain, 1)
+					_ips, err := doh.LookupManyDoH(domain, 1)
 					if err != nil {
 						// then try AAAA
-						ips, err = doh.LookupManyDoH(domain, 28)
+						_ips, err = doh.LookupManyDoH(domain, 28)
 						if err != nil {
 							return nil, err
 						}
 					}
+					ips := _ips.([]net.IP)
 					staticHosts[domain] = ips
 					return ips, nil
 				}
@@ -303,4 +304,9 @@ func setupV2rayFileSystem(internalAssets, externalAssets string) {
 	filesystem.NewFileReader = func(path string) (io.ReadCloser, error) {
 		return filesystem.NewFileSeeker(path)
 	}
+}
+
+// Reset v2ray internet connections
+func ResetConnections() {
+	nekoutils.PoolResetConnections()
 }
