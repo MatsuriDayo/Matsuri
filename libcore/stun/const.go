@@ -1,18 +1,16 @@
-// Copyright 2013, Cong Ding. All rights reserved.
+// Copyright 2016 Cong Ding
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//   http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// Author: Cong Ding <dinggnu@gmail.com>
 
 package stun
 
@@ -30,6 +28,14 @@ const (
 // NATType is the type of NAT described by int.
 type NATType int
 
+// NAT behavior type
+type BehaviorType int
+
+type NATBehavior struct {
+	MappingType   BehaviorType
+	FilteringType BehaviorType
+}
+
 // NAT types.
 const (
 	NATError NATType = iota
@@ -40,26 +46,50 @@ const (
 	NATSymmetric
 	NATRestricted
 	NATPortRestricted
-	NATSymmetricUDPFirewall
+	SymmetricUDPFirewall
 
 	// Deprecated spellings of these constants
-	NATSymetric            = NATSymmetric
-	NATSymetricUDPFirewall = NATSymmetricUDPFirewall
+	NATSymetric             = NATSymmetric
+	NATSymetricUDPFirewall  = SymmetricUDPFirewall
+	NATSymmetricUDPFirewall = SymmetricUDPFirewall
+)
+
+const (
+	BehaviorTypeUnknown BehaviorType = iota
+	BehaviorTypeEndpoint
+	BehaviorTypeAddr
+	BehaviorTypeAddrAndPort
 )
 
 var natStr map[NATType]string
+var natBehaviorTypeStr map[BehaviorType]string
+var natNormalTypeStr map[NATBehavior]string
 
 func init() {
 	natStr = map[NATType]string{
-		NATError:                "Test failed",
-		NATUnknown:              "Unexpected response from the STUN server",
-		NATBlocked:              "UDP is blocked",
-		NATFull:                 "Full cone NAT",
-		NATSymmetric:            "Symmetric NAT",
-		NATRestricted:           "Restricted NAT",
-		NATPortRestricted:       "Port restricted NAT",
-		NATNone:                 "Not behind a NAT",
-		NATSymmetricUDPFirewall: "Symmetric UDP firewall",
+		NATError:             "Test failed",
+		NATUnknown:           "Unexpected response from the STUN server",
+		NATBlocked:           "UDP is blocked",
+		NATFull:              "Full cone NAT",
+		NATSymmetric:         "Symmetric NAT",
+		NATRestricted:        "Restricted NAT",
+		NATPortRestricted:    "Port restricted NAT",
+		NATNone:              "Not behind a NAT",
+		SymmetricUDPFirewall: "Symmetric UDP firewall",
+	}
+
+	natBehaviorTypeStr = map[BehaviorType]string{
+		BehaviorTypeEndpoint:    "EndpointIndependent",
+		BehaviorTypeAddr:        "AddressDependent",
+		BehaviorTypeAddrAndPort: "AddressAndPortDependent",
+	}
+
+	// Defined in RFC 3489
+	natNormalTypeStr = map[NATBehavior]string{
+		NATBehavior{BehaviorTypeEndpoint, BehaviorTypeEndpoint}:       "Full cone NAT",
+		NATBehavior{BehaviorTypeEndpoint, BehaviorTypeAddr}:           "Restricted cone NAT",
+		NATBehavior{BehaviorTypeEndpoint, BehaviorTypeAddrAndPort}:    "Port Restricted cone NAT",
+		NATBehavior{BehaviorTypeAddrAndPort, BehaviorTypeAddrAndPort}: "Symmetric NAT",
 	}
 }
 
@@ -68,6 +98,20 @@ func (nat NATType) String() string {
 		return s
 	}
 	return "Unknown"
+}
+
+func (natBhType BehaviorType) String() string {
+	if s, ok := natBehaviorTypeStr[natBhType]; ok {
+		return s
+	}
+	return "Unknown"
+}
+
+func (natBehavior NATBehavior) NormalType() string {
+	if s, ok := natNormalTypeStr[natBehavior]; ok {
+		return s
+	}
+	return "Undefined"
 }
 
 const (
