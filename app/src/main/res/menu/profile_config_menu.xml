@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/action_move"
+        android:alphabeticShortcut="m"
+        android:icon="@drawable/ic_baseline_shuffle_24"
+        android:title="@string/move"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
     <item android:id="@+id/action_delete"
-          android:title="@string/delete"
-          android:icon="@drawable/ic_action_delete"
-          android:alphabeticShortcut="d"
-          app:showAsAction="ifRoom"/>
+        android:title="@string/delete"
+        android:icon="@drawable/ic_action_delete"
+        android:alphabeticShortcut="d"
+        app:showAsAction="ifRoom"/>
     <item android:id="@+id/action_apply"
           android:title="@string/apply"
           android:icon="@drawable/ic_action_done"

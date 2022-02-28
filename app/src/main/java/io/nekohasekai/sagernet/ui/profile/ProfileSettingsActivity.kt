@@ -25,26 +25,33 @@ import android.os.Parcelable
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.LinearLayout
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.ViewCompat
+import androidx.core.view.isVisible
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceDataStore
 import com.github.shadowsocks.plugin.Empty
 import com.github.shadowsocks.plugin.fragment.AlertDialogFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.takisoft.preferencex.PreferenceFragmentCompat
+import io.nekohasekai.sagernet.GroupType
 import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.database.GroupManager
 import io.nekohasekai.sagernet.database.ProfileManager
 import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
+import io.nekohasekai.sagernet.databinding.LayoutGroupItemBinding
 import io.nekohasekai.sagernet.fmt.AbstractBean
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
 import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
+import io.nekohasekai.sagernet.ktx.runOnMainDispatcher
 import io.nekohasekai.sagernet.ui.ThemedActivity
 import io.nekohasekai.sagernet.utils.DirectBoot
 import io.nekohasekai.sagernet.widget.ListListener
@@ -96,6 +103,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
     abstract fun T.init()
     abstract fun T.serialize()
 
+    val proxyEntity by lazy { SagerDatabase.proxyDao.getById(DataStore.editingId) }
     protected var isSubscription by Delegates.notNull<Boolean>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -116,20 +124,18 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
                     DataStore.editingGroup = DataStore.selectedGroupForImport()
                     createEntity().applyDefaultValues().init()
                 } else {
-                    val proxyEntity = SagerDatabase.proxyDao.getById(editingId)
                     if (proxyEntity == null) {
                         onMainDispatcher {
                             finish()
                         }
                         return@runOnDefaultDispatcher
                     }
-                    DataStore.editingGroup = proxyEntity.groupId
-                    (proxyEntity.requireBean() as T).init()
+                    DataStore.editingGroup = proxyEntity!!.groupId
+                    (proxyEntity!!.requireBean() as T).init()
                 }
 
                 onMainDispatcher {
-                    supportFragmentManager
-                        .beginTransaction()
+                    supportFragmentManager.beginTransaction()
                         .replace(R.id.settings, MyPreferenceFragmentCompat().apply {
                             activity = this@ProfileSettingsActivity
                         })
@@ -149,15 +155,14 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
             val editingGroup = DataStore.editingGroup
             ProfileManager.createProfile(editingGroup, createEntity().apply { serialize() })
         } else {
-            val entity = SagerDatabase.proxyDao.getById(DataStore.editingId)
-            if (entity == null) {
+            if (proxyEntity == null) {
                 finish()
                 return
             }
-            if (entity.id == DataStore.selectedProxy) {
+            if (proxyEntity!!.id == DataStore.selectedProxy) {
                 SagerNet.stopService()
             }
-            ProfileManager.updateProfile(entity.apply { (requireBean() as T).serialize() })
+            ProfileManager.updateProfile(proxyEntity!!.apply { (requireBean() as T).serialize() })
         }
         if (editingId == DataStore.selectedProxy && DataStore.directBootAware) DirectBoot.update()
         finish()
@@ -168,14 +173,20 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.profile_config_menu, menu)
+        menu.findItem(R.id.action_move)?.apply {
+            if (DataStore.editingId != 0L // not new profile
+                && SagerDatabase.groupDao.getById(DataStore.editingGroup)?.type == GroupType.BASIC // not in subscription group
+                && SagerDatabase.groupDao.allGroups()
+                    .filter { it.type == GroupType.BASIC }.size > 1 // have other basic group
+            ) isVisible = true
+        }
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = child.onOptionsItemSelected(item)
 
     override fun onBackPressed() {
-        if (DataStore.dirty) UnsavedChangesDialogFragment()
-            .apply { key() }
+        if (DataStore.dirty) UnsavedChangesDialogFragment().apply { key() }
             .show(supportFragmentManager, null) else super.onBackPressed()
     }
 
@@ -255,6 +266,39 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
                 runOnDefaultDispatcher {
                     activity.saveAndExit()
                 }
+                true
+            }
+            R.id.action_move -> {
+                val view = LinearLayout(context).apply {
+                    val ent = activity.proxyEntity!!
+                    orientation = LinearLayout.VERTICAL
+
+                    SagerDatabase.groupDao.allGroups()
+                        .filter { it.type == GroupType.BASIC && it.id != ent.groupId }
+                        .forEach { group ->
+                            LayoutGroupItemBinding.inflate(layoutInflater, this, true).apply {
+                                edit.isVisible = false
+                                options.isVisible = false
+                                groupName.text = group.displayName()
+                                groupUpdate.text = getString(R.string.move)
+                                groupUpdate.setOnClickListener {
+                                    runOnDefaultDispatcher {
+                                        val oldGroupId = ent.groupId
+                                        val newGroupId = group.id
+                                        ent.groupId = newGroupId
+                                        ProfileManager.updateProfile(ent)
+                                        GroupManager.postUpdate(oldGroupId) // reload
+                                        GroupManager.postUpdate(newGroupId)
+                                        DataStore.editingGroup = newGroupId // post switch animation
+                                        runOnMainDispatcher {
+                                            activity.finish()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                }
+                MaterialAlertDialogBuilder(activity).setView(view).show()
                 true
             }
             else -> false
