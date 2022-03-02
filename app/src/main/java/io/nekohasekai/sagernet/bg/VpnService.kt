@@ -46,10 +46,11 @@ import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.tryResume
 import io.nekohasekai.sagernet.ktx.tryResumeWithException
 import io.nekohasekai.sagernet.ui.VpnRequestActivity
-import io.nekohasekai.sagernet.utils.DefaultNetworkListener
 import io.nekohasekai.sagernet.utils.PackageCache
 import io.nekohasekai.sagernet.utils.Subnet
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asExecutor
+import kotlinx.coroutines.runBlocking
 import libcore.*
 import moe.matsuri.nya.neko.needBypassRootUid
 import java.io.FileDescriptor
@@ -94,7 +95,7 @@ class VpnService : BaseVpnService(),
     private var metered = false
 
     @Volatile
-    private var underlyingNetwork: Network? = null
+    override var underlyingNetwork: Network? = null
         @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1) set(value) {
             field = value
             if (active && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
@@ -106,6 +107,7 @@ class VpnService : BaseVpnService(),
             if (Build.VERSION.SDK_INT == 28 && metered) null else underlyingNetwork?.let {
                 arrayOf(it)
             }
+    override var upstreamInterfaceName: String? = null
 
     override suspend fun startProcesses() {
         super.startProcesses()
@@ -127,7 +129,6 @@ class VpnService : BaseVpnService(),
         super.killProcesses()
         persistAppStats()
         active = false
-        GlobalScope.launch(Dispatchers.Default) { DefaultNetworkListener.stop(this) }
     }
 
     override fun onBind(intent: Intent) = when (intent.action) {
@@ -153,8 +154,6 @@ class VpnService : BaseVpnService(),
         stopRunner()
         return Service.START_NOT_STICKY
     }
-
-    override suspend fun preInit() = DefaultNetworkListener.start(this) { underlyingNetwork = it }
 
     inner class NullConnectionException : NullPointerException(),
         BaseService.ExpectedException {

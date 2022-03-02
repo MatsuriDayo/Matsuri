@@ -255,7 +255,7 @@ private fun tryResolveVmess4Kitsunebi(server: String): VMessBean {
         url.queryParameter("tls")?.apply { security = "tls" }
         url.queryParameter("allowInsecure")?.apply { allowInsecure = true }
         url.queryParameter("obfs")?.apply {
-            type = this.replace("websocket", "ws")
+            type = this.replace("websocket", "ws").replace("none", "tcp")
             if (type == "ws") {
                 url.queryParameter("obfsParam")?.apply {
                     if (this.startsWith("{")) {

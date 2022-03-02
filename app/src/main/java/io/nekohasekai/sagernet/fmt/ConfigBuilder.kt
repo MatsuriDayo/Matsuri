@@ -110,6 +110,11 @@ fun buildV2RayConfig(
         rule.outbound.takeIf { it > 0 && it != proxy.id }
     }.toHashSet().toList()).map { it.id to it.resolveChain() }.toMap()
 
+    val uidListDNSRemote = mutableListOf<Int>()
+    val uidListDNSDirect = mutableListOf<Int>()
+    val domainListDNSRemote = mutableListOf<String>()
+    val domainListDNSDirect = mutableListOf<String>()
+
     val allowAccess = DataStore.allowAccess
     val bind = if (!forTest && allowAccess) "0.0.0.0" else LOCALHOST
 
@@ -129,15 +134,6 @@ fun buildV2RayConfig(
     val destinationOverride = DataStore.destinationOverride
     val trafficStatistics = !forTest && DataStore.profileTrafficStatistics
     val tryDomains = mutableListOf<String>()
-
-    var currentDomainStrategy = when {
-        !resolveDestination -> "AsIs"
-        ipv6Mode == IPv6Mode.DISABLE -> "UseIPv4"
-        ipv6Mode == IPv6Mode.PREFER -> "PreferIPv6"
-        ipv6Mode == IPv6Mode.ONLY -> "UseIPv6"
-        else -> "PreferIPv4"
-    }
-
     var dumpUid = false
     val alerts = mutableListOf<Pair<Int, String>>()
 
@@ -326,7 +322,7 @@ fun buildV2RayConfig(
 
             rules.addAll(wsRules.values)
 
-            if (DataStore.bypassLan && (requireHttp || DataStore.bypassLanInCoreOnly)) {
+            if (!forTest && DataStore.bypassLan && (requireHttp || DataStore.bypassLanInCoreOnly)) {
                 rules.add(RoutingObject.RuleObject().apply {
                     type = "field"
                     outboundTag = TAG_BYPASS
@@ -339,10 +335,10 @@ fun buildV2RayConfig(
         fun buildChain(
             chainTag: String, profileList: List<ProxyEntity>
         ): String {
-            var pastExternal = false // If the past profile is external
-            lateinit var pastOutbound: OutboundObject
             lateinit var currentOutbound: OutboundObject
+            lateinit var pastOutbound: OutboundObject
             lateinit var pastInboundTag: String
+            var pastEntity: ProxyEntity? = null
             val chainMap = LinkedHashMap<Int, ProxyEntity>()
             indexMap.add(IndexEntity(chainMap))
             val chainOutbounds = ArrayList<OutboundObject>()
@@ -350,6 +346,19 @@ fun buildV2RayConfig(
             // chainOutboundTag: v2ray outbound tag for this chain
             var chainOutboundTag = chainTag
             var muxApplied = false // nekobean 的算吗？
+
+            // v2sekai's outbound domainStrategy
+            fun genDomainStrategy(noAsIs: Boolean): String {
+                return when {
+                    !resolveDestination && !noAsIs -> "AsIs"
+                    ipv6Mode == IPv6Mode.DISABLE -> "UseIPv4"
+                    ipv6Mode == IPv6Mode.PREFER -> "PreferIPv6"
+                    ipv6Mode == IPv6Mode.ONLY -> "UseIPv6"
+                    else -> "PreferIPv4"
+                }
+            }
+
+            var currentDomainStrategy = genDomainStrategy(false)
 
             profileList.forEachIndexed { index, proxyEntity ->
                 val bean = proxyEntity.requireBean()
@@ -375,7 +384,7 @@ fun buildV2RayConfig(
                 // chain rules
                 if (index > 0) {
                     // chain route/proxy rules
-                    if (!pastExternal) {
+                    if (!pastEntity!!.needExternal()) {
                         pastOutbound.proxySettings = OutboundObject.ProxySettingsObject().apply {
                             tag = tagOut
                             transportLayer = true
@@ -491,9 +500,7 @@ fun buildV2RayConfig(
                                                     when (bean.packetEncoding) {
                                                         1 -> {
                                                             packetEncoding = "packet"
-                                                            if (currentDomainStrategy == "AsIs") {
-                                                                currentDomainStrategy = "UseIP"
-                                                            }
+                                                            currentDomainStrategy = genDomainStrategy(true)
                                                         }
                                                         2 -> packetEncoding = "xudp"
                                                     }
@@ -803,6 +810,16 @@ fun buildV2RayConfig(
                     }
                 }
 
+                pastEntity?.requireBean()?.apply {
+                    // don't loopback
+                    if (currentDomainStrategy != "AsIs" && !serverAddress.isIpAddress()) {
+                        domainListDNSDirect.add("full:$serverAddress")
+                    }
+                }
+                if (forTest) {
+                    currentDomainStrategy = "AsIs"
+                }
+
                 currentOutbound.tag = tagOut
                 currentOutbound.domainStrategy = currentDomainStrategy
 
@@ -842,9 +859,8 @@ fun buildV2RayConfig(
 
                 outbounds.add(currentOutbound)
                 chainOutbounds.add(currentOutbound)
-                pastExternal = proxyEntity.needExternal()
                 pastOutbound = currentOutbound
-
+                pastEntity = proxyEntity
             }
 
             return chainOutboundTag
@@ -860,11 +876,6 @@ fun buildV2RayConfig(
         val notVpn = DataStore.serviceMode != Key.MODE_VPN
 
         // apply user rules
-        val uidListDNSRemote = mutableListOf<Int>()
-        val uidListDNSDirect = mutableListOf<Int>()
-        val domainListDNSRemote = mutableListOf<String>()
-        val domainListDNSDirect = mutableListOf<String>()
-
         for (rule in extraRules) {
             val _uidList = rule.packages.map {
                 PackageCache[it]?.takeIf { uid -> uid >= 10000 } ?: 1000

@@ -25,10 +25,12 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Network
 import android.os.*
 import io.nekohasekai.sagernet.Action
 import io.nekohasekai.sagernet.BootReceiver
 import io.nekohasekai.sagernet.R
+import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.aidl.AppStatsList
 import io.nekohasekai.sagernet.aidl.ISagerNetService
 import io.nekohasekai.sagernet.aidl.ISagerNetServiceCallback
@@ -39,6 +41,7 @@ import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.fmt.TAG_SOCKS
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.plugin.PluginManager
+import io.nekohasekai.sagernet.utils.DefaultNetworkListener
 import io.nekohasekai.sagernet.utils.PackageCache
 import kotlinx.coroutines.*
 import libcore.AppStats
@@ -388,6 +391,7 @@ class BaseService {
                 wakeLock = null
             }
             data.proxy?.close()
+            runOnDefaultDispatcher { DefaultNetworkListener.stop(this) }
         }
 
         fun stopRunner(restart: Boolean = false, msg: String? = null, keepState: Boolean = true) {
@@ -427,7 +431,29 @@ class BaseService {
             (this as? VpnService)?.persistAppStats()
         }
 
-        suspend fun preInit() {}
+        // networks
+        var underlyingNetwork: Network?
+        var upstreamInterfaceName: String?
+
+        suspend fun preInit() {
+            DefaultNetworkListener.start(this) {
+                underlyingNetwork = it
+//                if (it == null) {
+//                    upstreamInterfaceName = "disconnected"
+//                }
+
+                SagerNet.connectivity.getLinkProperties(it)?.also { link ->
+                    val oldName = upstreamInterfaceName
+                    if (oldName != link.interfaceName) {
+                        upstreamInterfaceName = link.interfaceName
+                    }
+                    if (oldName != null && upstreamInterfaceName != null && oldName != upstreamInterfaceName) {
+                        Logs.d("Network changed: $oldName -> $upstreamInterfaceName")
+                        Libcore.resetConnections()
+                    }
+                }
+            }
+        }
 
         var wakeLock: PowerManager.WakeLock?
         fun acquireWakeLock()
