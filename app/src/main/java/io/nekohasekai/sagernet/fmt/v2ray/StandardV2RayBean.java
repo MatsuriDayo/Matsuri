@@ -168,7 +168,7 @@ public abstract class StandardV2RayBean extends AbstractBean {
         else if ("h2".equals(type)) type = "http";
 
         if (JavaUtil.isNullOrBlank(host)) host = "";
-        if (JavaUtil.isNullOrBlank(path)) path = "";
+        if (JavaUtil.isNullOrBlank(path)) path = "/";
         if (JavaUtil.isNullOrBlank(headerType)) headerType = "";
         if (JavaUtil.isNullOrBlank(mKcpSeed)) mKcpSeed = "";
         if (JavaUtil.isNullOrBlank(quicSecurity)) quicSecurity = "";

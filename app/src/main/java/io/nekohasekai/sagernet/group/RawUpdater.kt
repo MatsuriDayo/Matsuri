@@ -39,6 +39,7 @@ import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
 import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
 import io.nekohasekai.sagernet.ktx.*
 import libcore.Libcore
+import moe.matsuri.nya.Protocols
 import org.ini4j.Ini
 import org.json.JSONArray
 import org.json.JSONObject
@@ -100,19 +101,14 @@ object RawUpdater : GroupUpdater() {
         }
         proxies = proxiesMap.values.toList()
 
-        if (subscription.forceResolve) forceResolve(proxies, proxyGroup.id)
-
-        if (subscription.forceVMessAEAD) {
-            proxies.filterIsInstance<VMessBean>().forEach { it.alterId = 0 }
-        }
-
         val exists = SagerDatabase.proxyDao.getByGroup(proxyGroup.id)
         val duplicate = ArrayList<String>()
         if (subscription.deduplication) {
             Logs.d("Before deduplication: ${proxies.size}")
-            val uniqueProxies = LinkedHashSet<AbstractBean>()
-            val uniqueNames = HashMap<AbstractBean, String>()
-            for (proxy in proxies) {
+            val uniqueProxies = LinkedHashSet<Protocols.Deduplication>()
+            val uniqueNames = HashMap<Protocols.Deduplication, String>()
+            for (_proxy in proxies) {
+                val proxy = Protocols.Deduplication(_proxy)
                 if (!uniqueProxies.add(proxy)) {
                     val index = uniqueProxies.indexOf(proxy)
                     if (uniqueNames.containsKey(proxy)) {
@@ -122,13 +118,13 @@ object RawUpdater : GroupUpdater() {
                             uniqueNames[proxy] = ""
                         }
                     }
-                    duplicate.add(proxy.displayName() + " ($index)")
+                    duplicate.add(_proxy.displayName() + " ($index)")
                 } else {
-                    uniqueNames[proxy] = proxy.displayName()
+                    uniqueNames[proxy] = _proxy.displayName()
                 }
             }
             uniqueProxies.retainAll(uniqueNames.keys)
-            proxies = uniqueProxies.toList()
+            proxies = uniqueProxies.toList().map { it.bean }
         }
 
         Logs.d("New profiles: ${proxies.size}")

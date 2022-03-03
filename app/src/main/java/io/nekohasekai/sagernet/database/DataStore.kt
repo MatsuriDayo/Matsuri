@@ -292,9 +292,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var subscriptionType by profileCacheStore.stringToInt(Key.SUBSCRIPTION_TYPE)
     var subscriptionLink by profileCacheStore.string(Key.SUBSCRIPTION_LINK)
     var subscriptionToken by profileCacheStore.string(Key.SUBSCRIPTION_TOKEN)
-    var subscriptionForceResolve by profileCacheStore.boolean(Key.SUBSCRIPTION_FORCE_RESOLVE)
     var subscriptionDeduplication by profileCacheStore.boolean(Key.SUBSCRIPTION_DEDUPLICATION)
-    var subscriptionForceVMessAEAD by profileCacheStore.boolean(Key.SUBSCRIPTION_FORCE_VMESS_AEAD) { true }
     var subscriptionUpdateWhenConnectedOnly by profileCacheStore.boolean(Key.SUBSCRIPTION_UPDATE_WHEN_CONNECTED_ONLY)
     var subscriptionUserAgent by profileCacheStore.string(Key.SUBSCRIPTION_USER_AGENT)
     var subscriptionAutoUpdate by profileCacheStore.boolean(Key.SUBSCRIPTION_AUTO_UPDATE)

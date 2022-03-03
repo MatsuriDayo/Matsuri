@@ -61,9 +61,7 @@ class GroupSettingsActivity(
         DataStore.subscriptionType = subscription.type
         DataStore.subscriptionLink = subscription.link
         DataStore.subscriptionToken = subscription.token
-        DataStore.subscriptionForceResolve = subscription.forceResolve
         DataStore.subscriptionDeduplication = subscription.deduplication
-        DataStore.subscriptionForceVMessAEAD = subscription.forceVMessAEAD
         DataStore.subscriptionUpdateWhenConnectedOnly = subscription.updateWhenConnectedOnly
         DataStore.subscriptionUserAgent = subscription.customUserAgent
         DataStore.subscriptionAutoUpdate = subscription.autoUpdate
@@ -81,9 +79,7 @@ class GroupSettingsActivity(
                 type = DataStore.subscriptionType
                 link = DataStore.subscriptionLink
                 token = DataStore.subscriptionToken
-                forceResolve = DataStore.subscriptionForceResolve
                 deduplication = DataStore.subscriptionDeduplication
-                forceVMessAEAD = DataStore.subscriptionForceVMessAEAD
                 updateWhenConnectedOnly = DataStore.subscriptionUpdateWhenConnectedOnly
                 customUserAgent = DataStore.subscriptionUserAgent
                 autoUpdate = DataStore.subscriptionAutoUpdate

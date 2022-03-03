@@ -78,8 +78,6 @@ object SIP008Updater : GroupUpdater() {
             profiles.add(bean.applyDefaultValues())
         }
 
-        if (subscription.forceResolve) forceResolve(profiles, proxyGroup.id)
-
         val exists = SagerDatabase.proxyDao.getByGroup(proxyGroup.id)
         val duplicate = ArrayList<String>()
         if (subscription.deduplication) {
