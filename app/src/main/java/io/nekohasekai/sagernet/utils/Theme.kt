@@ -48,6 +48,7 @@ object Theme {
     const val BROWN = 18
     const val GREY = 19
     const val BLUE_GREY = 20
+    const val BLACK = 21
 
     private fun defaultTheme() = PINK_SSR
 
@@ -89,6 +90,7 @@ object Theme {
             BROWN -> R.style.Theme_SagerNet_Brown
             GREY -> R.style.Theme_SagerNet_Grey
             BLUE_GREY -> R.style.Theme_SagerNet_BlueGrey
+            BLACK -> R.style.Theme_SagerNet_Black
             else -> getTheme(defaultTheme())
         }
     }
@@ -115,7 +117,7 @@ object Theme {
             BROWN -> R.style.Theme_SagerNet_Dialog_Brown
             GREY -> R.style.Theme_SagerNet_Dialog_Grey
             BLUE_GREY -> R.style.Theme_SagerNet_Dialog_BlueGrey
-//            BLACK -> if (usingNightMode()) R.style.Theme_SagerNet_Dialog_Black else R.style.Theme_SagerNet_Dialog_LightBlack
+            BLACK -> R.style.Theme_SagerNet_Dialog_Black
             else -> getDialogTheme(defaultTheme())
         }
     }

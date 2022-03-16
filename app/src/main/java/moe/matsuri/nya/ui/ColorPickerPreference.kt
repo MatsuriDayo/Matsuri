@@ -20,6 +20,7 @@ import androidx.preference.PreferenceViewHolder
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.ktx.getColorAttr
+import io.nekohasekai.sagernet.ktx.isExpertFlavor
 import kotlin.math.roundToInt
 
 class ColorPickerPreference
@@ -45,7 +46,7 @@ class ColorPickerPreference
 
             widgetFrame.addView(
                 getNekoImageViewAtColor(
-                    context.getColorAttr(R.attr.colorAccent),
+                    context.getColorAttr(R.attr.colorPrimary),
                     48,
                     0
                 )
@@ -90,6 +91,7 @@ class ColorPickerPreference
 
             for (color in colors) {
                 i++ //Theme.kt
+                if (!isExpertFlavor && i in listOf(21)) continue
 
                 val themeId = i
                 val view = getNekoImageViewAtColor(color, 64, 0).apply {

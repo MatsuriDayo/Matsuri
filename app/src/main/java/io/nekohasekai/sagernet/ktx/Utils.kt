@@ -290,6 +290,7 @@ var isExpert: Boolean
     get() = BuildConfig.DEBUG || DataStore.isExpert
     set(value) = TODO()
 
+val isExpertFlavor = ((BuildConfig.FLAVOR == "expert") || BuildConfig.DEBUG)
 const val isOss = BuildConfig.FLAVOR == "oss"
 const val isFdroid = BuildConfig.FLAVOR == "fdroid"
 

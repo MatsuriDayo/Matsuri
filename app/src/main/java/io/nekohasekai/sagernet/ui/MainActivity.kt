@@ -76,7 +76,7 @@ class MainActivity : ThemedActivity(),
         binding = LayoutMainBinding.inflate(layoutInflater)
         binding.fab.initProgress(binding.fabProgress)
         if (themeResId !in intArrayOf(
-                R.style.Theme_SagerNet_Black, R.style.Theme_SagerNet_LightBlack
+                R.style.Theme_SagerNet_Black
             )
         ) {
             navigation = binding.navView
@@ -109,7 +109,7 @@ class MainActivity : ThemedActivity(),
             onNewIntent(intent)
         }
 
-        if (!isFdroid) CoroutineScope(Dispatchers.IO).launch {
+        if (!isFdroid && !isExpert) CoroutineScope(Dispatchers.IO).launch {
             for (i in 0 until 5) {
                 if (DataStore.ad != null) return@launch
                 val ret = NekomuraUtil.updateAd()
