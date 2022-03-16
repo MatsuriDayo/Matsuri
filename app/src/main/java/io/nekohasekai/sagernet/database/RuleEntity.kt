@@ -46,10 +46,6 @@ data class RuleEntity(
     var packages: List<String> = listOf(),
 ) : Parcelable {
 
-    fun isBypassRule(): Boolean {
-        return (domains.isNotBlank() && ip.isBlank() || ip.isNotBlank() && domains.isBlank()) && port.isBlank() && sourcePort.isBlank() && network.isBlank() && source.isBlank() && protocol.isBlank() && attrs.isBlank() && !reverse && redirect.isBlank() && outbound == -1L && packages.isEmpty()
-    }
-
     fun displayName(): String {
         return name.takeIf { it.isNotBlank() } ?: "Rule $id"
     }

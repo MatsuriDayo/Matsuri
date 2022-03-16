@@ -173,6 +173,7 @@ var staticHosts = make(map[string][]net.IP)
 var tryDomains = make([]string, 0)                                                    // server's domain, set when enhanced domain mode
 var androidResolver = &net.Resolver{PreferGo: false}                                  // Using Android API, lookup from current network.
 var androidUnderlyingResolver = &simpleSekaiWrapper{androidResolver: androidResolver} // Using Android API, lookup from non-VPN network.
+var dc dns.Client
 
 type simpleSekaiWrapper struct {
 	androidResolver *net.Resolver
@@ -230,18 +231,17 @@ func (p *simpleSekaiWrapper) LookupIP(network, host string) (ret []net.IP, err e
 // setup dialer and resolver for v2ray (v2ray options)
 func (v2ray *V2RayInstance) setupDialer() {
 	setupResolvers()
-	dc := v2ray.dnsClient
+	dc = v2ray.dnsClient
 
 	// All lookup except dnsClient -> dc.LookupIP()
 	// and also set protectedDialer
-	if c, ok := dc.(v2rayDns.ClientWithIPOption); ok {
+	if _, ok := dc.(v2rayDns.ClientWithIPOption); ok {
 		internet.UseAlternativeSystemDialer(&protect.ProtectedDialer{
 			Resolver: func(domain string) ([]net.IP, error) {
 				if ips, ok := staticHosts[domain]; ok && ips != nil {
 					return ips, nil
 				}
 
-				// server domain
 				if nekoutils.In(tryDomains, domain) {
 					// first try A
 					_ips, err := doh.LookupManyDoH(domain, 1)
@@ -257,9 +257,10 @@ func (v2ray *V2RayInstance) setupDialer() {
 					return ips, nil
 				}
 
-				// other domain
-				c.SetFakeDNSOption(false) // Skip FakeDNS
-				return dc.LookupIP(domain)
+				return dc.LookupIP(&dns.MatsuriDomainStringEx{
+					Domain:     domain,
+					OptNetwork: "ip",
+				})
 			},
 		})
 	}

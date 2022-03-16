@@ -54,6 +54,8 @@ func LookupManyDoH(domain string, queryType int) (interface{}, error) {
 
 	if ips == nil {
 		err = errors.New("LookupManyDoH: all tries failed")
+	} else if a, ok := ips.([]net.IP); ok && len(a) == 0 {
+		err = errors.New("LookupManyDoH: empty")
 	} else {
 		logrus.Debugln("LookupManyDoH:", domain, queryType, ips)
 	}
