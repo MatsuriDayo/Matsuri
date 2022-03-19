@@ -2,16 +2,17 @@ package gvisor
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
+	"net"
+	"strconv"
+
+	"libcore/tun"
+
 	v2rayNet "github.com/v2fly/v2ray-core/v5/common/net"
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/buffer"
 	"gvisor.dev/gvisor/pkg/tcpip/header"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
 	"gvisor.dev/gvisor/pkg/tcpip/transport/udp"
-	"libcore/tun"
-	"net"
-	"strconv"
 )
 
 func gUdpHandler(s *stack.Stack, handler tun.Handler) {
@@ -26,13 +27,13 @@ func gUdpHandler(s *stack.Stack, handler tun.Handler) {
 		srcAddr := net.JoinHostPort(id.RemoteAddress.String(), strconv.Itoa(int(id.RemotePort)))
 		src, err := v2rayNet.ParseDestination(fmt.Sprint("udp:", srcAddr))
 		if err != nil {
-			logrus.Warn("[UDP] parse source address ", srcAddr, " failed: ", err)
+			newError("[UDP] parse source address ", srcAddr, " failed: ", err).AtWarning().WriteToLog()
 			return true
 		}
 		dstAddr := net.JoinHostPort(id.LocalAddress.String(), strconv.Itoa(int(id.LocalPort)))
 		dst, err := v2rayNet.ParseDestination(fmt.Sprint("udp:", dstAddr))
 		if err != nil {
-			logrus.Warn("[UDP] parse destination address ", dstAddr, " failed: ", err)
+			newError("[UDP] parse destination address ", dstAddr, " failed: ", err).AtWarning().WriteToLog()
 			return true
 		}
 
@@ -48,12 +49,17 @@ func gUdpHandler(s *stack.Stack, handler tun.Handler) {
 			IP:   dst.Address.IP(),
 			Port: int(dst.Port),
 		}
-		go handler.NewPacket(src, dst, data.ToView(), func(bytes []byte, addr *net.UDPAddr) (int, error) {
-			if addr == nil {
-				addr = destUdpAddr
-			}
-			return packet.WriteBack(bytes, addr)
-		}, nil)
+		go handler.NewPacket(src, dst,
+			&tun.UDPPacket{
+				Data: data.ToView(),
+				Put:  nil, // DecRef by dispatcher
+			},
+			func(bytes []byte, addr *net.UDPAddr) (int, error) {
+				if addr == nil {
+					addr = destUdpAddr
+				}
+				return packet.WriteBack(bytes, addr)
+			})
 		return true
 	})
 }
@@ -106,6 +112,7 @@ func gSendUDP(r *stack.Route, data buffer.VectorisedView, localPort, remotePort 
 		ReserveHeaderBytes: header.UDPMinimumSize + int(r.MaxHeaderLength()),
 		Data:               data,
 	})
+	defer pkt.DecRef()
 
 	// Initialize the UDP header.
 	udpHdr := header.UDP(pkt.TransportHeader().Push(header.UDPMinimumSize))

@@ -1,30 +1,32 @@
 package system
 
 import (
-	"libcore/tun"
-	"net"
-	"runtime/debug"
+	"os"
 
-	"github.com/sirupsen/logrus"
-	v2rayNet "github.com/v2fly/v2ray-core/v5/common/net"
+	"libcore/tun"
+
+	"github.com/v2fly/v2ray-core/v5/common/buf"
+	"golang.org/x/sys/unix"
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/buffer"
 	"gvisor.dev/gvisor/pkg/tcpip/header"
 	"gvisor.dev/gvisor/pkg/tcpip/header/parse"
+	"gvisor.dev/gvisor/pkg/tcpip/link/rawfile"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
 )
+
+//go:generate go run ../errorgen
 
 var _ tun.Tun = (*SystemTun)(nil)
 
 var (
-	vlanClient4 = net.ParseIP(tun.PRIVATE_VLAN4_CLIENT).To4()
-	vlanClient6 = net.ParseIP(tun.PRIVATE_VLAN6_CLIENT)
+	vlanClient4 = tcpip.Address([]uint8{172, 19, 0, 1})
+	vlanClient6 = tcpip.Address([]uint8{0xfd, 0xfe, 0xdc, 0xba, 0x98, 0x76, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x1})
 )
 
 type SystemTun struct {
-	dispatcher   *readVDispatcher
-	dev          int32
-	mtu          int32
+	dev          int
+	mtu          int
 	handler      tun.Handler
 	ipv6Mode     int32
 	tcpForwarder *tcpForwarder
@@ -33,19 +35,12 @@ type SystemTun struct {
 
 func New(dev int32, mtu int32, handler tun.Handler, ipv6Mode int32, errorHandler func(err string)) (*SystemTun, error) {
 	t := &SystemTun{
-		dev:          dev,
-		mtu:          mtu,
+		dev:          int(dev),
+		mtu:          int(mtu),
 		handler:      handler,
 		ipv6Mode:     ipv6Mode,
 		errorHandler: errorHandler,
 	}
-	dispatcher, err := newReadVDispatcher(int(dev), t)
-	if err != nil {
-		return nil, err
-	}
-	go dispatcher.dispatchLoop()
-	t.dispatcher = dispatcher
-
 	tcpServer, err := newTcpForwarder(t)
 	if err != nil {
 		return nil, err
@@ -53,182 +48,86 @@ func New(dev int32, mtu int32, handler tun.Handler, ipv6Mode int32, errorHandler
 	go tcpServer.dispatchLoop()
 	t.tcpForwarder = tcpServer
 
+	go t.dispatchLoop()
 	return t, nil
 }
 
-func (n *SystemTun) deliverPacket(pkt *stack.PacketBuffer) {
-	var ipVersion int
-	if ihl, ok := pkt.Data().PullUp(1); ok {
-		ipVersion = header.IPVersion(ihl)
-	} else {
-		return
+func (t *SystemTun) dispatchLoop() {
+	cache := buf.New()
+	defer cache.Release()
+	data := cache.Extend(buf.Size)
+
+	device := os.NewFile(uintptr(t.dev), "tun")
+
+	for {
+		n, err := device.Read(data)
+		if err != nil {
+			break
+		}
+		cache.Clear()
+		cache.Resize(0, int32(n))
+		packet := data[:n]
+		if t.deliverPacket(cache, packet) {
+			cache = buf.New()
+			data = cache.Extend(buf.Size)
+		}
 	}
+}
 
-	log := "packet: "
+func (t *SystemTun) writeRawPacket(vv buffer.VectorisedView) tcpip.Error {
+	views := vv.Views()
+	iovecs := make([]unix.Iovec, len(views))
+	for i, v := range views {
+		iovecs[i] = rawfile.IovecFromBytes(v)
+	}
+	return rawfile.NonBlockingWriteIovec(t.dev, iovecs)
+}
 
-	var ipHeader IPHeader
-	switch ipVersion {
+func (t *SystemTun) writePacket(pkt *stack.PacketBuffer) tcpip.Error {
+	views := pkt.Views()
+	iovecs := make([]unix.Iovec, len(views))
+	for i, v := range views {
+		iovecs[i] = rawfile.IovecFromBytes(v)
+	}
+	return rawfile.NonBlockingWriteIovec(t.dev, iovecs)
+}
+
+func (t *SystemTun) writeBuffer(bytes []byte) tcpip.Error {
+	return rawfile.NonBlockingWrite(t.dev, bytes)
+}
+
+func (t *SystemTun) deliverPacket(cache *buf.Buffer, packet []byte) bool {
+	switch header.IPVersion(packet) {
 	case header.IPv4Version:
-		if !parse.IPv4(pkt) {
-			return
+		ipHdr := header.IPv4(packet)
+		switch ipHdr.TransportProtocol() {
+		case header.TCPProtocolNumber:
+			t.tcpForwarder.processIPv4(ipHdr, ipHdr.Payload())
+		case header.UDPProtocolNumber:
+			t.processIPv4UDP(cache, ipHdr, ipHdr.Payload())
+			return true
 		}
-		ipHeader = &IPv4Header{pkt, header.IPv4(pkt.NetworkHeader().View())}
-		log += "ipv4: "
 	case header.IPv6Version:
+		pkt := stack.NewPacketBuffer(stack.PacketBufferOptions{
+			Data: buffer.View(packet).ToVectorisedView(),
+		})
 		proto, _, _, _, ok := parse.IPv6(pkt)
+		pkt.DecRef()
 		if !ok {
-			return
+			return false
 		}
-		ipHeader = &IPv6Header{pkt, proto, header.IPv6(pkt.NetworkHeader().View())}
-		log += "ipv6: "
-	default:
-		return
+		ipHdr := header.IPv6(packet)
+		switch proto {
+		case header.TCPProtocolNumber:
+			t.tcpForwarder.processIPv6(ipHdr, ipHdr.Payload())
+		case header.UDPProtocolNumber:
+			t.processIPv6UDP(cache, ipHdr, ipHdr.Payload())
+			return true
+		}
 	}
-
-	switch ipHeader.Protocol() {
-	case header.TCPProtocolNumber:
-		log += "tcp: "
-		if !parse.TCP(pkt) {
-			newError(log, "unable to parse").AtWarning().WriteToLog()
-			return
-		}
-		if err := n.tcpForwarder.process(&TCPHeader{ipHeader, header.TCP(pkt.TransportHeader().View())}); err != nil {
-			newError(log, "process failed").Base(err).AtWarning().WriteToLog()
-			return
-		}
-		n.dispatcher.writePacket(pkt)
-	case header.UDPProtocolNumber:
-		log += "udp: "
-		if !parse.UDP(pkt) {
-			newError(log, "unable to parse").AtWarning().WriteToLog()
-			return
-		}
-		n.processUDP(&UDPHeader{ipHeader, header.UDP(pkt.TransportHeader().View())})
-	case header.ICMPv4ProtocolNumber:
-		log += "icmp4: "
-		if !parse.ICMPv4(pkt) {
-			newError(log, "unable to parse").AtWarning().WriteToLog()
-			return
-		}
-		n.processICMPv4(&ICMPv4Header{ipHeader, header.ICMPv4(pkt.TransportHeader().View())})
-	case header.ICMPv6ProtocolNumber:
-		log += "icmp6: "
-		if !parse.ICMPv6(pkt) {
-			newError(log, "unable to parse").AtWarning().WriteToLog()
-			return
-		}
-		n.processICMPv6(&ICMPv6Header{ipHeader, header.ICMPv6(pkt.TransportHeader().View())})
-	}
+	return false
 }
 
-func (n *SystemTun) processUDP(hdr *UDPHeader) {
-	sourceAddress := hdr.SourceAddress()
-	destinationAddress := hdr.DestinationAddress()
-	sourcePort := hdr.SourcePort()
-	destinationPort := hdr.DestinationPort()
-
-	source := v2rayNet.Destination{
-		Address: v2rayNet.IPAddress([]byte(sourceAddress)),
-		Port:    v2rayNet.Port(sourcePort),
-		Network: v2rayNet.Network_UDP,
-	}
-	destination := v2rayNet.Destination{
-		Address: v2rayNet.IPAddress([]byte(destinationAddress)),
-		Port:    v2rayNet.Port(destinationPort),
-		Network: v2rayNet.Network_UDP,
-	}
-
-	hdr.Packet().IncRef()
-	hdr.SetDestinationAddress(sourceAddress)
-	hdr.SetDestinationPort(sourcePort)
-
-	data := hdr.Packet().Data().ExtractVV()
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				logrus.Warningln("processUDP panic", r)
-				logrus.Warningln(string(debug.Stack()))
-			}
-		}()
-
-		n.handler.NewPacket(source, destination, data.ToView(), func(bytes []byte, addr *v2rayNet.UDPAddr) (int, error) {
-			ipData := stack.PayloadSince(hdr.Packet().NetworkHeader())
-			udpData := stack.PayloadSince(hdr.Packet().TransportHeader())[:header.UDPMinimumSize]
-
-			var newSourceAddress tcpip.Address
-			var newSourcePort uint16
-
-			if addr != nil {
-				newSourceAddress = tcpip.Address(addr.IP)
-				newSourcePort = uint16(addr.Port)
-			} else {
-				newSourceAddress = destinationAddress
-				newSourcePort = destinationPort
-			}
-
-			switch hdr.IPHeader.(type) {
-			case *IPv4Header:
-				ipHdr := header.IPv4(ipData)
-				ipData = ipData[:ipHdr.HeaderLength()]
-				ipHdr.SetSourceAddress(newSourceAddress)
-				ipHdr.SetTotalLength(uint16(len(ipData) + len(udpData) + len(bytes)))
-				ipHdr.SetChecksum(0)
-				ipHdr.SetChecksum(^ipHdr.CalculateChecksum())
-			case *IPv6Header:
-				ipHdr := header.IPv6(ipData)
-				ipData = ipData[:ipData.Size()-int(ipHdr.PayloadLength())]
-				ipHdr.SetSourceAddress(newSourceAddress)
-				ipHdr.SetPayloadLength(uint16(len(udpData) + len(bytes)))
-			}
-
-			udpHdr := header.UDP(udpData)
-			udpHdr.SetSourcePort(newSourcePort)
-			udpHdr.SetLength(uint16(len(udpData) + len(bytes)))
-			udpHdr.SetChecksum(0)
-			udpHdr.SetChecksum(^udpHdr.CalculateChecksum(header.Checksum(bytes, header.PseudoHeaderChecksum(header.UDPProtocolNumber, newSourceAddress, sourceAddress, uint16(len(udpData)+len(bytes))))))
-
-			replyVV := buffer.VectorisedView{}
-			replyVV.AppendView(ipData)
-			replyVV.AppendView(udpData)
-			replyVV.AppendView(bytes)
-
-			if err := n.dispatcher.writeRawPacket(replyVV); err != nil {
-				return 0, newError(err.String())
-			}
-
-			return len(bytes), nil
-		}, hdr)
-	}()
-}
-
-func (n *SystemTun) processICMPv4(hdr *ICMPv4Header) {
-	if hdr.Type() != header.ICMPv4Echo || hdr.Code() != header.ICMPv4UnusedCode {
-		return
-	}
-
-	hdr.SetType(header.ICMPv4EchoReply)
-	sourceAddress := hdr.SourceAddress()
-	hdr.SetSourceAddress(hdr.DestinationAddress())
-	hdr.SetDestinationAddress(sourceAddress)
-	hdr.UpdateChecksum()
-
-	n.dispatcher.writePacket(hdr.Packet())
-}
-
-func (n *SystemTun) processICMPv6(hdr *ICMPv6Header) {
-	if hdr.Type() != header.ICMPv6EchoRequest {
-		return
-	}
-	hdr.SetType(header.ICMPv6EchoReply)
-	sourceAddress := hdr.SourceAddress()
-	hdr.SetSourceAddress(hdr.DestinationAddress())
-	hdr.SetDestinationAddress(sourceAddress)
-	hdr.UpdateChecksum()
-
-	n.dispatcher.writePacket(hdr.Packet())
-}
-
-func (n *SystemTun) Stop() {
-	n.dispatcher.stop()
-	n.tcpForwarder.Close()
+func (t *SystemTun) Stop() {
+	t.tcpForwarder.Close()
 }

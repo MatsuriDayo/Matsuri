@@ -7,13 +7,11 @@ import (
 	"libcore/device"
 	"os"
 	"path/filepath"
-	"runtime/debug"
 	"strings"
 	"time"
 	_ "unsafe"
 
 	"github.com/sagernet/libping"
-	"github.com/v2fly/v2ray-core/v5/common"
 )
 
 //go:linkname systemRoots crypto/x509.systemRoots
@@ -31,25 +29,8 @@ func IcmpPing(address string, timeout int32) (int32, error) {
 	return libping.IcmpPing(address, timeout)
 }
 
-func closeIgnore(closer ...interface{}) {
-	for _, c := range closer {
-		if ca, ok := c.(common.Closable); ok {
-			_ = ca.Close()
-		} else if ia, ok := c.(common.Interruptible); ok {
-			ia.Interrupt()
-		}
-	}
-}
-
 func initCoreDefer() {
-	allDefer("InitCore")
-}
-
-func allDefer(name string) {
-	if r := recover(); r != nil {
-		s := fmt.Sprintln(name+" panic", r, string(debug.Stack()))
-		forceLog(s)
-	}
+	device.AllDefer("InitCore", forceLog)
 }
 
 func InitCore(internalAssets string, externalAssets string, prefix string, useOfficial BoolFunc, // extractV2RayAssets
@@ -75,6 +56,7 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 	// Set up some component
 	go func() {
 		defer initCoreDefer()
+		device.GoDebug(process)
 
 		externalAssetsPath = externalAssets
 		internalAssetsPath = internalAssets
@@ -107,7 +89,6 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 	}
 
 	device.AutoGoMaxProcs()
-	device.GoDebug()
 
 	// CA for other programs
 	go func() {

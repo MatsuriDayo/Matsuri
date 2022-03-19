@@ -148,16 +148,7 @@ func (dialer ProtectedDialer) dial(ctx context.Context, source v2rayNet.Address,
 		return nil, err
 	}
 
-	return &fdCloser{Conn: conn}, nil
-}
-
-type fdCloser struct {
-	net.Conn
-}
-
-func (c *fdCloser) Close() error {
-	logrus.Debugln("protect: close", c.RemoteAddr())
-	return c.Conn.Close()
+	return conn, nil
 }
 
 func getFd(network v2rayNet.Network, ipv6 bool) (fd int, err error) {

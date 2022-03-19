@@ -3,6 +3,7 @@ package libcore
 import (
 	"io"
 	"io/ioutil"
+	"libcore/comm"
 	"os"
 	"strconv"
 
@@ -75,7 +76,7 @@ func extractAssetName(name string, force bool, useOfficialAssets bool) error {
 			return newError("open version in assets").Base(err)
 		}
 		b, err := ioutil.ReadAll(av)
-		closeIgnore(av)
+		comm.CloseIgnore(av)
 		if err != nil {
 			return newError("read internal version").Base(err)
 		}
@@ -141,7 +142,7 @@ func extractAssetName(name string, force bool, useOfficialAssets bool) error {
 		return err
 	}
 	_, err = io.WriteString(o, assetVersion)
-	closeIgnore(o)
+	comm.CloseIgnore(o)
 	return err
 }
 
@@ -150,12 +151,12 @@ func extractAsset(assetPath string, path string) error {
 	if err != nil {
 		return err
 	}
-	defer closeIgnore(i)
+	defer comm.CloseIgnore(i)
 	o, err := os.Create(path)
 	if err != nil {
 		return err
 	}
-	defer closeIgnore(o)
+	defer comm.CloseIgnore(o)
 	_, err = io.Copy(o, i)
 	if err == nil {
 		logrus.Debugf("Extract >> %s", path)

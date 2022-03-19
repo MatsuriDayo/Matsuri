@@ -5,10 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"libcore/device"
 	"libcore/doh"
 	"libcore/protect"
-	"libcore/tun"
 	"log"
 	gonet "net"
 	"os"
@@ -24,7 +22,6 @@ import (
 	"github.com/v2fly/v2ray-core/v5/common/buf"
 	"github.com/v2fly/v2ray-core/v5/common/net"
 	"github.com/v2fly/v2ray-core/v5/common/platform/filesystem"
-	"github.com/v2fly/v2ray-core/v5/common/signal"
 	"github.com/v2fly/v2ray-core/v5/features/dns"
 	dns_feature "github.com/v2fly/v2ray-core/v5/features/dns"
 	v2rayDns "github.com/v2fly/v2ray-core/v5/features/dns"
@@ -139,32 +136,6 @@ func (instance *V2RayInstance) dialContext(ctx context.Context, destination net.
 		readerOpt = buf.ConnectionOutputMultiUDP(r.Reader)
 	}
 	return buf.NewConnection(buf.ConnectionInputMulti(r.Writer), readerOpt), nil
-}
-
-// for udp
-func (instance *V2RayInstance) newDispatcherConn(ctx context.Context, destinationConn net.Destination, destinationV2ray net.Destination, timeout time.Duration, writeBack tun.WriteBack) (*dispatcherConn, error) {
-	ctx, cancel := context.WithCancel(core.WithContext(ctx, instance.core))
-	link, err := instance.dispatcher.Dispatch(ctx, destinationV2ray)
-	if err != nil {
-		cancel()
-		return nil, err
-	}
-	c := &dispatcherConn{
-		dest:      destinationConn,
-		link:      link,
-		ctx:       ctx,
-		cancel:    cancel,
-		writeBack: writeBack,
-	}
-	c.timer = signal.CancelAfterInactivity(ctx, func() {
-		closeIgnore(c)
-	}, timeout)
-
-	for i := 0; i < device.NumUDPWorkers(); i++ {
-		go c.handleDownlink()
-	}
-
-	return c, nil
 }
 
 // Nekomura

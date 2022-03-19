@@ -18,7 +18,6 @@ func Start(
 
 	tab := newTable()
 	udp := &UDP{
-		calls:  map[*call]struct{}{},
 		device: device,
 		buf:    [65535]byte{},
 	}
@@ -68,6 +67,10 @@ func Start(
 			}
 
 			if ip.Offset() != 0 {
+				continue
+			}
+
+			if !ip.DestinationIP().IsGlobalUnicast() {
 				continue
 			}
 
@@ -136,7 +139,6 @@ func Start(
 				if !u.Valid() {
 					continue
 				}
-
 				udp.handleUDPPacket(ip, u)
 			}
 		}

@@ -12,14 +12,6 @@ import (
 
 // this file is a wrapper for libcore
 
-type udpCloser struct {
-	buf []byte
-}
-
-func (u *udpCloser) Close() error {
-	return pool.Put(u.buf)
-}
-
 func New(fd int32, handler tun.Handler) (*Tun2Socket, error) {
 	var stack *Tun2Socket
 
@@ -87,10 +79,15 @@ func New(fd int32, handler tun.Handler) (*Tun2Socket, error) {
 				Network: v2rayNet.Network_UDP,
 			}
 
-			go handler.NewPacket(source, destination, raw, func(b []byte, addr *net.UDPAddr) (int, error) {
-				// this is downlink
-				return stack.UDP().WriteTo(b, addr, lAddr)
-			}, &udpCloser{buf})
+			go handler.NewPacket(source, destination,
+				&tun.UDPPacket{
+					Data: raw,
+					Put:  func() { pool.Put(buf) },
+				},
+				func(b []byte, addr *net.UDPAddr) (int, error) {
+					// this is downlink
+					return stack.UDP().WriteTo(b, addr, lAddr)
+				})
 		}
 	}
 

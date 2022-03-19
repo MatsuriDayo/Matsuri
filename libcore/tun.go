@@ -2,7 +2,8 @@ package libcore
 
 import (
 	"context"
-	"io"
+	"libcore/comm"
+	"libcore/device"
 	"libcore/protect"
 	"libcore/tun"
 	"libcore/tun/gvisor"
@@ -19,12 +20,10 @@ import (
 	"github.com/miekg/dns"
 	"github.com/sirupsen/logrus"
 	core "github.com/v2fly/v2ray-core/v5"
-	"github.com/v2fly/v2ray-core/v5/common"
 	"github.com/v2fly/v2ray-core/v5/common/buf"
 	v2rayNet "github.com/v2fly/v2ray-core/v5/common/net"
 	"github.com/v2fly/v2ray-core/v5/common/session"
 	"github.com/v2fly/v2ray-core/v5/transport"
-	"github.com/v2fly/v2ray-core/v5/transport/pipe"
 )
 
 var _ tun.Handler = (*Tun2ray)(nil)
@@ -221,25 +220,22 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 		conn = &statsConn{conn, &stats.uplink, &stats.downlink}
 	}
 
-	defer closeIgnore(conn)
-
 	//这个 DispatchLink 是 outbound, link reader 是上行流量
-	reader, input := pipe.New()
-	link := &transport.Link{Reader: reader, Writer: connWriter{conn, buf.NewWriter(conn)}}
+	link := &transport.Link{
+		Reader: connReader{conn, buf.NewReader(conn)},
+		Writer: connWriter{conn, buf.NewWriter(conn)},
+	}
 	err := t.v2ray.dispatcher.DispatchLink(ctx, destination, link)
 
 	if err != nil {
 		logrus.Errorf("[TCP] dispatchLink failed: %s", err.Error())
-		closeIgnore(link.Reader, link.Writer)
+		comm.CloseIgnore(link.Reader, link.Writer)
+		comm.CloseIgnore(conn)
 		return
 	}
 
-	// copy uplink traffic
-	buf.Copy(buf.NewReader(conn), input)
-
-	// connection ends
+	// connection ends (in core), let core close it
 	// fuck v2ray pipe
-	common.Interrupt(input)
 }
 
 type connWriter struct {
@@ -247,43 +243,65 @@ type connWriter struct {
 	buf.Writer
 }
 
+type connReader struct {
+	net.Conn
+	buf.Reader
+}
+
+func (r connReader) ReadMultiBufferTimeout(t time.Duration) (buf.MultiBuffer, error) {
+	r.SetReadDeadline(time.Now().Add(t))
+	defer r.SetReadDeadline(time.Time{})
+	return r.ReadMultiBuffer()
+}
+
+func (r connReader) Interrupt() {
+	r.Close()
+}
+
 //UDP
-func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.Destination, data []byte, writeBack tun.WriteBack, closer io.Closer) {
+func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.Destination, p *tun.UDPPacket, writeBack tun.WriteBack) {
 	natKey := source.NetAddr()
 
-	//TODO refactor & see fullcone
-	sendTo := func() bool {
+	sendTo := func(firstPkt bool) bool {
 		conn := t.udpTable.Get(natKey)
 		if conn == nil {
 			return false
 		}
-		_, err := conn.WriteTo(data, &net.UDPAddr{
+		_, err := conn.WriteTo(p.Data, &net.UDPAddr{
 			IP:   destination.Address.IP(),
 			Port: int(destination.Port),
 		})
+		if p.Put != nil {
+			p.Put()
+		}
+		if !firstPkt && p.PutHeader != nil {
+			p.PutHeader() // only keep this for firstPkt
+		}
 		if err != nil {
 			_ = conn.Close()
 		}
 		return true
 	}
 
-	if sendTo() {
+	// cached udp conn
+	if sendTo(false) {
 		return
 	}
 
+	// new udp conn
 	lockKey := natKey + "-lock"
 	cond, loaded := t.udpTable.GetOrCreateLock(lockKey)
+
+	// cached udp conn (waiting)
 	if loaded {
 		cond.L.Lock()
 		cond.Wait()
-		sendTo()
+		sendTo(false)
 		cond.L.Unlock()
 		return
 	}
 
-	t.udpTable.Delete(lockKey)
-	cond.Broadcast()
-
+	// new udp conn
 	inbound := &session.Inbound{
 		Source: source,
 		Tag:    "socks",
@@ -297,7 +315,7 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 
 	// dns to all
 	dnsMsg := dns.Msg{}
-	err := dnsMsg.Unpack(data)
+	err := dnsMsg.Unpack(p.Data)
 	if err == nil && !dnsMsg.Response && len(dnsMsg.Question) > 0 {
 		// v2ray only support A and AAAA
 		switch dnsMsg.Question[0].Qtype {
@@ -369,7 +387,14 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 		})
 	}
 
-	conn, err := t.v2ray.newDispatcherConn(ctx, destination, destination2, time.Minute, writeBack)
+	workerN := 1
+	timeout := time.Minute
+	if !isDns {
+		workerN = device.NumUDPWorkers()
+	} else {
+		timeout = time.Second * 30
+	}
+	conn, err := t.v2ray.newDispatcherConn(ctx, destination, destination2, writeBack, timeout, workerN)
 
 	if err != nil {
 		logrus.Errorf("[UDP] dial failed: %s", err.Error())
@@ -401,19 +426,24 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 		}
 	}
 
+	// udp conn ok
 	t.udpTable.Set(natKey, conn)
+	t.udpTable.Delete(lockKey)
+	cond.Broadcast()
 
 	//uplink(?
-	go sendTo()
+	go sendTo(true)
 
 	//downlink (moved to handleDownlink)
-
 	select {
 	case <-conn.ctx.Done():
 	}
 
 	// close
-	closeIgnore(conn, closer)
+	if p.PutHeader != nil {
+		p.PutHeader()
+	}
+	comm.CloseIgnore(conn)
 	t.udpTable.Delete(natKey)
 }
 

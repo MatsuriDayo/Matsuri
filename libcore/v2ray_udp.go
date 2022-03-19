@@ -2,10 +2,13 @@ package libcore
 
 import (
 	"context"
+	"libcore/comm"
 	"libcore/tun"
 	"sync"
 	"sync/atomic"
+	"time"
 
+	core "github.com/v2fly/v2ray-core/v5"
 	"github.com/v2fly/v2ray-core/v5/common"
 	"github.com/v2fly/v2ray-core/v5/common/buf"
 	"github.com/v2fly/v2ray-core/v5/common/net"
@@ -15,6 +18,33 @@ import (
 )
 
 // this file is for v2ray's udp
+
+func (instance *V2RayInstance) newDispatcherConn(ctx context.Context, destinationConn net.Destination, destinationV2ray net.Destination,
+	writeBack tun.WriteBack, timeout time.Duration, workerN int,
+) (*dispatcherConn, error) {
+	ctx, cancel := context.WithCancel(core.WithContext(ctx, instance.core))
+	link, err := instance.dispatcher.Dispatch(ctx, destinationV2ray)
+	if err != nil {
+		cancel()
+		return nil, err
+	}
+	c := &dispatcherConn{
+		dest:      destinationConn,
+		link:      link,
+		ctx:       ctx,
+		cancel:    cancel,
+		writeBack: writeBack,
+	}
+	c.timer = signal.CancelAfterInactivity(ctx, func() {
+		comm.CloseIgnore(c)
+	}, timeout)
+
+	for i := 0; i < workerN; i++ {
+		go c.handleDownlink()
+	}
+
+	return c, nil
+}
 
 type dispatcherConn struct {
 	access sync.Mutex
@@ -31,7 +61,7 @@ type dispatcherConn struct {
 }
 
 func (c *dispatcherConn) handleDownlink() {
-	defer closeIgnore(c)
+	defer comm.CloseIgnore(c)
 
 	for {
 		select {
@@ -50,6 +80,7 @@ func (c *dispatcherConn) handleDownlink() {
 
 		for _, buffer := range mb {
 			if buffer.Len() <= 0 {
+				buffer.Release()
 				continue
 			}
 
@@ -60,6 +91,7 @@ func (c *dispatcherConn) handleDownlink() {
 			} else {
 				src = *buffer.Endpoint
 			}
+
 			if src.Address.Family().IsDomain() {
 				src.Address = net.AnyIP
 			}
@@ -68,6 +100,8 @@ func (c *dispatcherConn) handleDownlink() {
 				IP:   src.Address.IP(),
 				Port: int(src.Port),
 			})
+
+			buffer.Release()
 
 			if err == nil {
 				if c.stats != nil {
@@ -80,6 +114,7 @@ func (c *dispatcherConn) handleDownlink() {
 	}
 }
 
+// uplink
 func (c *dispatcherConn) WriteTo(p []byte, addr net.Addr) (n int, err error) {
 	if c.stats != nil {
 		atomic.AddUint64(c.stats.uplink, uint64(len(p)))

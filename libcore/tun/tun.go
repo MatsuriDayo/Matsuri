@@ -1,7 +1,6 @@
 package tun
 
 import (
-	"io"
 	"net"
 
 	v2rayNet "github.com/v2fly/v2ray-core/v5/common/net"
@@ -14,9 +13,16 @@ type Tun interface {
 // For UDP downlink
 type WriteBack func([]byte, *net.UDPAddr) (int, error)
 
+// For UDP upLink
+type UDPPacket struct {
+	Data      []byte
+	Put       func() // put cache for a packet
+	PutHeader func() // put cache for a connection(header)
+}
+
 type Handler interface {
 	NewConnection(source v2rayNet.Destination, destination v2rayNet.Destination, conn net.Conn)
-	NewPacket(source v2rayNet.Destination, destination v2rayNet.Destination, data []byte, writeBack WriteBack, closer io.Closer)
+	NewPacket(source v2rayNet.Destination, destination v2rayNet.Destination, p *UDPPacket, writeBack WriteBack)
 }
 
 const PRIVATE_VLAN4_CLIENT = "172.19.0.1"

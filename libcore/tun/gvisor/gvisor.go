@@ -1,9 +1,12 @@
 package gvisor
 
 import (
+	"errors"
 	"io"
-	"libcore/tun"
 	"os"
+
+	"libcore/comm"
+	"libcore/tun"
 
 	"github.com/sirupsen/logrus"
 	"gvisor.dev/gvisor/pkg/tcpip"
@@ -16,6 +19,8 @@ import (
 	"gvisor.dev/gvisor/pkg/tcpip/transport/tcp"
 	"gvisor.dev/gvisor/pkg/tcpip/transport/udp"
 )
+
+//go:generate go run ../errorgen
 
 var _ tun.Tun = (*GVisor)(nil)
 
@@ -46,7 +51,7 @@ func New(dev int32, mtu int32, handler tun.Handler, nicId tcpip.NICID, pcap bool
 	}
 	var o stack.Options
 	switch ipv6Mode {
-	case 0:
+	case comm.IPv6Disable:
 		o = stack.Options{
 			NetworkProtocols: []stack.NetworkProtocolFactory{
 				ipv4.NewProtocol,
@@ -57,7 +62,7 @@ func New(dev int32, mtu int32, handler tun.Handler, nicId tcpip.NICID, pcap bool
 				icmp.NewProtocol4,
 			},
 		}
-	case 3:
+	case comm.IPv6Only:
 		o = stack.Options{
 			NetworkProtocols: []stack.NetworkProtocolFactory{
 				ipv6.NewProtocol,
@@ -118,4 +123,8 @@ func gMust(err tcpip.Error) {
 	if err != nil {
 		logrus.Panicln(err.String())
 	}
+}
+
+func tcpipErr(err tcpip.Error) error {
+	return errors.New(err.String())
 }

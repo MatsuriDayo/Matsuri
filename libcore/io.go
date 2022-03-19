@@ -2,6 +2,7 @@ package libcore
 
 import (
 	"io"
+	"libcore/comm"
 	"os"
 
 	"github.com/ulikunitz/xz"
@@ -14,16 +15,16 @@ func Unxz(archive string, path string) error {
 	}
 	r, err := xz.NewReader(i)
 	if err != nil {
-		closeIgnore(i)
+		comm.CloseIgnore(i)
 		return err
 	}
 	o, err := os.Create(path)
 	if err != nil {
-		closeIgnore(i)
+		comm.CloseIgnore(i)
 		return err
 	}
 	_, err = io.Copy(o, r)
-	closeIgnore(i, o)
+	comm.CloseIgnore(i, o)
 	return err
 }
 

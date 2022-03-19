@@ -1,12 +1,13 @@
 package gvisor
 
 import (
+	"sync"
+
 	"golang.org/x/sys/unix"
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/header"
 	"gvisor.dev/gvisor/pkg/tcpip/link/rawfile"
 	"gvisor.dev/gvisor/pkg/tcpip/stack"
-	"sync"
 )
 
 var _ stack.InjectableLinkEndpoint = (*rwEndpoint)(nil)
