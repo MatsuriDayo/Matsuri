@@ -60,7 +60,8 @@ class TrafficFragment : ToolbarFragment(R.layout.layout_traffic),
         TabLayoutMediator(binding.trafficTab, binding.trafficPager) { tab, position ->
             tab.text = when (position) {
                 0 -> getString(R.string.traffic_active)
-                else -> getString(R.string.traffic_stats)
+                1 -> getString(R.string.traffic_stats)
+                else -> getString(R.string.traffic_active)
             }
             tab.view.setOnLongClickListener { // clear toast
                 true
@@ -85,13 +86,14 @@ class TrafficFragment : ToolbarFragment(R.layout.layout_traffic),
     inner class TrafficAdapter() : FragmentStateAdapter(this) {
 
         override fun getItemCount(): Int {
-            return 2
+            return if (isExpertFlavor) 3 else 2
         }
 
         override fun createFragment(position: Int): Fragment {
             return when (position) {
                 0 -> ActiveFragment()
-                else -> StatsFragment()
+                1 -> StatsFragment()
+                else -> ActiveConnFragment()
             }
         }
 

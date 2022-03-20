@@ -18,6 +18,8 @@ type AppStats struct {
 	DownlinkTotal int64
 
 	DeactivateAt int32
+
+	NekoConnectionsJSON string
 }
 
 type appStats struct {
@@ -98,6 +100,10 @@ func (t *Tun2ray) ReadAppTraffics(listener TrafficListener) error {
 	for _, stat := range stats {
 		listener.UpdateStats(stat)
 	}
+
+	listener.UpdateStats(&AppStats{
+		NekoConnectionsJSON: ListV2rayConnections(),
+	})
 
 	return nil
 }

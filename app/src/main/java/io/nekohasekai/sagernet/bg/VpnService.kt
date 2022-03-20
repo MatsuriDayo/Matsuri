@@ -378,6 +378,7 @@ class VpnService : BaseVpnService(),
         val toUpdate = mutableListOf<StatsEntity>()
         val all = SagerDatabase.statsDao.all().associateBy { it.packageName }
         for (stats in appStats) {
+            if (stats.nekoConnectionsJSON.isNotBlank()) continue
             val packageName = if (stats.uid >= 10000) {
                 PackageCache.uidMap[stats.uid]?.iterator()?.next() ?: "android"
             } else {

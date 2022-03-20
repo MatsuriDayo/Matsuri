@@ -52,7 +52,8 @@ class StatsEntity(
             0,
             uplink,
             downlink,
-            0
+            0,
+            ""
         )
     }
 

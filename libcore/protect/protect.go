@@ -13,6 +13,7 @@ import (
 	"github.com/v2fly/v2ray-core/v5/common/buf"
 	v2rayNet "github.com/v2fly/v2ray-core/v5/common/net"
 	"github.com/v2fly/v2ray-core/v5/features/dns"
+	"github.com/v2fly/v2ray-core/v5/nekoutils"
 	"github.com/v2fly/v2ray-core/v5/transport/internet"
 	"golang.org/x/sys/unix"
 )
@@ -135,9 +136,9 @@ func (dialer ProtectedDialer) dial(ctx context.Context, source v2rayNet.Address,
 			if err != nil {
 				return nil, err
 			}
-			conn = &internet.PacketConnWrapper{
-				Conn: pc,
-				Dest: destAddr,
+			conn = &nekoutils.PacketConnWrapper{
+				PacketConn: pc,
+				Dest:       destAddr,
 			}
 		}
 	default:

@@ -215,7 +215,8 @@ class BaseService {
                         it.downlink / sinceLastQueryInSeconds,
                         it.uplinkTotal,
                         it.downlinkTotal,
-                        it.deactivateAt
+                        it.deactivateAt,
+                        it.nekoConnectionsJSON
                     )
                 })
                 if (data?.state == State.Connected && statsListeners.isNotEmpty()) {
@@ -449,7 +450,7 @@ class BaseService {
                     }
                     if (oldName != null && upstreamInterfaceName != null && oldName != upstreamInterfaceName) {
                         Logs.d("Network changed: $oldName -> $upstreamInterfaceName")
-                        Libcore.resetConnections()
+                        Libcore.resetConnections(true)
                     }
                 }
             }

@@ -1,5 +1,6 @@
 package moe.matsuri.nya.utils
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.Base64
@@ -12,6 +13,8 @@ import libcore.Libcore
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.zip.Deflater
 import java.util.zip.Inflater
 import kotlin.math.roundToInt
@@ -186,6 +189,15 @@ object NekomuraUtil {
             inflater.end()
             outputStream.toByteArray()
         }
+    }
+
+    // Format Time
+
+    @SuppressLint("SimpleDateFormat")
+    val sdf1 = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+
+    fun timeStamp2Text(t: Long): String {
+        return sdf1.format(Date(t))
     }
 
 }

@@ -35,7 +35,8 @@ data class AppStats(
     var downlink: Long,
     var uplinkTotal: Long,
     var downlinkTotal: Long,
-    var deactivateAt: Int
+    var deactivateAt: Int,
+    var nekoConnectionsJSON: String, // 不要放在这里喵
 ) : Parcelable {
 
    operator fun plusAssign(stats: StatsEntity) {
