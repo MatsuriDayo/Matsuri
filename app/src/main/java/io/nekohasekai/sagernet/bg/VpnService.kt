@@ -312,7 +312,7 @@ class VpnService : BaseVpnService(),
                             // libcore/v2ray.go
                             when {
                                 answer.isNotEmpty() -> {
-                                    continuation.tryResume(answer.mapNotNull { it.hostAddress }
+                                    continuation.tryResume((answer as Collection<InetAddress?>).mapNotNull { it?.hostAddress }
                                         .joinToString(","))
                                 }
                                 rcode == 0 -> {
