@@ -1347,6 +1347,10 @@ class ConfigurationFragment @JvmOverloads constructor(
                     if (::undoManager.isInitialized) {
                         undoManager.flush()
                     }
+                    val oldProfile = configurationList[profile.id]
+                    if (profile.info.contains("withoutTraffic") && oldProfile != null) {
+                        profile.stats = oldProfile.stats
+                    }
                     configurationList[profile.id] = profile
                     notifyItemChanged(index)
                 }

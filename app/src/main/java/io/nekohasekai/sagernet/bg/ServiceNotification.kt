@@ -114,9 +114,6 @@ class ServiceNotification(
             override fun observatoryResultsUpdated(groupId: Long) {
             }
 
-            override fun profilePersisted(profileId: Long) {
-            }
-
             override fun missingPlugin(profileName: String?, pluginName: String?) {
             }
 

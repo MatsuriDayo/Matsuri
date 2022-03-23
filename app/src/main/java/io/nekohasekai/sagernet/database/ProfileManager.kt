@@ -161,8 +161,10 @@ object ProfileManager {
         }
     }
 
-    suspend fun postUpdate(profileId: Long) {
-        postUpdate(getProfile(profileId) ?: return)
+    suspend fun postUpdate(profileId: Long, withoutTraffic: Boolean = false) {
+        postUpdate(getProfile(profileId)?.also {
+            if (withoutTraffic) it.info = "withoutTraffic"
+        } ?: return)
     }
 
     suspend fun postUpdate(profile: ProxyEntity) {

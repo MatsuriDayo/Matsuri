@@ -57,6 +57,7 @@ import io.nekohasekai.sagernet.ktx.isTLS
 import io.nekohasekai.sagernet.ui.profile.*
 import moe.matsuri.nya.Protocols
 import moe.matsuri.nya.neko.*
+import org.json.JSONObject
 
 @Entity(
     tableName = "proxy_entities", indices = [Index("groupId", name = "groupId")]
@@ -122,6 +123,10 @@ data class ProxyEntity(
             }
         }
     }
+
+    @Ignore
+    @Transient
+    var info: String = ""
 
     @Ignore
     @Transient

@@ -878,8 +878,8 @@ fun buildV2RayConfig(
         // apply user rules
         for (rule in extraRules) {
             val _uidList = rule.packages.map {
-                PackageCache[it]?.takeIf { uid -> uid >= 10000 } ?: 1000
-            }.toHashSet().toList()
+                PackageCache[it]?.takeIf { uid -> uid >= 1000 }
+            }.toHashSet().filterNotNull()
 
             if (rule.packages.isNotEmpty()) {
                 dumpUid = true

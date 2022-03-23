@@ -407,9 +407,12 @@ class MainActivity : ThemedActivity(),
         if (msg != null) snackbar(getString(R.string.vpn_error, msg)).show()
 
         when (state) {
-            BaseService.State.Connected, BaseService.State.Stopped -> {
-                statsUpdated(emptyList())
+            BaseService.State.Stopping, BaseService.State.Connecting -> {
+                runOnDefaultDispatcher {
+                    ProfileManager.postUpdate(DataStore.currentProfile, withoutTraffic = true)
+                }
             }
+            else -> {}
         }
     }
 
@@ -471,12 +474,6 @@ class MainActivity : ThemedActivity(),
 
         runOnDefaultDispatcher {
             ProfileManager.postTrafficUpdated(profileId, stats)
-        }
-    }
-
-    override fun profilePersisted(profileId: Long) {
-        runOnDefaultDispatcher {
-            ProfileManager.postUpdate(profileId)
         }
     }
 

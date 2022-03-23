@@ -82,7 +82,7 @@ class BaseService {
                 Intent.ACTION_SHUTDOWN -> service.persistStats()
                 Action.RELOAD -> service.forceLoad()
                 Action.SWITCH_WAKE_LOCK -> service.switchWakeLock()
-                else -> service.stopRunner(keepState = false)
+                else -> service.stopRunner()
             }
         }
         var closeReceiverRegistered = false
@@ -332,12 +332,6 @@ class BaseService {
             broadcast { it.stateChanged(s.ordinal, profileName, msg) }
         }
 
-        fun profilePersisted(ids: List<Long>) = launch {
-            if (bandwidthListeners.isNotEmpty() && ids.isNotEmpty()) broadcast { item ->
-                if (bandwidthListeners.contains(item.asBinder())) ids.forEach(item::profilePersisted)
-            }
-        }
-
         fun missingPlugin(pluginName: String) = launch {
             val profileName = profileName
             broadcast { it.missingPlugin(profileName, pluginName) }
@@ -395,7 +389,7 @@ class BaseService {
             runOnDefaultDispatcher { DefaultNetworkListener.stop(this) }
         }
 
-        fun stopRunner(restart: Boolean = false, msg: String? = null, keepState: Boolean = true) {
+        fun stopRunner(restart: Boolean = false, msg: String? = null) {
             if (data.state == State.Stopping) return
             data.notification?.destroy()
             data.notification = null
@@ -413,7 +407,6 @@ class BaseService {
                         unregisterReceiver(data.receiver)
                         data.closeReceiverRegistered = false
                     }
-                    data.binder.profilePersisted(listOfNotNull(data.proxy).map { it.profile.id })
                     data.proxy = null
                 }
 

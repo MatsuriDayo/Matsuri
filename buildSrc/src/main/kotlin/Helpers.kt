@@ -256,7 +256,7 @@ fun Project.setupAppCommon() {
                     keyPassword(pwd)
                 }
             }
-        } else if (!requireFlavor().contains("fdroid", true)) {
+        } else if (requireFlavor().contains("(Oss|Expert|Play)Release".toRegex())) {
             exitProcess(0)
         }
         buildTypes {
