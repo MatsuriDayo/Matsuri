@@ -75,6 +75,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import libcore.Libcore
+import moe.matsuri.nya.Protocols.getProtocolColor
 import moe.matsuri.nya.neko.NekoJSInterface
 import moe.matsuri.nya.neko.NekoPluginManager
 import moe.matsuri.nya.neko.NekoSettingActivity
@@ -656,7 +657,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                     append("\n")
                     append(
                         profile.displayType(),
-                        ForegroundColorSpan(requireContext().getColorAttr(R.attr.accentOrTextSecondary)),
+                        ForegroundColorSpan(requireContext().getProtocolColor(profile.type)),
                         SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                     append(" ")
@@ -1518,6 +1519,7 @@ class ConfigurationFragment @JvmOverloads constructor(
 
                 profileName.text = proxyEntity.displayName()
                 profileType.text = proxyEntity.displayType()
+                profileType.setTextColor(requireContext().getProtocolColor(proxyEntity.type))
 
                 var rx = proxyEntity.rx
                 var tx = proxyEntity.tx

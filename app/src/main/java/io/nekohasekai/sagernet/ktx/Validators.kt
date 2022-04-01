@@ -30,6 +30,7 @@ import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
 import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
+import moe.matsuri.nya.neko.NekoBean
 
 interface ValidateResult
 object ResultSecure : ValidateResult
@@ -52,7 +53,7 @@ fun AbstractBean.isInsecure(): ValidateResult {
             }
         }
     } else if (this is ShadowsocksRBean) {
-        return ResultDeprecated(R.raw.shadowsocksr)
+        return ResultInsecure(R.raw.shadowsocksr)
     } else if (this is HttpBean) {
         if (!isTLS()) return ResultInsecure(R.raw.not_encrypted)
     } else if (this is SOCKSBean) {

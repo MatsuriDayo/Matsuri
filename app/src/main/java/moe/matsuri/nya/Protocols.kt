@@ -1,7 +1,11 @@
 package moe.matsuri.nya
 
+import android.content.Context
+import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.database.ProxyEntity.Companion.TYPE_NEKO
 import io.nekohasekai.sagernet.fmt.AbstractBean
+import io.nekohasekai.sagernet.ktx.getColorAttr
 import moe.matsuri.nya.neko.NekoPluginManager
 
 // Settings for all protocols, built-in or plugin
@@ -48,6 +52,15 @@ object Protocols {
             return hash() == other.hash()
         }
 
+    }
+
+    // Display
+
+    fun Context.getProtocolColor(type: Int): Int {
+        return when (type) {
+            TYPE_NEKO -> getColorAttr(android.R.attr.textColorPrimary)
+            else -> getColorAttr(R.attr.accentOrTextSecondary)
+        }
     }
 
 }

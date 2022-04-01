@@ -64,7 +64,7 @@ public class NekoBean extends AbstractBean {
         NekoPluginManager.Protocol p = NekoPluginManager.INSTANCE.findProtocol(protocolId);
         String neko = SagerNet.application.getResources().getString(R.string.neko_plugin);
         if (p == null) return neko;
-        return neko + " " + p.getProtocolId();
+        return p.getProtocolId();
     }
 
     @Override

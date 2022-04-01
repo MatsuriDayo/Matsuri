@@ -49,6 +49,7 @@ import io.nekohasekai.sagernet.databinding.LayoutProfileBinding
 import io.nekohasekai.sagernet.fmt.internal.ChainBean
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.ui.ProfileSelectActivity
+import moe.matsuri.nya.Protocols.getProtocolColor
 
 class ChainSettingsActivity : ProfileSettingsActivity<ChainBean>(R.layout.layout_chain_settings) {
 
@@ -288,6 +289,7 @@ class ChainSettingsActivity : ProfileSettingsActivity<ChainBean>(R.layout.layout
 
             profileName.text = proxyEntity.displayName()
             profileType.text = proxyEntity.displayType()
+            profileType.setTextColor(getProtocolColor(proxyEntity.type))
 
             var rx = proxyEntity.rx
             var tx = proxyEntity.tx
