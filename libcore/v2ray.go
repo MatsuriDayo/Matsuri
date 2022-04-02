@@ -5,13 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"libcore/doh"
 	"libcore/protect"
 	"log"
 	gonet "net"
-	"os"
-	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -23,7 +20,6 @@ import (
 	"github.com/v2fly/v2ray-core/v5/app/observatory"
 	"github.com/v2fly/v2ray-core/v5/common/buf"
 	"github.com/v2fly/v2ray-core/v5/common/net"
-	"github.com/v2fly/v2ray-core/v5/common/platform/filesystem"
 	"github.com/v2fly/v2ray-core/v5/features/dns"
 	dns_feature "github.com/v2fly/v2ray-core/v5/features/dns"
 	v2rayDns "github.com/v2fly/v2ray-core/v5/features/dns"
@@ -252,32 +248,6 @@ func setupResolvers() {
 
 	// "localhost" localDns lookup -> androidUnderlyingResolver.LookupIP()
 	localdns.SetLookupFunc(androidUnderlyingResolver.LookupIP)
-}
-
-func setupV2rayFileSystem(internalAssets, externalAssets string) {
-	filesystem.NewFileSeeker = func(path string) (io.ReadSeekCloser, error) {
-		_, fileName := filepath.Split(path)
-
-		paths := []string{
-			internalAssets + fileName,
-			externalAssets + fileName,
-		}
-
-		var err error
-
-		for _, path = range paths {
-			_, err = os.Stat(path)
-			if err == nil {
-				return os.Open(path)
-			}
-		}
-
-		return nil, err
-	}
-
-	filesystem.NewFileReader = func(path string) (io.ReadCloser, error) {
-		return filesystem.NewFileSeeker(path)
-	}
 }
 
 // Neko connections

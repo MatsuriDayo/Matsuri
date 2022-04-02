@@ -5,10 +5,12 @@ import (
 	"io/ioutil"
 	"libcore/comm"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/sagernet/gomobile/asset"
 	"github.com/sirupsen/logrus"
+	"github.com/v2fly/v2ray-core/v5/common/platform/filesystem"
 )
 
 const (
@@ -162,4 +164,39 @@ func extractAsset(assetPath string, path string) error {
 		logrus.Debugf("Extract >> %s", path)
 	}
 	return err
+}
+
+func setupV2rayFileSystem(internalAssets, externalAssets string) {
+	filesystem.NewFileSeeker = func(path string) (io.ReadSeekCloser, error) {
+		_, fileName := filepath.Split(path)
+
+		// 直接读 APK 的
+		if fileName == "index.html" {
+			av, err := asset.Open(assetsPrefix + fileName)
+			if err != nil {
+				return nil, newError("open " + fileName + " in assets").Base(err)
+			}
+			return av, nil
+		}
+
+		paths := []string{
+			internalAssets + fileName,
+			externalAssets + fileName,
+		}
+
+		var err error
+
+		for _, path = range paths {
+			_, err = os.Stat(path)
+			if err == nil {
+				return os.Open(path)
+			}
+		}
+
+		return nil, err
+	}
+
+	filesystem.NewFileReader = func(path string) (io.ReadCloser, error) {
+		return filesystem.NewFileSeeker(path)
+	}
 }

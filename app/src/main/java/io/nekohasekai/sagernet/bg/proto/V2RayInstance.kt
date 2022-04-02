@@ -326,7 +326,7 @@ abstract class V2RayInstance(
 
         v2rayPoint.start()
 
-        if (config.requireWs) {
+        if (config.wsPort > 0) {
             val url = "http://$LOCALHOST:" + (config.wsPort) + "/"
 
             runOnMainDispatcher {
