@@ -75,6 +75,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import libcore.Libcore
+import moe.matsuri.nya.Protocols
 import moe.matsuri.nya.Protocols.getProtocolColor
 import moe.matsuri.nya.neko.NekoJSInterface
 import moe.matsuri.nya.neko.NekoPluginManager
@@ -647,7 +648,9 @@ class ConfigurationFragment @JvmOverloads constructor(
                         profileStatusColor = requireContext().getColour(R.color.material_red_500)
                     }
                     3 -> {
-                        profileStatusText = getString(R.string.unavailable)
+                        val err = profile.error ?: ""
+                        val msg = Protocols.genFriendlyMsg(err)
+                        profileStatusText = if (msg != err) msg else getString(R.string.unavailable)
                         profileStatusColor = requireContext().getColour(R.color.material_red_500)
                     }
                 }
@@ -1571,9 +1574,11 @@ class ConfigurationFragment @JvmOverloads constructor(
                 }
 
                 if (proxyEntity.status == 3) {
-                    profileStatus.setText(R.string.unavailable)
+                    val err = proxyEntity.error ?: "<?>"
+                    val msg = Protocols.genFriendlyMsg(err)
+                    profileStatus.text = if (msg != err) msg else getString(R.string.unavailable)
                     profileStatus.setOnClickListener {
-                        alert(proxyEntity.error ?: "<?>").show()
+                        alert(err).show()
                     }
                 } else {
                     profileStatus.setOnClickListener(null)

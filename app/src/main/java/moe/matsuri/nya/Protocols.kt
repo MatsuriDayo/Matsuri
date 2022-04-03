@@ -5,6 +5,7 @@ import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProxyEntity.Companion.TYPE_NEKO
 import io.nekohasekai.sagernet.fmt.AbstractBean
+import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.getColorAttr
 import moe.matsuri.nya.neko.NekoPluginManager
 
@@ -60,6 +61,21 @@ object Protocols {
         return when (type) {
             TYPE_NEKO -> getColorAttr(android.R.attr.textColorPrimary)
             else -> getColorAttr(R.attr.accentOrTextSecondary)
+        }
+    }
+
+    // Test
+
+    fun genFriendlyMsg(msg: String): String {
+        val msgL = msg.lowercase()
+        return when {
+            msgL.contains("timeout") || msgL.contains("deadline") -> {
+                app.getString(R.string.connection_test_timeout)
+            }
+            msgL.contains("refused") || msgL.contains("closed pipe") -> {
+                app.getString(R.string.connection_test_refused)
+            }
+            else -> msg
         }
     }
 

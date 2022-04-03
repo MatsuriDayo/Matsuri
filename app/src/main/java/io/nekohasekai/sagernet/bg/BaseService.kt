@@ -47,6 +47,7 @@ import kotlinx.coroutines.*
 import libcore.AppStats
 import libcore.Libcore
 import libcore.TrafficListener
+import moe.matsuri.nya.Protocols
 import java.net.UnknownHostException
 import com.github.shadowsocks.plugin.PluginManager as ShadowsocksPluginPluginManager
 import io.nekohasekai.sagernet.aidl.AppStats as AidlAppStats
@@ -279,17 +280,7 @@ class BaseService {
                     data!!.proxy!!.v2rayPoint, TAG_SOCKS, DataStore.connectionTestURL, 3000
                 )
             } catch (e: Exception) {
-                var msg = e.readableMessage
-                val msgL = msg.lowercase()
-                when {
-                    msgL.contains("timeout") || msg.contains("deadline") -> {
-                        msg = app.getString(R.string.connection_test_timeout)
-                    }
-                    msg.contains("refused") || msgL.contains("closed pipe") -> {
-                        msg = app.getString(R.string.connection_test_refused)
-                    }
-                }
-                error(msg)
+                error(Protocols.genFriendlyMsg(e.readableMessage))
             }
         }
 
