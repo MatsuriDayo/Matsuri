@@ -266,7 +266,7 @@
     </PreferenceCategory>
 
     <PreferenceCategory app:title="@string/cag_misc">
-        <io.nekohasekai.sagernet.widget.LinkPreference
+        <EditTextPreference
             app:defaultValue="http://cp.cloudflare.com/"
             app:icon="@drawable/ic_baseline_cast_connected_24"
             app:key="connectionTestURL"

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/v2fly/v2ray-core/v5/common/net"
@@ -17,7 +18,6 @@ func UrlTestV2ray(instance *V2RayInstance, inbound string, link string, timeout 
 
 	transport := &http.Transport{
 		TLSHandshakeTimeout: time.Duration(timeout) * time.Millisecond,
-		DisableKeepAlives:   true,
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 			// I believe the server...
 
@@ -45,21 +45,47 @@ func UrlTestV2ray(instance *V2RayInstance, inbound string, link string, timeout 
 			return instance.dialContext(ctx, dest)
 		},
 	}
-	req, err := http.NewRequestWithContext(context.Background(), "GET", link, nil)
+
+	// Keep alive, use one connection
+	client := &http.Client{
+		Transport: transport,
+		Timeout:   time.Duration(timeout) * time.Millisecond,
+	}
+
+	// Test handshake time
+	var time_start time.Time
+	var times = 1
+	var rtt_times = 1
+
+	// Test RTT "true delay"
+	if link2 := strings.TrimLeft(link, "true"); link != link2 {
+		link = link2
+		times = 3
+		rtt_times = 2
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Millisecond)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, "GET", link, nil)
 	req.Header.Set("User-Agent", fmt.Sprintf("curl/7.%d.%d", rand.Int()%54, rand.Int()%2))
 	if err != nil {
 		return 0, err
 	}
-	start := time.Now()
-	resp, err := (&http.Client{
-		Transport: transport,
-		Timeout:   time.Duration(timeout) * time.Millisecond,
-	}).Do(req)
-	if err == nil && resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusOK {
-		err = fmt.Errorf("unexcpted response status: %d", resp.StatusCode)
+
+	for i := 0; i < times; i++ {
+		if i == 1 || times == 1 {
+			time_start = time.Now()
+		}
+
+		resp, err := client.Do(req)
+
+		if err == nil && resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusOK {
+			err = fmt.Errorf("unexcpted response status: %d", resp.StatusCode)
+		}
+		if err != nil {
+			return 0, err
+		}
 	}
-	if err != nil {
-		return 0, err
-	}
-	return int32(time.Since(start).Milliseconds()), nil
+
+	return int32(time.Since(time_start).Milliseconds() / int64(rtt_times)), nil
 }
