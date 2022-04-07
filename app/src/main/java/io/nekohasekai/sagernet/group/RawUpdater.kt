@@ -318,6 +318,14 @@ object RawUpdater : GroupUpdater() {
                                     }
                                     "ws-opts" -> for (wsOpt in (opt.value as Map<String, Any>)) {
                                         when (wsOpt.key.lowercase()) {
+                                            "headers" -> for (wsHeader in (opt.value as Map<String, Any>)) {
+                                                when (wsHeader.key.lowercase()) {
+                                                    "host" -> bean.host = wsHeader.value?.toString()
+                                                }
+                                            }
+                                            "path" -> {
+                                                bean.path = opt.value?.toString()
+                                            }
                                             "max-early-data" -> {
                                                 bean.wsMaxEarlyData = wsOpt.value.toString().toInt()
                                             }
