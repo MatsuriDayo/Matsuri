@@ -221,9 +221,10 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 	}
 
 	//这个 DispatchLink 是 outbound, link reader 是上行流量
+	rw := &connReaderWriter{conn, buf.NewReader(conn), buf.NewWriter(conn), 0}
 	link := &transport.Link{
-		Reader: connReader{conn, buf.NewReader(conn)},
-		Writer: connWriter{conn, buf.NewWriter(conn)},
+		Reader: rw,
+		Writer: rw,
 	}
 	err := t.v2ray.dispatcher.DispatchLink(ctx, destination, link)
 
@@ -238,24 +239,29 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 	// fuck v2ray pipe
 }
 
-type connWriter struct {
-	net.Conn
-	buf.Writer
-}
-
-type connReader struct {
+type connReaderWriter struct {
 	net.Conn
 	buf.Reader
+	buf.Writer
+	closed uint32
 }
 
-func (r connReader) ReadMultiBufferTimeout(t time.Duration) (buf.MultiBuffer, error) {
+func (r *connReaderWriter) ReadMultiBufferTimeout(t time.Duration) (buf.MultiBuffer, error) {
 	r.SetReadDeadline(time.Now().Add(t))
 	defer r.SetReadDeadline(time.Time{})
 	return r.ReadMultiBuffer()
 }
 
-func (r connReader) Interrupt() {
+func (r *connReaderWriter) Interrupt() {
 	r.Close()
+}
+
+func (r *connReaderWriter) Close() (err error) {
+	cnt := atomic.AddUint32(&r.closed, 1)
+	if cnt > 1 {
+		return nil
+	}
+	return r.Conn.Close()
 }
 
 //UDP

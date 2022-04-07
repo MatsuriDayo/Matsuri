@@ -1306,6 +1306,7 @@ class ConfigurationFragment @JvmOverloads constructor(
             }
 
             fun remove(pos: Int) {
+                if (pos < 0) return
                 configurationIdList.removeAt(pos)
                 notifyItemRemoved(pos)
             }
