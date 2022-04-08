@@ -21,6 +21,7 @@ import (
 
 	"github.com/Dreamacro/clash/transport/socks5"
 	"github.com/v2fly/v2ray-core/v5/common/buf"
+	"github.com/v2fly/v2ray-core/v5/nekoutils"
 )
 
 type HTTPClient interface {
@@ -73,13 +74,13 @@ func NewHttpClient() HTTPClient {
 
 func (c *httpClient) ModernTLS() {
 	c.tls.MinVersion = tls.VersionTLS12
-	c.tls.CipherSuites = map1(tls.CipherSuites(), func(it *tls.CipherSuite) uint16 { return it.ID })
+	c.tls.CipherSuites = nekoutils.Map(tls.CipherSuites(), func(it *tls.CipherSuite) uint16 { return it.ID })
 }
 
 func (c *httpClient) RestrictedTLS() {
 	c.tls.MinVersion = tls.VersionTLS13
-	c.tls.CipherSuites = map1(filter1(tls.CipherSuites(), func(it *tls.CipherSuite) bool {
-		return contians1(it.SupportedVersions, uint16(tls.VersionTLS13))
+	c.tls.CipherSuites = nekoutils.Map(nekoutils.Filter(tls.CipherSuites(), func(it *tls.CipherSuite) bool {
+		return nekoutils.Contains(it.SupportedVersions, uint16(tls.VersionTLS13))
 	}), func(it *tls.CipherSuite) uint16 {
 		return it.ID
 	})
@@ -145,6 +146,11 @@ type httpRequest struct {
 
 func (r *httpRequest) SetURL(link string) (err error) {
 	r.request.URL, err = url.Parse(link)
+	if r.request.URL.User != nil {
+		user := r.request.URL.User.Username()
+		password, _ := r.request.URL.User.Password()
+		r.request.SetBasicAuth(user, password)
+	}
 	return
 }
 
@@ -230,33 +236,4 @@ func (h *httpResponse) WriteTo(path string) error {
 	defer buffer.Release()
 	_, err = io.CopyBuffer(file, h.Body, buffer.Extend(buf.Size))
 	return err
-}
-
-// TODO remove when go 1.18
-
-func map1(arr []*tls.CipherSuite, block func(it *tls.CipherSuite) uint16) []uint16 {
-	var retArr []uint16
-	for index := range arr {
-		retArr = append(retArr, block(arr[index]))
-	}
-	return retArr
-}
-
-func filter1(arr []*tls.CipherSuite, block func(it *tls.CipherSuite) bool) []*tls.CipherSuite {
-	var retArr []*tls.CipherSuite
-	for _, it := range arr {
-		if block(it) {
-			retArr = append(retArr, it)
-		}
-	}
-	return retArr
-}
-
-func contians1(arr []uint16, target uint16) bool {
-	for i := range arr {
-		if target == arr[i] {
-			return true
-		}
-	}
-	return false
 }
