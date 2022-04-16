@@ -407,9 +407,10 @@ class MainActivity : ThemedActivity(),
         if (msg != null) snackbar(getString(R.string.vpn_error, msg)).show()
 
         when (state) {
-            BaseService.State.Stopping, BaseService.State.Connecting -> {
+            BaseService.State.Stopped -> {
                 runOnDefaultDispatcher {
-                    ProfileManager.postUpdate(DataStore.currentProfile, withoutTraffic = true)
+                    // refresh view
+                    ProfileManager.postUpdate(DataStore.currentProfile)
                 }
             }
             else -> {}
@@ -465,6 +466,7 @@ class MainActivity : ThemedActivity(),
         if (it) snackbar(R.string.vpn_permission_denied).show()
     }
 
+    // may NOT called when app is in background
     override fun trafficUpdated(profileId: Long, stats: TrafficStats, isCurrent: Boolean) {
         if (profileId == 0L) return
 

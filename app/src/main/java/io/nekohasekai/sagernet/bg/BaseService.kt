@@ -109,6 +109,10 @@ class BaseService {
                 stopListeningForStats(callback)
             }
         }
+
+        // statsListeners: TODO add links
+        // bandwidthListeners: only for UI update, don't save data
+
         private val bandwidthListeners = mutableMapOf<IBinder, Long>()  // the binder is the real identifier
         private val statsListeners = mutableMapOf<IBinder, Long>()  // the binder is the real identifier
         override val coroutineContext = Dispatchers.Main.immediate + Job()
@@ -376,6 +380,7 @@ class BaseService {
                 release()
                 wakeLock = null
             }
+            // ProxyInstance: save traffic
             data.proxy?.close()
             runOnDefaultDispatcher { DefaultNetworkListener.stop(this) }
         }
