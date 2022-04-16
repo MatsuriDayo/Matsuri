@@ -144,8 +144,13 @@ class NekoJSInterface(val plgId: String) {
         var jsReceivedValue = ""
 
         runOnMainDispatcher {
-            webView!!.evaluateJavascript(script) { value ->
-                jsReceivedValue = value
+            if (webView != null) {
+                webView!!.evaluateJavascript(script) { value ->
+                    jsReceivedValue = value
+                    jsLatch.countDown()
+                }
+            } else {
+                jsReceivedValue = "webView is null"
                 jsLatch.countDown()
             }
         }
@@ -201,7 +206,8 @@ class NekoJSInterface(val plgId: String) {
             val sendData = JSONObject()
             sendData.put("port", port)
             sendData.put(
-                "sharedStorage", NekomuraUtil.b64EncodeUrlSafe(bean.sharedStorage.toString().toByteArray())
+                "sharedStorage",
+                NekomuraUtil.b64EncodeUrlSafe(bean.sharedStorage.toString().toByteArray())
             )
             otherArgs?.forEach { (t, u) -> sendData.put(t, u) }
 
@@ -222,7 +228,10 @@ class NekoJSInterface(val plgId: String) {
         // UI Interface
 
         suspend fun setSharedStorage(sharedStorage: String) {
-            callProtocol("setSharedStorage", NekomuraUtil.b64EncodeUrlSafe(sharedStorage.toByteArray()))
+            callProtocol(
+                "setSharedStorage",
+                NekomuraUtil.b64EncodeUrlSafe(sharedStorage.toByteArray())
+            )
         }
 
         suspend fun requireSetProfileCache() {
@@ -247,7 +256,8 @@ class NekoJSInterface(val plgId: String) {
             sendData.put("newValue", v)
 
             callProtocol(
-                "onPreferenceChanged", NekomuraUtil.b64EncodeUrlSafe(sendData.toString().toByteArray())
+                "onPreferenceChanged",
+                NekomuraUtil.b64EncodeUrlSafe(sendData.toString().toByteArray())
             )
         }
 

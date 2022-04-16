@@ -1096,8 +1096,22 @@ class ConfigurationFragment @JvmOverloads constructor(
         lateinit var layoutManager: LinearLayoutManager
         lateinit var configurationListView: RecyclerView
 
-        val select by lazy { (parentFragment as ConfigurationFragment).select }
-        val selectedItem by lazy { (parentFragment as ConfigurationFragment).selectedItem }
+        val select by lazy {
+            try {
+                (parentFragment as ConfigurationFragment).select
+            } catch (e: Exception) {
+                Logs.e(e)
+                false
+            }
+        }
+        val selectedItem by lazy {
+            try {
+                (parentFragment as ConfigurationFragment).selectedItem
+            } catch (e: Exception) {
+                Logs.e(e)
+                null
+            }
+        }
 
         override fun onResume() {
             super.onResume()
