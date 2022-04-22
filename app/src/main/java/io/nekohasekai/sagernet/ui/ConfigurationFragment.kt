@@ -86,9 +86,13 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.UnknownHostException
+import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.zip.ZipInputStream
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 import kotlin.collections.set
 
 class ConfigurationFragment @JvmOverloads constructor(
@@ -617,7 +621,7 @@ class ConfigurationFragment @JvmOverloads constructor(
 
         lateinit var cancel: () -> Unit
         val fragment by lazy { getCurrentGroupFragment() }
-        val results = mutableListOf<ProxyEntity?>()
+        val results = Collections.synchronizedList(mutableListOf<ProxyEntity?>())
         var proxyN = 0
         val finishedN = AtomicInteger(0)
 
