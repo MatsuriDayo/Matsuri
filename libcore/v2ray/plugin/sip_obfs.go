@@ -1,4 +1,4 @@
-package libcore
+package plugin
 
 import (
 	"github.com/Dreamacro/clash/transport/simple-obfs"

@@ -6,6 +6,8 @@ import (
 	"go.uber.org/automaxprocs/maxprocs"
 )
 
+var IsNekoray = false
+
 func AutoGoMaxProcs() {
 	maxprocs.Set(maxprocs.Logger(func(string, ...interface{}) {}))
 }

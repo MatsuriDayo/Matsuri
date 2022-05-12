@@ -6,9 +6,7 @@ import (
 	"libcore/device"
 	"libcore/protect"
 	"libcore/tun"
-	"libcore/tun/gvisor"
-	"libcore/tun/system"
-	"libcore/tun/tun2socket"
+	"libcore/tun/tuns"
 	"math"
 	"net"
 	"os"
@@ -110,11 +108,11 @@ func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
 			}
 		}
 
-		t.dev, err = gvisor.New(config.FileDescriptor, config.MTU, t, gvisor.DefaultNIC, config.PCap, pcapFile, math.MaxUint32, config.IPv6Mode)
+		t.dev, err = tuns.NewGvisor(config.FileDescriptor, config.MTU, t, 0x01, config.PCap, pcapFile, math.MaxUint32, config.IPv6Mode)
 	} else if config.Implementation == 1 { // SYSTEM
-		t.dev, err = system.New(config.FileDescriptor, config.MTU, t, config.IPv6Mode, config.ErrorHandler.HandleError)
+		t.dev, err = tuns.NewSystem(config.FileDescriptor, config.MTU, t, config.IPv6Mode, config.ErrorHandler.HandleError)
 	} else if config.Implementation == 2 { // Tun2Socket
-		t.dev, err = tun2socket.New(config.FileDescriptor, t)
+		t.dev, err = tuns.NewTun2Socket(config.FileDescriptor, t)
 	} else {
 		err = newError("Not supported")
 	}

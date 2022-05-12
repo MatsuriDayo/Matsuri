@@ -1,4 +1,4 @@
-package libcore
+package plugin
 
 import (
 	"bytes"

@@ -4,6 +4,7 @@ import (
 	"io"
 	"io/ioutil"
 	"libcore/comm"
+	"libcore/device"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -31,6 +32,10 @@ type BoolFunc interface {
 }
 
 func extractV2RayAssets(useOfficial BoolFunc) {
+	if device.IsNekoray {
+		return
+	}
+
 	useOfficialAssets := useOfficial.Invoke()
 
 	extract := func(name string) {
@@ -167,6 +172,10 @@ func extractAsset(assetPath string, path string) error {
 }
 
 func setupV2rayFileSystem(internalAssets, externalAssets string) {
+	if device.IsNekoray {
+		return
+	}
+
 	filesystem.NewFileSeeker = func(path string) (io.ReadSeekCloser, error) {
 		_, fileName := filepath.Split(path)
 

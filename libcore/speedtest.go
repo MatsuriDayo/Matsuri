@@ -78,13 +78,10 @@ func UrlTestV2ray(instance *V2RayInstance, inbound string, link string, timeout 
 		}
 
 		resp, err := client.Do(req)
-
-		if err == nil && resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusOK {
-			err = fmt.Errorf("unexcpted response status: %d", resp.StatusCode)
-		}
 		if err != nil {
 			return 0, err
 		}
+		resp.Body.Close()
 	}
 
 	return int32(time.Since(time_start).Milliseconds() / int64(rtt_times)), nil

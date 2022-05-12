@@ -10,8 +10,6 @@ import (
 	"strings"
 	"time"
 	_ "unsafe"
-
-	"github.com/sagernet/libping"
 )
 
 //go:linkname systemRoots crypto/x509.systemRoots
@@ -23,10 +21,6 @@ func Setenv(key, value string) error {
 
 func Unsetenv(key string) error {
 	return os.Unsetenv(key)
-}
-
-func IcmpPing(address string, timeout int32) (int32, error) {
-	return libping.IcmpPing(address, timeout)
 }
 
 func initCoreDefer() {
@@ -44,6 +38,7 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 	// Set up log
 	SetEnableLog(enableLog, maxKB)
 	s := fmt.Sprintln("InitCore called", externalAssets, cachePath, process, isBgProcess)
+	s = strings.TrimRight(s, "\n")
 	err := setupLogger(filepath.Join(cachePath, "neko.log"))
 
 	if err == nil {

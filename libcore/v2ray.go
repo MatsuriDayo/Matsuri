@@ -28,7 +28,6 @@ import (
 	"github.com/v2fly/v2ray-core/v5/features/routing"
 	"github.com/v2fly/v2ray-core/v5/features/stats"
 	"github.com/v2fly/v2ray-core/v5/infra/conf/serial"
-	_ "github.com/v2fly/v2ray-core/v5/main/distro/all"
 	"github.com/v2fly/v2ray-core/v5/nekoutils"
 	"github.com/v2fly/v2ray-core/v5/transport/internet"
 )

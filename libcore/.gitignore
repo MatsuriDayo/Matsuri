@@ -1,4 +1,3 @@
-*.pb.go
 binary*.go
 *.[a|j]ar
 .idea/
