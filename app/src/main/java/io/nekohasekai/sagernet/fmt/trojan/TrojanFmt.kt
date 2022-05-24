@@ -47,7 +47,8 @@ fun parseTrojan(server: String): TrojanBean {
         security = link.queryParameter("security") ?: "tls"
         sni = link.queryParameter("sni") ?: link.queryParameter("peer")
         alpn = link.queryParameter("alpn")
-        link.queryParameter("allowInsecure")?.apply { allowInsecure = true }
+        link.queryParameter("allowInsecure")
+            ?.apply { if (this == "1" || this == "true") allowInsecure = true }
         name = link.fragment
     }
 

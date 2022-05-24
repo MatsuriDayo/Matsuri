@@ -28,9 +28,9 @@ import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean
 import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
+import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
-import moe.matsuri.nya.neko.NekoBean
 
 interface ValidateResult
 object ResultSecure : ValidateResult
@@ -70,6 +70,8 @@ fun AbstractBean.isInsecure(): ValidateResult {
         if (allowInsecure) return ResultInsecure(R.raw.insecure)
         if (alterId > 0) return ResultDeprecated(R.raw.vmess_md5_auth)
     } else if (this is HysteriaBean) {
+        if (allowInsecure) return ResultInsecure(R.raw.insecure)
+    } else if (this is TrojanBean) {
         if (allowInsecure) return ResultInsecure(R.raw.insecure)
     }
     return ResultSecure

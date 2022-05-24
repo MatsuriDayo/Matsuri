@@ -253,7 +253,8 @@ private fun tryResolveVmess4Kitsunebi(server: String): VMessBean {
         url.queryParameter("alterId")?.apply { alterId = this.toInt() }
         url.queryParameter("path")?.apply { path = this }
         url.queryParameter("tls")?.apply { security = "tls" }
-        url.queryParameter("allowInsecure")?.apply { allowInsecure = true }
+        url.queryParameter("allowInsecure")
+            ?.apply { if (this == "1" || this == "true") allowInsecure = true }
         url.queryParameter("obfs")?.apply {
             type = this.replace("websocket", "ws").replace("none", "tcp")
             if (type == "ws") {
