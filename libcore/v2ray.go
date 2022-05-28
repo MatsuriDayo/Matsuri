@@ -284,14 +284,18 @@ func ListV2rayConnections() string {
 	}
 
 	addToList := func(list interface{}) {
-		for _, c := range list.([]interface{}) {
+		for i, c := range list.([]interface{}) {
+			if i >= 100 { // too much
+				return
+			}
 			if c2, ok := c.(*nekoutils.ManagedV2rayConn); ok {
 				if c2.Tag == "dns-out" || c2.Tag == "direct" {
 					continue
 				}
-				list2 = append(list2, &struct {
+				item := &struct {
 					ID    uint32
 					Dest  string
+					RDest string
 					Start int64
 					End   int64
 					Uid   uint32
@@ -301,9 +305,15 @@ func ListV2rayConnections() string {
 					Dest:  c2.Dest.String(),
 					Start: c2.StartTime,
 					End:   c2.EndTime,
-					Uid:   c2.Inbound.Uid,
 					Tag:   c2.Tag,
-				})
+				}
+				if c2.Inbound != nil {
+					item.Uid = c2.Inbound.Uid
+				}
+				if c2.RouteDest.IsValid() {
+					item.RDest = c2.RouteDest.String()
+				}
+				list2 = append(list2, item)
 			}
 		}
 	}

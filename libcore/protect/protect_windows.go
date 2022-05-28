@@ -8,6 +8,6 @@ import (
 	"github.com/v2fly/v2ray-core/v5/transport/internet"
 )
 
-func (dialer ProtectedDialer) Dial(ctx context.Context, source v2rayNet.Address, destination v2rayNet.Destination, sockopt *internet.SocketConfig) (conn net.Conn, err error) {
+func (dialer ProtectedDialer) dial(ctx context.Context, source v2rayNet.Address, destination v2rayNet.Destination, sockopt *internet.SocketConfig) (conn net.Conn, err error) {
 	return v2rayDefaultDialer.Dial(ctx, source, destination, sockopt)
 }

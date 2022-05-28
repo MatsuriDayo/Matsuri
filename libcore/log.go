@@ -7,6 +7,7 @@ import (
 	"libcore/device"
 	"log"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -92,14 +93,14 @@ type logfile struct {
 }
 
 func (lp *logfile) lock() {
-	if lp.f != nil {
+	if lp.f != nil && runtime.GOOS != "windows" {
 		device.Flock(int(lp.f.Fd()), device.LOCK_EX)
 	} else {
 		lp.mutex.Lock()
 	}
 }
 func (lp *logfile) unlock() {
-	if lp.f != nil {
+	if lp.f != nil && runtime.GOOS != "windows" {
 		device.Flock(int(lp.f.Fd()), device.LOCK_UN)
 	} else {
 		lp.mutex.Unlock()
@@ -117,8 +118,11 @@ func (lp *logfile) Write(p []byte) (n int, err error) {
 			lp.f.Seek(0, os.SEEK_SET)
 			data, _ := ioutil.ReadAll(lp.f)
 			if len(data)-max > 0 {
-				lp.f.Truncate(0)
-				lp.f.Write(data[len(data)-max:])
+				err := lp.f.Truncate(0)
+				// TODO windows "access is denied"
+				if err == nil {
+					lp.f.Write(data[len(data)-max:])
+				}
 			}
 		}
 	} else {
