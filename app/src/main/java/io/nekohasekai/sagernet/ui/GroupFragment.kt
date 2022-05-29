@@ -48,6 +48,7 @@ import io.nekohasekai.sagernet.widget.ListHolderListener
 import io.nekohasekai.sagernet.widget.QRCodeDialog
 import io.nekohasekai.sagernet.widget.UndoSnackbarManager
 import kotlinx.coroutines.delay
+import moe.matsuri.nya.utils.NekomuraUtil
 import java.util.*
 
 class GroupFragment : ToolbarFragment(R.layout.layout_group),
@@ -345,7 +346,8 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
                 R.id.action_export_clipboard -> {
                     runOnDefaultDispatcher {
                         val profiles = SagerDatabase.proxyDao.getByGroup(selectedGroup.id)
-                        val links = profiles.mapNotNull { it.toLink(compact = true) }.joinToString("\n")
+                        val links = profiles.mapNotNull { it.toLink(compact = true) }
+                            .joinToString("\n")
                         onMainDispatcher {
                             SagerNet.trySetPrimaryClip(links)
                             snackbar(getString(R.string.copy_toast_msg)).show()
@@ -434,7 +436,7 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
 
             val subscription = proxyGroup.subscription
             val textLayout = groupTraffic.parent as View
-            if (subscription != null && subscription.bytesUsed > 0L) {
+            if (subscription != null && subscription.bytesUsed > 0L) { // SIP008 & Open Online Config
                 groupTraffic.isVisible = true
                 groupTraffic.text = if (subscription.bytesRemaining > 0L) {
                     getString(
@@ -452,6 +454,44 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
                     )
                 }
                 groupStatus.setPadding(0)
+            } else if (subscription != null && !subscription.subscriptionUserinfo.isNullOrBlank()) { // Raw
+                var text = "";
+
+                fun get(regex: String): String? {
+                    return regex.toRegex().findAll(subscription.subscriptionUserinfo).mapNotNull {
+                        if (it.groupValues.size > 1) it.groupValues[1] else null
+                    }.firstOrNull();
+                }
+
+                var used: Long = 0
+                get("upload=([0-9]+)")?.apply {
+                    used += toLong()
+                }
+                get("download=([0-9]+)")?.apply {
+                    used += toLong()
+                }
+                val total = get("total=([0-9]+)")?.toLong() ?: 0
+                if (used > 0 || total > 0) {
+                    text += getString(
+                        R.string.subscription_traffic,
+                        Formatter.formatFileSize(context, used),
+                        Formatter.formatFileSize(context, total - used)
+                    )
+
+                }
+                get("expire=([0-9]+)")?.apply {
+                    text += "\n"
+                    text += getString(
+                        R.string.subscription_expire,
+                        NekomuraUtil.timeStamp2Text(this.toLong() * 1000)
+                    )
+                }
+
+                if (text.isNotEmpty()) {
+                    groupTraffic.isVisible = true
+                    groupTraffic.text = text;
+                    groupStatus.setPadding(0)
+                }
             } else {
                 groupTraffic.isVisible = false
                 groupStatus.setPadding(0, 0, 0, dp2px(4))

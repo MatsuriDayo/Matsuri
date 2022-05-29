@@ -84,6 +84,7 @@ object RawUpdater : GroupUpdater() {
             proxies = parseRaw(response.contentString)
                 ?: error(app.getString(R.string.no_proxies_found))
 
+            subscription.subscriptionUserinfo = response.getHeader("Subscription-Userinfo")
         }
 
         val proxiesMap = LinkedHashMap<String, AbstractBean>()

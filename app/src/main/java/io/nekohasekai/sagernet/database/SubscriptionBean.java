@@ -62,6 +62,10 @@ public class SubscriptionBean extends Serializable {
     public Set<String> selectedOwners;
     public Set<String> selectedTags;
 
+    // https://github.com/crossutility/Quantumult/blob/master/extra-subscription-feature.md
+
+    public String subscriptionUserinfo;
+
     public SubscriptionBean() {
     }
 
@@ -98,6 +102,10 @@ public class SubscriptionBean extends Serializable {
             KryosKt.writeStringList(output, selectedGroups);
             KryosKt.writeStringList(output, selectedOwners);
             KryosKt.writeStringList(output, selectedTags);
+        }
+
+        if (type == SubscriptionType.RAW) {
+            output.writeString(subscriptionUserinfo);
         }
 
     }
@@ -167,6 +175,10 @@ public class SubscriptionBean extends Serializable {
                 }
                 selectedTags = KryosKt.readStringSet(input);
             }
+        }
+
+        if (type == SubscriptionType.RAW) {
+            subscriptionUserinfo = input.readString();
         }
     }
 

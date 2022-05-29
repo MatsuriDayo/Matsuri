@@ -47,6 +47,7 @@ type HTTPRequest interface {
 }
 
 type HTTPResponse interface {
+	GetHeader(string) string
 	GetContent() ([]byte, error)
 	GetContentString() (string, error)
 	WriteTo(path string) error
@@ -207,6 +208,10 @@ func (h *httpResponse) errorString() string {
 		return fmt.Sprint("HTTP ", h.Status)
 	}
 	return fmt.Sprint("HTTP ", h.Status, ": ", content)
+}
+
+func (h *httpResponse) GetHeader(key string) string {
+	return h.Header.Get(key)
 }
 
 func (h *httpResponse) GetContent() ([]byte, error) {

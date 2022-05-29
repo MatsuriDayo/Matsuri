@@ -245,6 +245,7 @@ class GroupSettingsActivity(
                 finish()
                 return
             }
+            entity.subscription?.subscriptionUserinfo = "";
             GroupManager.updateGroup(entity.apply { serialize() })
         }
 
