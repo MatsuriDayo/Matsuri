@@ -55,10 +55,6 @@
             android:nextFocusUp="@+id/fab"
             app:backgroundTint="?colorMaterial300"
             app:contentInsetStart="0dp"
-            app:fabAlignmentMode="end"
-            app:fabCradleMargin="0dp"
-            app:fabCradleRoundedCornerRadius="0dp"
-            app:fabCradleVerticalOffset="8dp"
             app:hideOnScroll="true"
             app:layout_scrollFlags="enterAlways|scroll">
 
