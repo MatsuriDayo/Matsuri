@@ -38,7 +38,7 @@ public class SubscriptionBean extends Serializable {
     public Integer type;
     public String link;
     public String token;
-    public Boolean forceResolve; //del
+    public Boolean forceResolve;
     public Boolean deduplication;
     public Boolean forceVMessAEAD; //del
     public Boolean updateWhenConnectedOnly;

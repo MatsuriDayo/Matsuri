@@ -148,6 +148,8 @@ object OpenOnlineConfigUpdater : GroupUpdater() {
             }
         }
 
+        if (subscription.forceResolve) forceResolve(profiles, proxyGroup.id)
+
         val exists = SagerDatabase.proxyDao.getByGroup(proxyGroup.id)
         val duplicate = ArrayList<String>()
         if (subscription.deduplication) {
