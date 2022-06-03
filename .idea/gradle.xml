@@ -28,7 +28,6 @@
             <option value="$PROJECT_DIR$/plugin/api" />
           </set>
         </option>
-        <option name="resolveModulePerSourceSet" value="false" />
       </GradleProjectSettings>
     </option>
   </component>
