@@ -213,3 +213,16 @@ fun Context.dp2Pixel(sizeDp: Int): Int {
     val factor = resources.displayMetrics.density
     return (sizeDp * factor).roundToInt()
 }
+
+//
+
+fun Long.toBytesString(): String {
+    return when {
+        this > 1024 * 1024 * 1024 -> String.format(
+            "%.2f GiB", (this.toDouble() / 1024 / 1024 / 1024)
+        )
+        this > 1024 * 1024 -> String.format("%.2f MiB", (this.toDouble() / 1024 / 1024))
+        this > 1024 -> String.format("%.2f KiB", (this.toDouble() / 1024))
+        else -> "$this Bytes"
+    }
+}

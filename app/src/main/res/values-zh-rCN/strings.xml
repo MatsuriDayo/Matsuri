@@ -464,4 +464,5 @@
     <string name="acquire_wake_lock_summary">保持 CPU 开启</string>
     <string name="neko_plugin_internal_error">%s 内部错误</string>
     <string name="move">移动</string>
+    <string name="subscription_expire">过期: %s</string>
 </resources>

@@ -49,6 +49,7 @@ import io.nekohasekai.sagernet.widget.QRCodeDialog
 import io.nekohasekai.sagernet.widget.UndoSnackbarManager
 import kotlinx.coroutines.delay
 import moe.matsuri.nya.utils.NekomuraUtil
+import moe.matsuri.nya.utils.toBytesString
 import java.util.*
 
 class GroupFragment : ToolbarFragment(R.layout.layout_group),
@@ -474,10 +475,9 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
                 if (used > 0 || total > 0) {
                     text += getString(
                         R.string.subscription_traffic,
-                        Formatter.formatFileSize(context, used),
-                        Formatter.formatFileSize(context, total - used)
+                        used.toBytesString(),
+                        (total - used).toBytesString()
                     )
-
                 }
                 get("expire=([0-9]+)")?.apply {
                     text += "\n"
