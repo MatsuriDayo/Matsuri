@@ -25,7 +25,7 @@ type IPPacket interface {
 	Valid() bool
 	Flags() byte
 	SetFlags(flags byte)
-	Offset() uint16
+	FragmentOffset() uint16
 	Protocol() IPProtocol
 	Payload() []byte
 	SetSourceIP(ip net.IP)
@@ -115,7 +115,7 @@ func (p IPv6Packet) Flags() byte {
 
 func (p IPv6Packet) SetFlags(flags byte) {}
 
-func (p IPv6Packet) Offset() uint16 {
+func (p IPv6Packet) FragmentOffset() uint16 {
 	return 0
 }
 
@@ -193,12 +193,6 @@ func (p IPv4Packet) Flags() byte {
 func (p IPv4Packet) SetFlags(flags byte) {
 	p[6] &= 0x1F
 	p[6] |= flags << 5
-}
-
-func (p IPv4Packet) Offset() uint16 {
-	offset := binary.BigEndian.Uint16(p[6:8])
-
-	return (offset & 0x1fff) * 8
 }
 
 func (p IPv4Packet) SourceIP() net.IP {

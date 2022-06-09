@@ -66,7 +66,7 @@ func Start(
 				continue
 			}
 
-			if ip.Offset() != 0 {
+			if ip.FragmentOffset() != 0 {
 				continue
 			}
 
