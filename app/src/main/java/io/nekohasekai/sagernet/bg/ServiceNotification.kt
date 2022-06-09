@@ -111,9 +111,6 @@ class ServiceNotification(
             override fun statsUpdated(statsList: AppStatsList?) {
             }
 
-            override fun observatoryResultsUpdated(groupId: Long) {
-            }
-
             override fun missingPlugin(profileName: String?, pluginName: String?) {
             }
 

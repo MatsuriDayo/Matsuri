@@ -17,14 +17,12 @@ import (
 
 	core "github.com/v2fly/v2ray-core/v5"
 	"github.com/v2fly/v2ray-core/v5/app/dispatcher"
-	"github.com/v2fly/v2ray-core/v5/app/observatory"
 	"github.com/v2fly/v2ray-core/v5/common/buf"
 	"github.com/v2fly/v2ray-core/v5/common/net"
 	"github.com/v2fly/v2ray-core/v5/features/dns"
 	dns_feature "github.com/v2fly/v2ray-core/v5/features/dns"
 	v2rayDns "github.com/v2fly/v2ray-core/v5/features/dns"
 	"github.com/v2fly/v2ray-core/v5/features/dns/localdns"
-	"github.com/v2fly/v2ray-core/v5/features/extension"
 	"github.com/v2fly/v2ray-core/v5/features/routing"
 	"github.com/v2fly/v2ray-core/v5/features/stats"
 	"github.com/v2fly/v2ray-core/v5/infra/conf/serial"
@@ -41,7 +39,6 @@ type V2RayInstance struct {
 	started      bool
 	core         *core.Instance
 	statsManager stats.Manager
-	observatory  *observatory.Observer
 	dispatcher   *dispatcher.DefaultDispatcher
 	dnsClient    dns.Client
 }
@@ -76,10 +73,6 @@ func (instance *V2RayInstance) LoadConfig(content string) error {
 
 	instance.setupDialer()
 
-	o := c.GetFeature(extension.ObservatoryType())
-	if o != nil {
-		instance.observatory = o.(*observatory.Observer)
-	}
 	return nil
 }
 

@@ -4,8 +4,7 @@ go 1.18
 
 require (
 	github.com/Dreamacro/clash v1.9.0
-	github.com/golang/protobuf v1.5.2
-	github.com/miekg/dns v1.1.48
+	github.com/miekg/dns v1.1.49
 	github.com/sagernet/gomobile v0.0.0-20210905032500-701a995ff844
 	github.com/sagernet/libping v0.1.1
 	github.com/sirupsen/logrus v1.8.1
@@ -34,6 +33,7 @@ require (
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/geeksbaek/seed v0.0.0-20180909040025-2a7f5fb92e22 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/btree v1.0.1 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/jhump/protoreflect v1.12.0 // indirect

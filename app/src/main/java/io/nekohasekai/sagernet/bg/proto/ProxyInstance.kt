@@ -19,25 +19,18 @@
 
 package io.nekohasekai.sagernet.bg.proto
 
-import com.v2ray.core.app.observatory.OutboundStatus
 import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.ktx.Logs
-import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.utils.DirectBoot
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
 import java.io.IOException
-import java.util.*
-import kotlin.concurrent.timerTask
 
 class ProxyInstance(profile: ProxyEntity, val service: BaseService.Interface) : V2RayInstance(
     profile
 ) {
-
-    lateinit var observatoryJob: Job
 
     override suspend fun init() {
         super.init()
@@ -52,13 +45,6 @@ class ProxyInstance(profile: ProxyEntity, val service: BaseService.Interface) : 
     override fun launch() {
         super.launch()
 
-        if (config.observatoryTags.isNotEmpty()) {
-            v2rayPoint.setStatusUpdateListener(::sendObservatoryResult)
-            observatoryJob = runOnDefaultDispatcher {
-                sendInitStatuses()
-            }
-        }
-
         /* if (BuildConfig.DEBUG && DataStore.enableLog) {
              externalInstances[9999] = DebugInstance().apply {
                  launch()
@@ -66,93 +52,9 @@ class ProxyInstance(profile: ProxyEntity, val service: BaseService.Interface) : 
          }*/
     }
 
-    fun sendInitStatuses() {
-        val time = (System.currentTimeMillis() / 1000) - 300
-        for (observatoryTag in config.observatoryTags) {
-            val profileId = observatoryTag.substringAfter("global-")
-            if (profileId.toLongOrNull() != null) {
-                val id = profileId.toLong()
-                val profile = when {
-                    id == profile.id -> profile
-                    statsOutbounds.containsKey(id) -> statsOutbounds[id]!!.proxyEntity
-                    else -> SagerDatabase.proxyDao.getById(id)
-                } ?: continue
-
-                if (profile.status > 0) v2rayPoint.updateStatus(
-                    OutboundStatus.newBuilder()
-                        .setOutboundTag(observatoryTag)
-                        .setAlive(profile.status == 1)
-                        .setDelay(profile.ping.toLong())
-                        .setLastErrorReason(profile.error ?: "")
-                        .setLastTryTime(time)
-                        .setLastSeenTime(time)
-                        .build()
-                        .toByteArray()
-                )
-            }
-        }
-    }
-
-    val updateTimer by lazy { Timer("Observatory Timer") }
-    val updateTasks by lazy { hashMapOf<Long, TimerTask>() }
-
-    fun sendObservatoryResult(statusPb: ByteArray?) {
-        if (statusPb == null || statusPb.isEmpty()) {
-            return
-        }
-        val status = OutboundStatus.parseFrom(statusPb)
-        val profileId = status.outboundTag.substringAfter("global-")
-        if (profileId.toLongOrNull() != null) {
-            val id = profileId.toLong()
-            val profile = when {
-                id == profile.id -> profile
-                statsOutbounds.containsKey(id) -> statsOutbounds[id]!!.proxyEntity
-                else -> {
-                    SagerDatabase.proxyDao.getById(id)
-                }
-            }
-
-            if (profile != null) {
-                val newStatus = if (status.alive) 1 else 3
-                val newDelay = status.delay.toInt()
-                val newErrorReason = status.lastErrorReason
-
-                if (profile.status != newStatus || profile.ping != newDelay || profile.error != newErrorReason) {
-                    profile.status = newStatus
-                    profile.ping = newDelay
-                    profile.error = newErrorReason
-
-                    SagerDatabase.proxyDao.updateProxy(profile)
-
-                    Logs.d("Send result for #$profileId ${profile.displayName()}")
-
-                    val groupId = profile.groupId
-                    updateTasks.put(groupId, timerTask {
-                        synchronized(this@ProxyInstance) {
-                            if (updateTasks[groupId] == this) {
-                                service.data.binder.broadcast {
-                                    it.observatoryResultsUpdated(profile.groupId)
-                                }
-                                updateTasks.remove(profile.groupId)
-                            }
-                        }
-                    }.also {
-                        updateTimer.schedule(it, 2333L)
-                    })?.cancel()
-                }
-            } else {
-                Logs.d("Profile with id #$profileId not found")
-            }
-        } else {
-            Logs.d("Persist skipped on outbound ${status.outboundTag}")
-        }
-    }
-
     override fun close() {
         persistStats()
         super.close()
-
-        if (::observatoryJob.isInitialized) observatoryJob.cancel()
     }
 
     // ------------- stats -------------

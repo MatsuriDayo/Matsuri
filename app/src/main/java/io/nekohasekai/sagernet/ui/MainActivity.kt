@@ -479,12 +479,6 @@ class MainActivity : ThemedActivity(),
         }
     }
 
-    override fun observatoryResultsUpdated(groupId: Long) {
-        runOnDefaultDispatcher {
-            GroupManager.postReload(groupId)
-        }
-    }
-
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
         when (key) {
             Key.SERVICE_MODE -> onBinderDied()
