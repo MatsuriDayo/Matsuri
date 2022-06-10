@@ -328,7 +328,7 @@ class ChainSettingsActivity : ProfileSettingsActivity<ChainBean>(R.layout.layout
                 } else ResultLocal
 
                 when (validateResult) {
-                    is ResultInsecure -> onMainDispatcher {
+                    is ResultInsecure, is ResultInsecureText -> onMainDispatcher {
                         shareLayout.isVisible = true
 
                         shareLayer.setBackgroundColor(Color.RED)
@@ -336,9 +336,15 @@ class ChainSettingsActivity : ProfileSettingsActivity<ChainBean>(R.layout.layout
                         shareButton.setColorFilter(Color.WHITE)
 
                         shareLayout.setOnClickListener {
+                            val text = when (validateResult) {
+                                is ResultInsecure -> resources.openRawResource(
+                                    validateResult.textRes
+                                ).bufferedReader().use { it.readText() }
+                                is ResultInsecureText -> validateResult.text
+                                else -> ""
+                            }
                             MaterialAlertDialogBuilder(this@ChainSettingsActivity).setTitle(R.string.insecure)
-                                .setMessage(resources.openRawResource(validateResult.textRes)
-                                    .bufferedReader().use { it.readText() })
+                                .setMessage(text)
                                 .setPositiveButton(android.R.string.ok, null).show().apply {
                                     findViewById<TextView>(android.R.id.message)?.apply {
                                         Linkify.addLinks(this, Linkify.WEB_URLS)

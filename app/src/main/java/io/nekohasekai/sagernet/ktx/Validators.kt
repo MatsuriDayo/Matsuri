@@ -31,12 +31,14 @@ import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
+import moe.matsuri.nya.neko.NekoBean
 
 interface ValidateResult
 object ResultSecure : ValidateResult
 object ResultLocal : ValidateResult
 class ResultDeprecated(@RawRes val textRes: Int) : ValidateResult
 class ResultInsecure(@RawRes val textRes: Int) : ValidateResult
+class ResultInsecureText(val text: String) : ValidateResult
 
 val ssSecureList = "(gcm|poly1305)".toRegex()
 
@@ -73,6 +75,9 @@ fun AbstractBean.isInsecure(): ValidateResult {
         if (allowInsecure) return ResultInsecure(R.raw.insecure)
     } else if (this is TrojanBean) {
         if (allowInsecure) return ResultInsecure(R.raw.insecure)
+    } else if (this is NekoBean) {
+        val hint = sharedStorage.optString("insecureHint")
+        if (hint.isNotBlank()) return ResultInsecureText(hint)
     }
     return ResultSecure
 }

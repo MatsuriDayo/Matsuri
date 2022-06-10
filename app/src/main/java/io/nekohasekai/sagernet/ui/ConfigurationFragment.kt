@@ -1672,7 +1672,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                         } else ResultLocal
 
                         when (validateResult) {
-                            is ResultInsecure -> onMainDispatcher {
+                            is ResultInsecure, is ResultInsecureText -> onMainDispatcher {
                                 shareLayout.isVisible = true
 
                                 shareLayer.setBackgroundColor(Color.RED)
@@ -1680,10 +1680,15 @@ class ConfigurationFragment @JvmOverloads constructor(
                                 shareButton.setColorFilter(Color.WHITE)
 
                                 shareLayout.setOnClickListener {
+                                    val text = when (validateResult) {
+                                        is ResultInsecure -> resources.openRawResource(
+                                            validateResult.textRes
+                                        ).bufferedReader().use { it.readText() }
+                                        is ResultInsecureText -> validateResult.text
+                                        else -> ""
+                                    }
                                     MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.insecure)
-                                        .setMessage(resources.openRawResource(validateResult.textRes)
-                                            .bufferedReader()
-                                            .use { it.readText() })
+                                        .setMessage(text)
                                         .setPositiveButton(android.R.string.ok) { _, _ ->
                                             showShare(it)
                                         }
