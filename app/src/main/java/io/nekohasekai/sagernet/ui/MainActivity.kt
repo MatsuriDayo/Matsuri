@@ -295,7 +295,7 @@ class MainActivity : ThemedActivity(),
             }
             .setNeutralButton(android.R.string.cancel, null)
             .setNeutralButton(R.string.action_learn_more) { _, _ ->
-                launchCustomTab("https://sagernet.org/plugin/")
+                launchCustomTab("https://matsuridayo.github.io/plugin/")
             }
             .show()
     }

@@ -738,26 +738,6 @@ fun buildV2RayConfig(
                                     tlsSettings.allowInsecure = true
                                 }
                             }
-                        } else if (bean is WireGuardBean) {
-                            protocol = "wireguard"
-                            settings = LazyOutboundConfigurationObject(this,
-                                WireGuardOutbounzConfigurationObject().apply {
-                                    address = bean.finalAddress
-                                    port = bean.finalPort
-                                    network = "udp"
-                                    localAddresses = bean.localAddress.split("\n")
-                                    privateKey = bean.privateKey
-                                    peerPublicKey = bean.peerPublicKey
-                                    preSharedKey = bean.peerPreSharedKey
-                                    mtu = bean.mtu
-                                })
-                            streamSettings = StreamSettingsObject().apply {
-                                if (needKeepAliveInterval) {
-                                    sockopt = StreamSettingsObject.SockoptObject().apply {
-                                        tcpKeepAliveInterval = keepAliveInterval
-                                    }
-                                }
-                            }
                         } else if (bean is SSHBean) {
                             protocol = "ssh"
                             settings = LazyOutboundConfigurationObject(this,

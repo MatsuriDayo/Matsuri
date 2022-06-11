@@ -487,7 +487,6 @@
     <string name="backup_importing">Importando…</string> 
  
     <string name="packet_encoding">Codificación de paquetes</string> 
-    <string name="wireguard_provider">Proveedor WireGuard</string> 
     <string name="experimental_reduced_iv_head_entropy">Esta es la propuesta de GFWReport para una contramedida para el flujo aleatorio como comportamiento de bloqueo de protocolo observado en GFW. Esta opción reasigna los primeros 6 bytes de IV a caracteres imprimibles, es posible que cualquier persona en la ruta de red privilegiada identifique el protocolo cuando está activado.</string> 
     <string name="acquire_wake_lock">Adquirir WakeLock</string> 
     <string name="release_wake_lock">Liberar WakeLock</string> 

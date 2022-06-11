@@ -3,3 +3,4 @@ binary*.go
 .idea/
 /build/
 /debug.go
+/.build/

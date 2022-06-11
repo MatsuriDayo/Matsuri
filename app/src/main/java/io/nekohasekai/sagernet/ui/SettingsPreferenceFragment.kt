@@ -208,7 +208,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
 
         val providerTrojan = findPreference<SimpleMenuPreference>(Key.PROVIDER_TROJAN)!!
-        val providerWireguard = findPreference<SimpleMenuPreference>(Key.PROVIDER_WIREGUARD)!!
         val muxProtocols = findPreference<MultiSelectListPreference>(Key.MUX_PROTOCOLS)!!
 
         muxProtocols.apply {
@@ -282,7 +281,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         transproxyMode.onPreferenceChangeListener = reloadListener
 
         providerTrojan.onPreferenceChangeListener = reloadListener
-        providerWireguard.onPreferenceChangeListener = reloadListener
         appTrafficStatistics.onPreferenceChangeListener = reloadListener
         tunImplementation.onPreferenceChangeListener = reloadListener
         destinationOverride.onPreferenceChangeListener = reloadListener

@@ -454,7 +454,6 @@
     <string name="neko_plugin_summary">高级插件可以提供原本不支持的协议。\n\n
 任何人都可以编写高级插件，开启相当于给予其控制 Matsuri 的权限，请从信任的来源下载安装。\n\n
 提示： Hysteria/NaiveProxy/Trojan-Go 属于 SagerNet 的支持，安装后可直接使用，不会在这里显示。</string>
-    <string name="wireguard_provider">Wireguard 提供程序</string>
     <string name="packet_encoding" translatable="false">包编码</string>
     <string name="action_switch">切换</string>
     <string name="enhance_resolve_server_domain">增强域名解析</string>

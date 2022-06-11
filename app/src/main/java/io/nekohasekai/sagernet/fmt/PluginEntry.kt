@@ -33,6 +33,10 @@ enum class PluginEntry(
     NaiveProxy("naive-plugin", R.string.action_naive, "io.nekohasekai.sagernet.plugin.naive"),
     PingTunnel("pingtunnel-plugin", R.string.action_ping_tunnel, "io.nekohasekai.sagernet.plugin.pingtunnel"),
     Hysteria("hysteria-plugin", R.string.action_hysteria, "io.nekohasekai.sagernet.plugin.hysteria", DownloadSource(fdroid = false)),
+    WireGuard("wireguard-plugin", R.string.action_wireguard, "io.nekohasekai.sagernet.plugin.wireguard", DownloadSource(
+        fdroid = false,
+        downloadLink = "https://github.com/SagerNet/SagerNet/releases/tag/wireguard-plugin-20210424-5"
+    )),
 
     // shadowsocks plugins
 

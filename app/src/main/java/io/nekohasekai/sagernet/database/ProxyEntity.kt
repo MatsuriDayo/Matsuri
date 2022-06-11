@@ -314,7 +314,7 @@ data class ProxyEntity(
             TYPE_TROJAN_GO -> true
             TYPE_NAIVE -> true
             TYPE_HYSTERIA -> true
-            TYPE_WG -> DataStore.providerWireguard != TrojanProvider.V2RAY
+            TYPE_WG -> true
             TYPE_NEKO -> true
             else -> false
         }
