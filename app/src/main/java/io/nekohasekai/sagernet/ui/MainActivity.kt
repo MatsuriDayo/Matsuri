@@ -339,6 +339,14 @@ class MainActivity : ThemedActivity(),
 
 
     fun displayFragment(fragment: ToolbarFragment) {
+        if (fragment is ConfigurationFragment) {
+            binding.stats.allowShow = true
+            binding.fab.show()
+        } else {
+            binding.stats.allowShow = false
+            binding.stats.performHide()
+            binding.fab.hide()
+        }
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragment_holder, fragment)
             .commitAllowingStateLoss()

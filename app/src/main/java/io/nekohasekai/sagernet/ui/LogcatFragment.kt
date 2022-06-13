@@ -53,12 +53,6 @@ class LogcatFragment : ToolbarFragment(R.layout.layout_logcat),
             binding.textview.breakStrategy = 0 // simple
         }
 
-        activity?.apply {
-            if (this is MainActivity) {
-                this.binding.stats.performHide()
-            }
-        }
-
         reloadSession()
     }
 

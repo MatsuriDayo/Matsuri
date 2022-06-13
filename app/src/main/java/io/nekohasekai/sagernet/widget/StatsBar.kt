@@ -49,12 +49,16 @@ class StatsBar @JvmOverloads constructor(
     private lateinit var txText: TextView
     private lateinit var rxText: TextView
     private lateinit var behavior: YourBehavior
+
+    var allowShow = true
+
     override fun getBehavior(): YourBehavior {
-        if (!this::behavior.isInitialized) behavior = YourBehavior()
+        if (!this::behavior.isInitialized) behavior = YourBehavior { allowShow }
         return behavior
     }
 
-    class YourBehavior : Behavior() {
+    class YourBehavior(val getAllowShow: () -> Boolean) : Behavior() {
+
         override fun onNestedScroll(
             coordinatorLayout: CoordinatorLayout, child: BottomAppBar, target: View,
             dxConsumed: Int, dyConsumed: Int, dxUnconsumed: Int, dyUnconsumed: Int,
@@ -73,15 +77,13 @@ class StatsBar @JvmOverloads constructor(
             )
         }
 
-        var hide = false
-
         override fun slideUp(child: BottomAppBar) {
-            hide = false
+            if (!getAllowShow()) return
             super.slideUp(child)
         }
 
         override fun slideDown(child: BottomAppBar) {
-            hide = true
+            if (!getAllowShow()) return
             super.slideDown(child)
         }
     }
