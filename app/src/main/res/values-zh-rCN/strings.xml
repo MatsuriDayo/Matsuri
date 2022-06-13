@@ -464,4 +464,5 @@
     <string name="neko_plugin_internal_error">%s 内部错误</string>
     <string name="move">移动</string>
     <string name="subscription_expire">过期: %s</string>
+    <string name="update_all_subscription">更新所有订阅</string>
 </resources>

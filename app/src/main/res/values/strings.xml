@@ -29,6 +29,7 @@
     <string name="group_name_required">Group name required</string>
     <string name="group_create">Create group</string>
     <string name="group_create_subscription">Create subscription</string>
+    <string name="update_all_subscription">Update all subscriptions</string>
     <string name="group_edit">Edit group</string>
     <string name="group_edit_subscription">Edit subscription</string>
     <string name="group_status_empty">Empty group</string>

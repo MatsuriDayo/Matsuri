@@ -37,9 +37,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import io.nekohasekai.sagernet.GroupType
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
-import io.nekohasekai.sagernet.database.GroupManager
-import io.nekohasekai.sagernet.database.ProxyGroup
-import io.nekohasekai.sagernet.database.SagerDatabase
+import io.nekohasekai.sagernet.database.*
 import io.nekohasekai.sagernet.databinding.LayoutGroupItemBinding
 import io.nekohasekai.sagernet.fmt.toUniversalLink
 import io.nekohasekai.sagernet.group.GroupUpdater
@@ -131,6 +129,19 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
         when (item.itemId) {
             R.id.action_new_group -> {
                 startActivity(Intent(context, GroupSettingsActivity::class.java))
+            }
+            R.id.action_update_all -> {
+                MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.confirm)
+                    .setMessage(R.string.update_all_subscription)
+                    .setPositiveButton(R.string.yes) { _, _ ->
+                        SagerDatabase.groupDao.allGroups()
+                            .filter { it.type == GroupType.SUBSCRIPTION }
+                            .forEach {
+                                GroupUpdater.startUpdate(it, true)
+                            }
+                    }
+                    .setNegativeButton(R.string.no, null)
+                    .show()
             }
         }
         return true
