@@ -24,7 +24,9 @@ var _logrusFormatter = &logrusFormatter{}
 
 func (f *logrusFormatter) Format(entry *logrus.Entry) ([]byte, error) {
 	msg := fmt.Sprint("[", entry.Time.Format("2006-01-02 15:04:05"), "] ")
-	msg += fmt.Sprint("[", strings.Title(entry.Level.String()), "] ")
+	if entry.Level != logrus.Level(114514) {
+		msg += fmt.Sprint("[", strings.Title(entry.Level.String()), "] ")
+	}
 	for k, v := range entry.Data {
 		msg += fmt.Sprintf("[%s=%v] ", k, v)
 	}
@@ -57,7 +59,7 @@ func (w *v2rayLogWriter) Write(s string) error {
 		s = strings.Replace(s, "[Error]", "", 1)
 		priority = logrus.ErrorLevel
 	} else {
-		priority = logrus.DebugLevel
+		priority = logrus.Level(114514)
 	}
 
 	if v2rayLogHook != nil {
@@ -67,7 +69,7 @@ func (w *v2rayLogWriter) Write(s string) error {
 		}
 	}
 
-	NekoLogWrite2(int32(priority), strings.Trim(s, " "))
+	NekoLogWrite(int32(priority), "", strings.Trim(s, " "))
 	return nil
 }
 
@@ -191,10 +193,10 @@ func (lp *logfile) init(path string) (err error) {
 	return
 }
 
-func forceLog(str string) {
+func ForceLog(str string) {
 	entry := &logrus.Entry{
 		Time:    time.Now(),
-		Level:   logrus.DebugLevel,
+		Level:   logrus.Level(114514),
 		Message: str,
 	}
 	b, _ := _logrusFormatter.Format(entry)
@@ -202,11 +204,17 @@ func forceLog(str string) {
 }
 
 func NekoLogWrite(level int32, tag, str string) {
-	logrus.StandardLogger().WithField("tag", tag).Log(logrus.Level(level), strings.Trim(str, "\n"))
-}
-
-func NekoLogWrite2(level int32, str string) {
-	logrus.StandardLogger().Log(logrus.Level(level), strings.Trim(str, "\n"))
+	if level == 114514 {
+		if logrus.GetLevel() > logrus.FatalLevel {
+			ForceLog(str)
+		}
+	} else {
+		if tag == "" {
+			logrus.StandardLogger().Log(logrus.Level(level), strings.Trim(str, "\n"))
+		} else {
+			logrus.StandardLogger().WithField("tag", tag).Log(logrus.Level(level), strings.Trim(str, "\n"))
+		}
+	}
 }
 
 func NekoLogClear() {

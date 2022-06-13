@@ -24,7 +24,7 @@ func Unsetenv(key string) error {
 }
 
 func initCoreDefer() {
-	device.AllDefer("InitCore", forceLog)
+	device.AllDefer("InitCore", ForceLog)
 }
 
 func InitCore(internalAssets string, externalAssets string, prefix string, useOfficial BoolFunc, // extractV2RayAssets
@@ -42,10 +42,10 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 	err := setupLogger(filepath.Join(cachePath, "neko.log"))
 
 	if err == nil {
-		go forceLog(s)
+		go ForceLog(s)
 	} else {
 		// not fatal
-		forceLog(fmt.Sprintln("Log not inited:", s, err.Error()))
+		ForceLog(fmt.Sprintln("Log not inited:", s, err.Error()))
 	}
 
 	// Set up some component
@@ -90,7 +90,7 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 		defer initCoreDefer()
 		f, err := os.OpenFile(filepath.Join(internalAssets, "ca.pem"), os.O_CREATE|os.O_RDWR, 0644)
 		if err != nil {
-			forceLog("open ca.pem: " + err.Error())
+			ForceLog("open ca.pem: " + err.Error())
 		} else {
 			if b, _ := ioutil.ReadAll(f); b == nil || string(b) != mozillaCA {
 				f.Truncate(0)
