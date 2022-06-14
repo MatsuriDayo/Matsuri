@@ -22,7 +22,7 @@ package io.nekohasekai.sagernet.fmt.wireguard
 import com.wireguard.crypto.Key
 import io.nekohasekai.sagernet.ktx.wrapUri
 import moe.matsuri.nya.utils.JavaUtil
-import moe.matsuri.nya.utils.NekomuraUtil
+import moe.matsuri.nya.utils.Util
 
 fun WireGuardBean.buildWireGuardUapiConf(): String {
 
@@ -32,7 +32,7 @@ fun WireGuardBean.buildWireGuardUapiConf(): String {
     conf += Key.fromBase64(peerPublicKey).toHex()
     if (peerPreSharedKey.isNotBlank()) {
         conf += "\npreshared_key="
-        conf += JavaUtil.bytesToHex(NekomuraUtil.b64Decode(peerPreSharedKey))
+        conf += JavaUtil.bytesToHex(Util.b64Decode(peerPreSharedKey))
     }
     conf += "\nendpoint=${wrapUri()}"
     conf += "\nallowed_ip=0.0.0.0/0"

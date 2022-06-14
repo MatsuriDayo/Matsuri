@@ -21,7 +21,7 @@ package io.nekohasekai.sagernet.fmt.shadowsocksr
 
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
 import io.nekohasekai.sagernet.ktx.decodeBase64UrlSafe
-import moe.matsuri.nya.utils.NekomuraUtil
+import moe.matsuri.nya.utils.Util
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.json.JSONObject
 import java.util.*
@@ -59,7 +59,7 @@ fun parseShadowsocksR(url: String): ShadowsocksRBean {
 
 fun ShadowsocksRBean.toUri(): String {
 
-    return "ssr://" + NekomuraUtil.b64EncodeUrlSafe(
+    return "ssr://" + Util.b64EncodeUrlSafe(
         "%s:%d:%s:%s:%s:%s/?obfsparam=%s&protoparam=%s&remarks=%s".format(
             Locale.ENGLISH,
             serverAddress,
@@ -67,10 +67,10 @@ fun ShadowsocksRBean.toUri(): String {
             protocol,
             method,
             obfs,
-            NekomuraUtil.b64EncodeUrlSafe("%s".format(Locale.ENGLISH, password)),
-            NekomuraUtil.b64EncodeUrlSafe("%s".format(Locale.ENGLISH, obfsParam)),
-            NekomuraUtil.b64EncodeUrlSafe("%s".format(Locale.ENGLISH, protocolParam)),
-            NekomuraUtil.b64EncodeUrlSafe(
+            Util.b64EncodeUrlSafe("%s".format(Locale.ENGLISH, password)),
+            Util.b64EncodeUrlSafe("%s".format(Locale.ENGLISH, obfsParam)),
+            Util.b64EncodeUrlSafe("%s".format(Locale.ENGLISH, protocolParam)),
+            Util.b64EncodeUrlSafe(
                 "%s".format(
                     Locale.ENGLISH, name ?: ""
                 )

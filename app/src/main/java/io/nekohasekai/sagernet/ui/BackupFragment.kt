@@ -41,7 +41,7 @@ import io.nekohasekai.sagernet.databinding.LayoutBackupBinding
 import io.nekohasekai.sagernet.databinding.LayoutImportBinding
 import io.nekohasekai.sagernet.databinding.LayoutProgressBinding
 import io.nekohasekai.sagernet.ktx.*
-import moe.matsuri.nya.utils.NekomuraUtil
+import moe.matsuri.nya.utils.Util
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -132,7 +132,7 @@ class BackupFragment : NamedFragment(R.layout.layout_backup) {
         val parcel = Parcel.obtain()
         writeToParcel(parcel, 0)
         try {
-            return NekomuraUtil.b64EncodeUrlSafe(parcel.marshall())
+            return Util.b64EncodeUrlSafe(parcel.marshall())
         } finally {
             parcel.recycle()
         }
@@ -275,7 +275,7 @@ class BackupFragment : NamedFragment(R.layout.layout_backup) {
             val profiles = mutableListOf<ProxyEntity>()
             val jsonProfiles = content.getJSONArray("profiles")
             for (i in 0 until jsonProfiles.length()) {
-                val data = NekomuraUtil.b64Decode(jsonProfiles[i] as String)
+                val data = Util.b64Decode(jsonProfiles[i] as String)
                 val parcel = Parcel.obtain()
                 parcel.unmarshall(data, 0, data.size)
                 parcel.setDataPosition(0)
@@ -288,7 +288,7 @@ class BackupFragment : NamedFragment(R.layout.layout_backup) {
             val groups = mutableListOf<ProxyGroup>()
             val jsonGroups = content.getJSONArray("groups")
             for (i in 0 until jsonGroups.length()) {
-                val data = NekomuraUtil.b64Decode(jsonGroups[i] as String)
+                val data = Util.b64Decode(jsonGroups[i] as String)
                 val parcel = Parcel.obtain()
                 parcel.unmarshall(data, 0, data.size)
                 parcel.setDataPosition(0)
@@ -302,7 +302,7 @@ class BackupFragment : NamedFragment(R.layout.layout_backup) {
             val rules = mutableListOf<RuleEntity>()
             val jsonRules = content.getJSONArray("rules")
             for (i in 0 until jsonRules.length()) {
-                val data = NekomuraUtil.b64Decode(jsonRules[i] as String)
+                val data = Util.b64Decode(jsonRules[i] as String)
                 val parcel = Parcel.obtain()
                 parcel.unmarshall(data, 0, data.size)
                 parcel.setDataPosition(0)
@@ -316,7 +316,7 @@ class BackupFragment : NamedFragment(R.layout.layout_backup) {
             val settings = mutableListOf<KeyValuePair>()
             val jsonSettings = content.getJSONArray("settings")
             for (i in 0 until jsonSettings.length()) {
-                val data = NekomuraUtil.b64Decode(jsonSettings[i] as String)
+                val data = Util.b64Decode(jsonSettings[i] as String)
                 val parcel = Parcel.obtain()
                 parcel.unmarshall(data, 0, data.size)
                 parcel.setDataPosition(0)

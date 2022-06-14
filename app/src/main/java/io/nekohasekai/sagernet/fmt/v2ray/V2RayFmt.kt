@@ -247,7 +247,6 @@ private fun tryResolveVmess4Kitsunebi(server: String): VMessBean {
         encryption = arr21[0]
         if (indexSplit < 0) return@apply
 
-        // nekomura
         val url = ("https://localhost/path?" + server.substringAfter("?")).toHttpUrl()
         url.queryParameter("remarks")?.apply { name = this }
         url.queryParameter("alterId")?.apply { alterId = this.toInt() }

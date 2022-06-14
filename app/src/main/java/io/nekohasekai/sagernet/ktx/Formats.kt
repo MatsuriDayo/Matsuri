@@ -36,7 +36,7 @@ import io.nekohasekai.sagernet.fmt.v2ray.parseV2Ray
 import moe.matsuri.nya.neko.NekoJSInterface
 import moe.matsuri.nya.neko.NekoPluginManager
 import moe.matsuri.nya.neko.parseShareLink
-import moe.matsuri.nya.utils.NekomuraUtil
+import moe.matsuri.nya.utils.Util
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -119,7 +119,7 @@ fun JSONObject.getIntNya(name: String): Int? {
 
 
 fun String.decodeBase64UrlSafe(): String {
-    return String(NekomuraUtil.b64Decode(this))
+    return String(Util.b64Decode(this))
 }
 
 // Sub

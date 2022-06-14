@@ -6,11 +6,7 @@ import android.graphics.drawable.Drawable
 import android.util.Base64
 import androidx.appcompat.content.res.AppCompatResources
 import io.nekohasekai.sagernet.SagerNet
-import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.ktx.Logs
-import libcore.HTTPResponse
-import libcore.Libcore
-import org.json.JSONObject
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.text.SimpleDateFormat
@@ -42,52 +38,7 @@ fun File.recreate(dir: Boolean) {
     }
 }
 
-object NekomuraUtil {
-
-    class AdObject(
-        var code: Int = 0, var url: String = "", var title: String = ""
-    )
-
-    // 0=Failed 1=No AD 2=AD
-    fun updateAd(): AdObject {
-        val ret = AdObject()
-        val response: HTTPResponse
-
-        try {
-            val client = Libcore.newHttpClient().apply {
-                modernTLS()
-                trySocks5(DataStore.socksPort)
-            }
-            response = client.newRequest().apply {
-                setURL("https://api.github.com/repos/MatsuriDayo/nya/contents/ad2.txt?ref=main")
-            }.execute()
-        } catch (e: Exception) {
-            ret.code = 0
-            return ret
-        }
-
-        try {
-            val json = JSONObject(response.contentString)
-            val content = String(Base64.decode(json.getString("content"), Base64.DEFAULT));
-
-            // v2: very simple URL & title with base64
-            val url = String(b64Decode(getSubString(content, "#UrlStart#", "#UrlEnd#")))
-            val title = String(b64Decode(getSubString(content, "#TitleStart#", "#TitleEnd#")))
-
-            if (url.startsWith("https://")) {
-                ret.url = url
-                ret.title = title
-                ret.code = 2
-                return ret
-            }
-            ret.code = 1
-            return ret
-        } catch (e: Exception) {
-            // no result
-            ret.code = 1
-            return ret
-        }
-    }
+object Util {
 
     /**
      * 取两个文本之间的文本值

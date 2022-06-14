@@ -57,7 +57,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import libcore.Libcore
-import moe.matsuri.nya.utils.NekomuraUtil
+import moe.matsuri.nya.utils.Util
 import java.text.SimpleDateFormat
 import java.util.*
 import com.github.shadowsocks.plugin.PluginManager as ShadowsocksPluginPluginManager
@@ -109,26 +109,6 @@ class MainActivity : ThemedActivity(),
             onNewIntent(intent)
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
-            for (i in 0 until 5) {
-                if (DataStore.ad != null) return@launch
-                val ret = NekomuraUtil.updateAd()
-                if (ret.code != 0) {
-                    DataStore.ad = ret
-                    if (ret.code == 2) {
-                        runOnUiThread {
-                            navigation.menu.findItem(R.id.nav_tuiguang).apply {
-                                title = ret.title
-                                isVisible = true
-                            }
-                        }
-                    }
-                    return@launch
-                } else {
-                    delay(10 * 1000)
-                }
-            }
-        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -176,8 +156,7 @@ class MainActivity : ThemedActivity(),
             val data = uri.encodedQuery.takeIf { !it.isNullOrBlank() } ?: return
             try {
                 group = KryoConverters.deserialize(
-                    ProxyGroup().apply { export = true },
-                    NekomuraUtil.zlibDecompress(NekomuraUtil.b64Decode(data))
+                    ProxyGroup().apply { export = true }, Util.zlibDecompress(Util.b64Decode(data))
                 ).apply {
                     export = false
                 }
@@ -374,9 +353,7 @@ class MainActivity : ThemedActivity(),
             }
             R.id.nav_about -> displayFragment(AboutFragment())
             R.id.nav_tuiguang -> {
-                DataStore.ad?.url.apply {
-                    if (!isNullOrBlank()) launchCustomTab(this)
-                }
+                launchCustomTab("https://matsuricom.github.io/")
                 return false
             }
             else -> return false

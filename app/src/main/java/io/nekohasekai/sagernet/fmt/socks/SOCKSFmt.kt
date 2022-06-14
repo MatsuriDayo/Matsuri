@@ -21,7 +21,6 @@ package io.nekohasekai.sagernet.fmt.socks
 
 import io.nekohasekai.sagernet.ktx.*
 import moe.matsuri.nya.utils.NGUtil
-import moe.matsuri.nya.utils.NekomuraUtil
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 

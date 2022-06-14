@@ -34,7 +34,7 @@ import io.nekohasekai.sagernet.databinding.LayoutTrafficConnBinding
 import io.nekohasekai.sagernet.databinding.LayoutTrafficListBinding
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.utils.PackageCache
-import moe.matsuri.nya.utils.NekomuraUtil
+import moe.matsuri.nya.utils.Util
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -147,10 +147,10 @@ class ActiveConnFragment : Fragment(R.layout.layout_traffic_list) {
                 }
             }
 
-            var text1 = "\nStart: " + NekomuraUtil.timeStamp2Text(
+            var text1 = "\nStart: " + Util.timeStamp2Text(
                 start
             )
-            if (end > 0) text1 += "\nEnd: " + NekomuraUtil.timeStamp2Text(end)
+            if (end > 0) text1 += "\nEnd: " + Util.timeStamp2Text(end)
             text1 += "\n" + tag
 
             var text2 = stats.optString("Dest")

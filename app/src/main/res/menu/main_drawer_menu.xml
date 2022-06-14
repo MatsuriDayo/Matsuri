@@ -46,8 +46,7 @@
         <item
             android:id="@+id/nav_tuiguang"
             android:icon="@drawable/ic_baseline_airplanemode_active_24"
-            android:title="推广"
-            android:visible="false" />
+            android:title="推广" />
         <item
             android:id="@+id/nav_faq"
             android:icon="@drawable/ic_device_data_usage"

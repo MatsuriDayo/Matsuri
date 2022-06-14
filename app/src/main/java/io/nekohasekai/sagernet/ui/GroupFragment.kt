@@ -46,7 +46,7 @@ import io.nekohasekai.sagernet.widget.ListHolderListener
 import io.nekohasekai.sagernet.widget.QRCodeDialog
 import io.nekohasekai.sagernet.widget.UndoSnackbarManager
 import kotlinx.coroutines.delay
-import moe.matsuri.nya.utils.NekomuraUtil
+import moe.matsuri.nya.utils.Util
 import moe.matsuri.nya.utils.toBytesString
 import java.util.*
 
@@ -494,7 +494,7 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
                     text += "\n"
                     text += getString(
                         R.string.subscription_expire,
-                        NekomuraUtil.timeStamp2Text(this.toLong() * 1000)
+                        Util.timeStamp2Text(this.toLong() * 1000)
                     )
                 }
 

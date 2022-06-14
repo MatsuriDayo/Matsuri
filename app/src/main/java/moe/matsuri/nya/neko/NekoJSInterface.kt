@@ -15,7 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 import moe.matsuri.nya.utils.JavaUtil
-import moe.matsuri.nya.utils.NekomuraUtil
+import moe.matsuri.nya.utils.Util
 import org.json.JSONObject
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -172,7 +172,7 @@ class NekoJSInterface(val plgId: String) {
 
         return callJS(
             "nekoInit(\"${
-                NekomuraUtil.b64EncodeUrlSafe(
+                Util.b64EncodeUrlSafe(
                     sendData.toString().toByteArray()
                 )
             }\")"
@@ -207,12 +207,12 @@ class NekoJSInterface(val plgId: String) {
             sendData.put("port", port)
             sendData.put(
                 "sharedStorage",
-                NekomuraUtil.b64EncodeUrlSafe(bean.sharedStorage.toString().toByteArray())
+                Util.b64EncodeUrlSafe(bean.sharedStorage.toString().toByteArray())
             )
             otherArgs?.forEach { (t, u) -> sendData.put(t, u) }
 
             return callProtocol(
-                "buildAllConfig", NekomuraUtil.b64EncodeUrlSafe(sendData.toString().toByteArray())
+                "buildAllConfig", Util.b64EncodeUrlSafe(sendData.toString().toByteArray())
             )
         }
 
@@ -221,7 +221,7 @@ class NekoJSInterface(val plgId: String) {
             sendData.put("shareLink", shareLink)
 
             return callProtocol(
-                "parseShareLink", NekomuraUtil.b64EncodeUrlSafe(sendData.toString().toByteArray())
+                "parseShareLink", Util.b64EncodeUrlSafe(sendData.toString().toByteArray())
             )
         }
 
@@ -230,7 +230,7 @@ class NekoJSInterface(val plgId: String) {
         suspend fun setSharedStorage(sharedStorage: String) {
             callProtocol(
                 "setSharedStorage",
-                NekomuraUtil.b64EncodeUrlSafe(sharedStorage.toByteArray())
+                Util.b64EncodeUrlSafe(sharedStorage.toByteArray())
             )
         }
 
@@ -257,7 +257,7 @@ class NekoJSInterface(val plgId: String) {
 
             callProtocol(
                 "onPreferenceChanged",
-                NekomuraUtil.b64EncodeUrlSafe(sendData.toString().toByteArray())
+                Util.b64EncodeUrlSafe(sendData.toString().toByteArray())
             )
         }
 
