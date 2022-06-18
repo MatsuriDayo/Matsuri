@@ -173,7 +173,7 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 		}
 	}
 
-	ctx := core.WithContext(context.Background(), t.v2ray.core)
+	ctx := core.WithContext(context.Background(), t.v2ray.Core)
 	ctx = session.ContextWithInbound(ctx, inbound)
 
 	if !isDns && (t.sniffing || t.fakedns) {
@@ -224,7 +224,7 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 		Reader: rw,
 		Writer: rw,
 	}
-	err := t.v2ray.dispatcher.DispatchLink(ctx, destination, link)
+	err := t.v2ray.Dispatcher.DispatchLink(ctx, destination, link)
 
 	if err != nil {
 		logrus.Errorf("[TCP] dispatchLink failed: %s", err.Error())

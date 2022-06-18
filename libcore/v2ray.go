@@ -14,6 +14,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unsafe"
 
 	core "github.com/v2fly/v2ray-core/v5"
 	"github.com/v2fly/v2ray-core/v5/app/dispatcher"
@@ -37,10 +38,10 @@ func GetV2RayVersion() string {
 type V2RayInstance struct {
 	access       sync.Mutex
 	started      bool
-	core         *core.Instance
-	statsManager stats.Manager
-	dispatcher   *dispatcher.DefaultDispatcher
-	dnsClient    dns.Client
+	Core         *core.Instance
+	StatsManager stats.Manager
+	Dispatcher   *dispatcher.DefaultDispatcher
+	DnsClient    dns.Client
 }
 
 func NewV2rayInstance() *V2RayInstance {
@@ -66,10 +67,10 @@ func (instance *V2RayInstance) LoadConfig(content string) error {
 		return err
 	}
 
-	instance.core = c
-	instance.statsManager = c.GetFeature(stats.ManagerType()).(stats.Manager)
-	instance.dispatcher = c.GetFeature(routing.DispatcherType()).(routing.Dispatcher).(*dispatcher.DefaultDispatcher)
-	instance.dnsClient = c.GetFeature(dns.ClientType()).(dns.Client)
+	instance.Core = c
+	instance.StatsManager = c.GetFeature(stats.ManagerType()).(stats.Manager)
+	instance.Dispatcher = c.GetFeature(routing.DispatcherType()).(routing.Dispatcher).(*dispatcher.DefaultDispatcher)
+	instance.DnsClient = c.GetFeature(dns.ClientType()).(dns.Client)
 
 	instance.setupDialer()
 
@@ -82,10 +83,10 @@ func (instance *V2RayInstance) Start() error {
 	if instance.started {
 		return newError("already started")
 	}
-	if instance.core == nil {
+	if instance.Core == nil {
 		return newError("not initialized")
 	}
-	err := instance.core.Start()
+	err := instance.Core.Start()
 	if err != nil {
 		return err
 	}
@@ -94,10 +95,10 @@ func (instance *V2RayInstance) Start() error {
 }
 
 func (instance *V2RayInstance) QueryStats(tag string, direct string) int64 {
-	if instance.statsManager == nil {
+	if instance.StatsManager == nil {
 		return 0
 	}
-	counter := instance.statsManager.GetCounter(fmt.Sprintf("outbound>>>%s>>>traffic>>>%s", tag, direct))
+	counter := instance.StatsManager.GetCounter(fmt.Sprintf("outbound>>>%s>>>traffic>>>%s", tag, direct))
 	if counter == nil {
 		return 0
 	}
@@ -108,14 +109,17 @@ func (instance *V2RayInstance) Close() error {
 	instance.access.Lock()
 	defer instance.access.Unlock()
 	if instance.started {
-		return instance.core.Close()
+		nekoutils.ConnectionLog_V2Ray.ResetConnections(uintptr(unsafe.Pointer(instance.Core)))
+		nekoutils.ConnectionPool_V2Ray.ResetConnections(uintptr(unsafe.Pointer(instance.Core)))
+		nekoutils.ConnectionPool_System.ResetConnections(uintptr(unsafe.Pointer(instance.Core)))
+		return instance.Core.Close()
 	}
 	return nil
 }
 
-func (instance *V2RayInstance) dialContext(ctx context.Context, destination net.Destination) (net.Conn, error) {
-	ctx = core.WithContext(ctx, instance.core)
-	r, err := instance.dispatcher.Dispatch(ctx, destination)
+func (instance *V2RayInstance) DialContext(ctx context.Context, destination net.Destination) (net.Conn, error) {
+	ctx = core.WithContext(ctx, instance.Core)
+	r, err := instance.Dispatcher.Dispatch(ctx, destination)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +132,7 @@ func (instance *V2RayInstance) dialContext(ctx context.Context, destination net.
 	return buf.NewConnection(buf.ConnectionInputMulti(r.Writer), readerOpt), nil
 }
 
-// Nekomura
+// DNS & Protect
 
 var staticHosts = make(map[string][]net.IP)
 var tryDomains = make([]string, 0)                                                    // server's domain, set when enhanced domain mode
@@ -192,7 +196,7 @@ func (p *simpleSekaiWrapper) LookupIP(network, host string) (ret []net.IP, err e
 // setup dialer and resolver for v2ray (v2ray options)
 func (v2ray *V2RayInstance) setupDialer() {
 	setupResolvers()
-	dc = v2ray.dnsClient
+	dc = v2ray.DnsClient
 
 	// All lookup except dnsClient -> dc.LookupIP()
 	// and also set protectedDialer
@@ -244,12 +248,12 @@ func setupResolvers() {
 
 // Neko connections
 
-func ResetConnections(system bool) {
+func ResetAllConnections(system bool) {
 	if system {
-		nekoutils.ConnectionPool_System.ResetConnections(true)
+		nekoutils.ConnectionPool_System.ResetConnections(0)
 	} else {
-		nekoutils.ConnectionPool_V2Ray.ResetConnections(false)
-		nekoutils.ConnectionLog_V2Ray.ResetConnections(false)
+		nekoutils.ConnectionPool_V2Ray.ResetConnections(0)
+		nekoutils.ConnectionLog_V2Ray.ResetConnections(0)
 	}
 }
 

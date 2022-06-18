@@ -12,7 +12,7 @@ func SetConfig(tryDomainStr string, disableExtraCoreLog bool, nekoConnLog bool) 
 	staticHosts = make(map[string][]net.IP)
 
 	nekoutils.Connection_V2Ray_Enabled = nekoConnLog
-	ResetConnections(false)
+	ResetAllConnections(false)
 
 	if disableExtraCoreLog {
 		v2rayLogHook = func(s string) string {

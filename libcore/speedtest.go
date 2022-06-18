@@ -42,7 +42,7 @@ func UrlTestV2ray(instance *V2RayInstance, inbound string, link string, timeout 
 			if inbound != "" {
 				ctx = session.ContextWithInbound(ctx, &session.Inbound{Tag: inbound})
 			}
-			return instance.dialContext(ctx, dest)
+			return instance.DialContext(ctx, dest)
 		},
 	}
 

@@ -206,7 +206,7 @@ func ForceLog(str string) {
 func NekoLogWrite(level int32, tag, str string) {
 	if level == 114514 {
 		if logrus.GetLevel() > logrus.FatalLevel {
-			ForceLog(str)
+			ForceLog(strings.Trim(str, "\n"))
 		}
 	} else {
 		if tag == "" {
