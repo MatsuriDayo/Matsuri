@@ -158,7 +158,15 @@ fun HysteriaBean.buildHysteriaConfig(port: Int, cacheFile: (() -> File)?): Strin
         }
         put("up_mbps", uploadMbps)
         put("down_mbps", downloadMbps)
-        put("socks5", JSONObject(mapOf("listen" to "$LOCALHOST:$port")))
+        put(
+            "socks5", JSONObject(
+                mapOf(
+                    "listen" to "$LOCALHOST:$port",
+                    "timeout" to 5,
+                )
+            )
+        )
+        put("retry", 5)
         put("obfs", obfuscation)
         when (authPayloadType) {
             HysteriaBean.TYPE_BASE64 -> put("auth", authPayload)
