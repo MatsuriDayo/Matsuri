@@ -16,11 +16,14 @@ import (
 var FdProtector Protector
 var v2rayDefaultDialer = &internet.DefaultSystemDialer{}
 
+// non-Windows
+// May be a func to apply fwmark to the fd (implement by Android or Nekoray)
 type Protector interface {
 	Protect(fd int32) bool
 }
 
-// TODO now it is v2ray's default dialer, test for bug (VPN / non-VPN)
+// Use my dial function on non-Windows platforms
+// Use v2ray's dial on Windows
 type ProtectedDialer struct {
 	Resolver func(domain string) ([]net.IP, error)
 }

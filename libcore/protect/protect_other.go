@@ -8,7 +8,6 @@ import (
 	"net"
 	"os"
 	"syscall"
-	"time"
 
 	v2rayNet "github.com/v2fly/v2ray-core/v5/common/net"
 	"github.com/v2fly/v2ray-core/v5/nekoutils"
@@ -17,11 +16,7 @@ import (
 )
 
 func (dialer ProtectedDialer) dial(ctx context.Context, source v2rayNet.Address, destination v2rayNet.Destination, sockopt *internet.SocketConfig) (conn net.Conn, err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-	destIp := destination.Address.IP()
-	ipv6 := len(destIp) != net.IPv4len
-	fd, err := getFd(destination.Network, ipv6)
+	fd, err := getFd(destination.Network)
 	if err != nil {
 		return nil, err
 	}
@@ -33,6 +28,8 @@ func (dialer ProtectedDialer) dial(ctx context.Context, source v2rayNet.Address,
 		return nil, newError("protect failed")
 	}
 
+	// Apply sockopt
+
 	if sockopt != nil {
 		internet.ApplySockopt(sockopt, destination, uintptr(fd), ctx)
 	}
@@ -40,32 +37,33 @@ func (dialer ProtectedDialer) dial(ctx context.Context, source v2rayNet.Address,
 	// SO_SNDTIMEO default is 75s
 	syscall.SetsockoptTimeval(fd, syscall.SOL_SOCKET, syscall.SO_SNDTIMEO, &syscall.Timeval{Sec: 10})
 
-	var sockaddr unix.Sockaddr
-	if !ipv6 {
-		socketAddress := &unix.SockaddrInet4{
-			Port: int(destination.Port),
+	// Do Connect
+
+	if destination.Network == v2rayNet.Network_TCP {
+		sockaddr := &unix.SockaddrInet6{
+			Port: int(destination.Port.Value()),
 		}
-		copy(socketAddress.Addr[:], destIp)
-		sockaddr = socketAddress
+		copy(sockaddr.Addr[:], destination.Address.IP().To16())
+
+		err = unix.Connect(fd, sockaddr)
 	} else {
-		socketAddress := &unix.SockaddrInet6{
-			Port: int(destination.Port),
-		}
-		copy(socketAddress.Addr[:], destIp)
-		sockaddr = socketAddress
+		err = unix.Bind(fd, &unix.SockaddrInet6{})
 	}
 
-	err = unix.Connect(fd, sockaddr)
 	if err != nil {
 		syscall.Close(fd)
 		return nil, err
 	}
+
+	// Get go file
 
 	file := os.NewFile(uintptr(fd), "socket")
 	if file == nil {
 		return nil, newError("failed to connect to fd")
 	}
 	defer file.Close() // old fd will closed
+
+	// Get go conn
 
 	switch destination.Network {
 	case v2rayNet.Network_UDP:
@@ -91,20 +89,12 @@ func (dialer ProtectedDialer) dial(ctx context.Context, source v2rayNet.Address,
 	return conn, nil
 }
 
-func getFd(network v2rayNet.Network, ipv6 bool) (fd int, err error) {
-	var af int
-	if !ipv6 {
-		af = unix.AF_INET
-	} else {
-		af = unix.AF_INET6
-	}
+func getFd(network v2rayNet.Network) (fd int, err error) {
 	switch network {
 	case v2rayNet.Network_TCP:
-		fd, err = unix.Socket(af, unix.SOCK_STREAM, unix.IPPROTO_TCP)
+		fd, err = unix.Socket(unix.AF_INET6, unix.SOCK_STREAM, unix.IPPROTO_TCP)
 	case v2rayNet.Network_UDP:
-		fd, err = unix.Socket(af, unix.SOCK_DGRAM, unix.IPPROTO_UDP)
-	case v2rayNet.Network_UNIX:
-		fd, err = unix.Socket(af, unix.SOCK_STREAM, 0)
+		fd, err = unix.Socket(unix.AF_INET6, unix.SOCK_DGRAM, unix.IPPROTO_UDP)
 	default:
 		err = fmt.Errorf("unknow network")
 	}
