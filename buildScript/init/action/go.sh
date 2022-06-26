@@ -6,8 +6,8 @@ mkdir -p $GOPATH
 cd $golang
 
 if [ ! -f "go/bin/go" ]; then
-    curl -Lso go.tar.gz https://go.dev/dl/go1.18.2.linux-amd64.tar.gz
-    echo "e54bec97a1a5d230fc2f9ad0880fcbabb5888f30ed9666eca4a91c5a32e86cbc go.tar.gz" | sha256sum -c -
+    curl -Lso go.tar.gz https://go.dev/dl/go1.18.3.linux-amd64.tar.gz
+    echo "956f8507b302ab0bb747613695cdae10af99bbd39a90cae522b7c0302cc27245 go.tar.gz" | sha256sum -c -
     tar xzf go.tar.gz
 fi
 
