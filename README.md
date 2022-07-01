@@ -44,7 +44,6 @@ https://matsuridayo.github.io
 
 ### ROOT required
 
-* Ping Tunnel ( pingtunnel-plugin )
 * Hysteria faketcp ( hysteria-plugin )
 
 ### 订阅 Subscription

@@ -3,6 +3,7 @@ package libcore
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"libcore/device"
 	"log"
@@ -85,8 +86,8 @@ func (stdLogWriter) Write(p []byte) (n int, err error) {
 }
 
 // manage log file
-var _logfile = &logfile{}
-var max = 50 * 1024
+var _logFile = &logfile{}
+var _logMaxSize = 50 * 1024
 
 type logfile struct {
 	f     *os.File
@@ -116,23 +117,23 @@ func (lp *logfile) Write(p []byte) (n int, err error) {
 
 	// Truncate long file
 	if lp.f != nil {
-		if offset, _ := lp.f.Seek(0, os.SEEK_END); offset > int64(max) {
-			lp.f.Seek(0, os.SEEK_SET)
+		if offset, _ := lp.f.Seek(0, io.SeekEnd); offset > int64(_logMaxSize) {
+			lp.f.Seek(0, io.SeekStart)
 			data, _ := ioutil.ReadAll(lp.f)
-			if len(data)-max > 0 {
+			if len(data)-_logMaxSize > 0 {
 				err := lp.f.Truncate(0)
 				// TODO windows "access is denied"
 				if err == nil {
-					lp.f.Write(data[len(data)-max:])
+					lp.f.Write(data[len(data)-_logMaxSize:])
 				}
 			}
 		}
 	} else {
-		if lp.buf.Len() > max {
+		if lp.buf.Len() > _logMaxSize {
 			data := lp.buf.Bytes()
-			if len(data)-max > 0 {
+			if len(data)-_logMaxSize > 0 {
 				lp.buf.Reset()
-				lp.buf.Write(data[len(data)-max:])
+				lp.buf.Write(data[len(data)-_logMaxSize:])
 			}
 		}
 	}
@@ -163,7 +164,7 @@ func (lp *logfile) Get() []byte {
 	var a []byte
 
 	if lp.f != nil {
-		lp.f.Seek(0, os.SEEK_SET)
+		lp.f.Seek(0, io.SeekStart)
 		a, _ = ioutil.ReadAll(lp.f)
 	} else {
 		a = lp.buf.Bytes()
@@ -178,6 +179,15 @@ func (lp *logfile) Get() []byte {
 func (lp *logfile) init(path string) (err error) {
 	lp.lock()
 	defer lp.unlock()
+
+	if runtime.GOOS == "windows" {
+		oldF, err := os.ReadFile(path)
+		if err == nil && len(oldF) > _logMaxSize {
+			if os.Truncate(path, 0) == nil {
+				lp.buf.Write(oldF[len(oldF)-_logMaxSize:])
+			}
+		}
+	}
 
 	lp.f, err = os.OpenFile(path, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0644)
 	if err != nil {
@@ -200,7 +210,7 @@ func ForceLog(str string) {
 		Message: str,
 	}
 	b, _ := _logrusFormatter.Format(entry)
-	_logfile.Write(b)
+	_logFile.Write(b)
 }
 
 func NekoLogWrite(level int32, tag, str string) {
@@ -218,11 +228,11 @@ func NekoLogWrite(level int32, tag, str string) {
 }
 
 func NekoLogClear() {
-	_logfile.Clear()
+	_logFile.Clear()
 }
 
 func NekoLogGet() []byte {
-	return _logfile.Get()
+	return _logFile.Get()
 }
 
 func SetEnableLog(enableLog bool, maxKB int32) {
@@ -232,15 +242,15 @@ func SetEnableLog(enableLog bool, maxKB int32) {
 		logrus.SetLevel(logrus.FatalLevel)
 	}
 	if maxKB > 0 {
-		max = int(maxKB) * 1024
+		_logMaxSize = int(maxKB) * 1024
 	}
 }
 
 func setupLogger(path string) (err error) {
 	//init neko logger
 	logrus.SetFormatter(_logrusFormatter)
-	err = _logfile.init(path)
-	logrus.SetOutput(_logfile)
+	err = _logFile.init(path)
+	logrus.SetOutput(_logFile)
 
 	//replace loggers
 	log.SetOutput(stdLogWriter{})
