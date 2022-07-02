@@ -27,6 +27,7 @@ import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.DnsResolver
+import android.net.LocalSocket
 import android.net.Network
 import android.net.ProxyInfo
 import android.os.Build
@@ -36,15 +37,14 @@ import android.os.PowerManager
 import android.system.ErrnoException
 import android.system.Os
 import androidx.annotation.RequiresApi
+import com.github.shadowsocks.net.ConcurrentLocalSocketListener
 import io.nekohasekai.sagernet.*
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.database.StatsEntity
 import io.nekohasekai.sagernet.fmt.LOCALHOST
 import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
-import io.nekohasekai.sagernet.ktx.Logs
-import io.nekohasekai.sagernet.ktx.tryResume
-import io.nekohasekai.sagernet.ktx.tryResumeWithException
+import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.ui.VpnRequestActivity
 import io.nekohasekai.sagernet.utils.PackageCache
 import io.nekohasekai.sagernet.utils.Subnet
@@ -53,7 +53,9 @@ import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.runBlocking
 import libcore.*
 import moe.matsuri.nya.neko.needBypassRootUid
+import java.io.File
 import java.io.FileDescriptor
+import java.io.IOException
 import java.net.InetAddress
 import kotlin.coroutines.suspendCoroutine
 import android.net.VpnService as BaseVpnService
@@ -108,8 +110,10 @@ class VpnService : BaseVpnService(),
                 arrayOf(it)
             }
     override var upstreamInterfaceName: String? = null
+    private var worker: ProtectWorker? = null
 
     override suspend fun startProcesses() {
+        worker = ProtectWorker().apply { start() }
         super.startProcesses()
         startVpn()
     }
@@ -124,6 +128,10 @@ class VpnService : BaseVpnService(),
 
     @Suppress("EXPERIMENTAL_API_USAGE")
     override fun killProcesses() {
+        runOnDefaultDispatcher {
+            worker?.shutdown(this)
+            worker = null
+        }
         getTun()?.close()
         if (::conn.isInitialized) conn.close()
         super.killProcesses()
@@ -415,4 +423,30 @@ class VpnService : BaseVpnService(),
         super.onDestroy()
         data.binder.close()
     }
+
+    private inner class ProtectWorker : ConcurrentLocalSocketListener(
+        "ShadowsocksVpnThread",
+        File(SagerNet.application.noBackupFilesDir, "protect_path")
+    ) {
+        override fun acceptInternal(socket: LocalSocket) {
+            if (socket.inputStream.read() == -1) return
+            val success = socket.ancillaryFileDescriptors?.single()?.use { fd ->
+                underlyingNetwork.let { network ->
+                    if (network != null) try {
+                        network.bindSocket(fd)
+                        return@let true
+                    } catch (e: IOException) {
+                        Logs.w(e)
+                        return@let false
+                    }
+                    protect(fd.int)
+                }
+            } ?: false
+            try {
+                socket.outputStream.write(if (success) 0 else 1)
+            } catch (_: IOException) {
+            }        // ignore connection early close
+        }
+    }
+
 }

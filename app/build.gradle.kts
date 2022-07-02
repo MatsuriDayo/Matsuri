@@ -4,7 +4,6 @@ plugins {
     id("kotlin-kapt")
     id("kotlin-parcelize")
     id("com.mikepenz.aboutlibraries.plugin")
-    id("com.google.protobuf")
 }
 
 setupApp()
@@ -78,7 +77,6 @@ dependencies {
     implementation("com.github.MatrixDev.Roomigrant:RoomigrantLib:0.3.4")
     kapt("com.github.MatrixDev.Roomigrant:RoomigrantCompiler:0.3.4")
 
-    implementation(project(":library:proto-stub"))
 //    implementation("io.grpc:grpc-okhttp:1.40.1")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")

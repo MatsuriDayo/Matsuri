@@ -1,6 +1,7 @@
 binary*.go
 *.[a|j]ar
-.idea/
-/build/
+.idea
+.vscode
 /debug.go
-/.build/
+build
+.build

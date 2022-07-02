@@ -1,7 +1,5 @@
 include(":library:stub")
 include(":library:include")
-include(":library:proto")
-include(":library:proto-stub")
 
 include(":plugin:api")
 

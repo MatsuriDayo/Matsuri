@@ -92,10 +92,10 @@ fun Project.requireTargetAbi(): String {
 fun Project.setupCommon() {
     android.apply {
         buildToolsVersion("30.0.3")
-        compileSdkVersion(31)
+        compileSdkVersion(32)
         defaultConfig {
             minSdk = 21
-            targetSdk = 31
+            targetSdk = 32
         }
         buildTypes {
             getByName("release") {

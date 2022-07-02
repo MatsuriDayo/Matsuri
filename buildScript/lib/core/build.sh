@@ -14,3 +14,4 @@ rm -rf $TEMP_V2RAY_PATH 2>/dev/null
 mkdir -p $TEMP_V2RAY_PATH
 /bin/cp -r ../../v2ray-core/* $TEMP_V2RAY_PATH
 chmod -R 777 $TEMP_V2RAY_PATH
+rm -f $TEMP_V2RAY_PATH/go.*

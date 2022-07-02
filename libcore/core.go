@@ -35,6 +35,11 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 
 	isBgProcess := strings.HasSuffix(process, ":bg")
 
+	// Working dir
+	if !device.IsNekoray {
+		os.Chdir(filepath.Join(cachePath, "../no_backup"))
+	}
+
 	// Set up log
 	SetEnableLog(enableLog, maxKB)
 	s := fmt.Sprintln("InitCore called", externalAssets, cachePath, process, isBgProcess)

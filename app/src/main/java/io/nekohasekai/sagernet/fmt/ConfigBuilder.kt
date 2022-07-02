@@ -30,6 +30,7 @@ import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.fmt.V2rayBuildResult.IndexEntity
 import io.nekohasekai.sagernet.fmt.gson.gson
 import io.nekohasekai.sagernet.fmt.http.HttpBean
+import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
 import io.nekohasekai.sagernet.fmt.internal.ChainBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean
 import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
@@ -40,7 +41,7 @@ import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
 import io.nekohasekai.sagernet.fmt.v2ray.V2RayConfig
 import io.nekohasekai.sagernet.fmt.v2ray.V2RayConfig.*
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
-import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
+import io.nekohasekai.sagernet.ktx.isExpertFlavor
 import io.nekohasekai.sagernet.ktx.isIpAddress
 import io.nekohasekai.sagernet.ktx.mkPort
 import io.nekohasekai.sagernet.utils.PackageCache
@@ -801,34 +802,36 @@ fun buildV2RayConfig(
                 // External proxy need a dokodemo-door inbound to forward the traffic
                 // For external proxy software, their traffic must goes to v2ray-core to use protected fd.
                 if (bean.canMapping() && proxyEntity.needExternal()) {
-                    val mappingPort = mkPort()
-                    bean.finalAddress = LOCALHOST
-                    bean.finalPort = mappingPort
+                    // With ss protect, don't use mapping
+                    if (!isExpertFlavor && !bean.isFirstProfile && bean !is HysteriaBean) {
+                        val mappingPort = mkPort()
+                        bean.finalAddress = LOCALHOST
+                        bean.finalPort = mappingPort
 
-                    inbounds.add(InboundObject().apply {
-                        listen = LOCALHOST
-                        port = mappingPort
-                        tag = "$chainTag-mapping-${proxyEntity.id}"
-                        protocol = "dokodemo-door"
-                        settings = LazyInboundConfigurationObject(this,
-                            DokodemoDoorInboundConfigurationObject().apply {
-                                address = bean.serverAddress
-                                network = bean.network()
-                                port = bean.serverPort
-                            })
+                        inbounds.add(InboundObject().apply {
+                            listen = LOCALHOST
+                            port = mappingPort
+                            tag = "$chainTag-mapping-${proxyEntity.id}"
+                            protocol = "dokodemo-door"
+                            settings = LazyInboundConfigurationObject(this,
+                                DokodemoDoorInboundConfigurationObject().apply {
+                                    address = bean.serverAddress
+                                    network = bean.network()
+                                    port = bean.serverPort
+                                })
 
-                        pastInboundTag = tag
+                            pastInboundTag = tag
 
-                        // no chain rule and not outbound, so need to set to direct
-                        if (bean.isFirstProfile) {
-                            routing.rules.add(RoutingObject.RuleObject().apply {
-                                type = "field"
-                                inboundTag = listOf(tag)
-                                outboundTag = TAG_DIRECT
-                            })
-                        }
-
-                    })
+                            // no chain rule and not outbound, so need to set to direct
+                            if (bean.isFirstProfile) {
+                                routing.rules.add(RoutingObject.RuleObject().apply {
+                                    type = "field"
+                                    inboundTag = listOf(tag)
+                                    outboundTag = TAG_DIRECT
+                                })
+                            }
+                        })
+                    }
                 }
 
                 outbounds.add(currentOutbound)

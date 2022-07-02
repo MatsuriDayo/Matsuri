@@ -109,7 +109,7 @@ class StatsBar @JvmOverloads constructor(
         }
         if ((state == BaseService.State.Connected).also { hideOnScroll = it }) {
             postWhenStarted {
-                performShow()
+                if (allowShow) performShow()
                 setStatus(app.getText(R.string.vpn_connected))
             }
         } else {
