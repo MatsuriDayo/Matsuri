@@ -19,8 +19,10 @@
 
 package io.nekohasekai.sagernet.fmt.v2ray
 
+import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.ktx.*
 import moe.matsuri.nya.utils.NGUtil
+import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import org.json.JSONObject
 
@@ -46,11 +48,11 @@ fun parseV2Ray(link: String): StandardV2RayBean {
     val bean = VMessBean()
     val url = link.replace("vmess://", "https://").toHttpUrl()
 
-    bean.serverAddress = url.host
-    bean.serverPort = url.port
-    bean.name = url.fragment
-
     if (url.password.isNotBlank()) { // https://github.com/v2fly/v2fly-github-io/issues/26
+        bean.serverAddress = url.host
+        bean.serverPort = url.port
+        bean.name = url.fragment
+
         var protocol = url.username
         bean.type = protocol
         bean.alterId = url.password.substringAfterLast('-').toInt()
@@ -114,108 +116,120 @@ fun parseV2Ray(link: String): StandardV2RayBean {
                 }
             }
         }
-    } else { // https://github.com/XTLS/Xray-core/issues/91
-
-        bean.uuid = url.username
-        if (url.pathSegments.size > 1 || url.pathSegments[0].isNotBlank()) {
-            bean.path = url.pathSegments.joinToString("/")
-        }
-
-        val protocol = url.queryParameter("type") ?: "tcp"
-        bean.type = protocol
-
-        when (url.queryParameter("security")) {
-            "tls" -> {
-                bean.security = "tls"
-                url.queryParameter("sni")?.let {
-                    bean.sni = it
-                }
-                url.queryParameter("alpn")?.let {
-                    bean.alpn = it
-                }
-                url.queryParameter("cert")?.let {
-                    bean.certificates = it
-                }
-                url.queryParameter("chain")?.let {
-                    bean.pinnedPeerCertificateChainSha256 = it
-                }
-            }
-        }
-        when (protocol) {
-            "tcp" -> {
-                url.queryParameter("headerType")?.let { headerType ->
-                    if (headerType == "http") {
-                        bean.headerType = headerType
-                        url.queryParameter("host")?.let {
-                            bean.host = it
-                        }
-                        url.queryParameter("path")?.let {
-                            bean.path = it
-                        }
-                    }
-                }
-            }
-            "kcp" -> {
-                url.queryParameter("headerType")?.let {
-                    bean.headerType = it
-                }
-                url.queryParameter("seed")?.let {
-                    bean.mKcpSeed = it
-                }
-            }
-            "http" -> {
-                url.queryParameter("host")?.let {
-                    bean.host = it
-                }
-                url.queryParameter("path")?.let {
-                    bean.path = it
-                }
-            }
-            "ws" -> {
-                url.queryParameter("host")?.let {
-                    bean.host = it
-                }
-                url.queryParameter("path")?.let {
-                    bean.path = it
-                }
-                url.queryParameter("ed")?.let { ed ->
-                    bean.wsMaxEarlyData = ed.toInt()
-
-                    url.queryParameter("eh")?.let {
-                        bean.earlyDataHeaderName = it
-                    }
-                }
-            }
-            "quic" -> {
-                url.queryParameter("headerType")?.let {
-                    bean.headerType = it
-                }
-                url.queryParameter("quicSecurity")?.let { quicSecurity ->
-                    bean.quicSecurity = quicSecurity
-                    url.queryParameter("key")?.let {
-                        bean.quicKey = it
-                    }
-                }
-            }
-            "grpc" -> {
-                url.queryParameter("serviceName")?.let {
-                    bean.grpcServiceName = it
-                }
-            }
-        }
-
-        url.queryParameter("packetEncoding")?.let {
-            when (it) {
-                "packet" -> bean.packetEncoding = 1
-                "xudp" -> bean.packetEncoding = 2
-            }
-        }
-
+    } else {
+        bean.parseDuckSoft(url)
     }
 
     Logs.d(formatObject(bean))
 
     return bean
+}
+
+// https://github.com/XTLS/Xray-core/issues/91
+// NO allowInsecure
+fun StandardV2RayBean.parseDuckSoft(url: HttpUrl) {
+    serverAddress = url.host
+    serverPort = url.port
+    name = url.fragment
+
+    if (this is TrojanBean) {
+        password = url.username
+    } else {
+        uuid = url.username
+    }
+
+    if (url.pathSegments.size > 1 || url.pathSegments[0].isNotBlank()) {
+        path = url.pathSegments.joinToString("/")
+    }
+
+    type = url.queryParameter("type") ?: "tcp"
+    security = url.queryParameter("security") ?: "tls"
+
+    when (security) {
+        "tls" -> {
+            url.queryParameter("sni")?.let {
+                sni = it
+            }
+            url.queryParameter("alpn")?.let {
+                alpn = it
+            }
+            url.queryParameter("cert")?.let {
+                certificates = it
+            }
+            url.queryParameter("chain")?.let {
+                pinnedPeerCertificateChainSha256 = it
+            }
+        }
+    }
+    when (type) {
+        "tcp" -> {
+            url.queryParameter("headerType")?.let { ht ->
+                if (ht == "http") {
+                    headerType = ht
+                    url.queryParameter("host")?.let {
+                        host = it
+                    }
+                    url.queryParameter("path")?.let {
+                        path = it
+                    }
+                }
+            }
+        }
+        "kcp" -> {
+            url.queryParameter("headerType")?.let {
+                headerType = it
+            }
+            url.queryParameter("seed")?.let {
+                mKcpSeed = it
+            }
+        }
+        "http" -> {
+            url.queryParameter("host")?.let {
+                host = it
+            }
+            url.queryParameter("path")?.let {
+                path = it
+            }
+        }
+        "ws" -> {
+            url.queryParameter("host")?.let {
+                host = it
+            }
+            url.queryParameter("path")?.let {
+                path = it
+            }
+            url.queryParameter("ed")?.let { ed ->
+                wsMaxEarlyData = ed.toInt()
+
+                url.queryParameter("eh")?.let {
+                    earlyDataHeaderName = it
+                }
+            }
+        }
+        "quic" -> {
+            url.queryParameter("headerType")?.let {
+                headerType = it
+            }
+            url.queryParameter("quicSecurity")?.let { qs ->
+                quicSecurity = qs
+                url.queryParameter("key")?.let {
+                    quicKey = it
+                }
+            }
+        }
+        "grpc" -> {
+            url.queryParameter("serviceName")?.let {
+                grpcServiceName = it
+            }
+        }
+    }
+
+    url.queryParameter("packetEncoding")?.let {
+        when (it) {
+            "packet" -> packetEncoding = 1
+            "xudp" -> packetEncoding = 2
+        }
+    }
 }
 
 // 不确定是谁的格式
@@ -417,11 +431,11 @@ fun VMessBean.toV2rayN(): String {
 fun StandardV2RayBean.toUri(standard: Boolean = true): String {
     if (this is VMessBean && alterId > 0) return toV2rayN()
 
-    val builder = linkBuilder().username(uuid)
+    val builder = linkBuilder().username(if (this is TrojanBean) password else uuid)
         .host(serverAddress)
         .port(serverPort)
         .addQueryParameter("type", type)
-        .addQueryParameter("encryption", encryption)
+    if (this !is TrojanBean) builder.addQueryParameter("encryption", encryption)
 
     when (type) {
         "tcp" -> {
@@ -500,6 +514,7 @@ fun StandardV2RayBean.toUri(standard: Boolean = true): String {
                 if (pinnedPeerCertificateChainSha256.isNotBlank()) {
                     builder.addQueryParameter("chain", pinnedPeerCertificateChainSha256)
                 }
+                if (allowInsecure) builder.addQueryParameter("allowInsecure", "1")
             }
         }
     }

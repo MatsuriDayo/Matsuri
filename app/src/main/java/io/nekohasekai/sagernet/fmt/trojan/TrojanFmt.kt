@@ -19,58 +19,23 @@
 
 package io.nekohasekai.sagernet.fmt.trojan
 
-import io.nekohasekai.sagernet.ktx.linkBuilder
-import io.nekohasekai.sagernet.ktx.toLink
-import io.nekohasekai.sagernet.ktx.urlSafe
+import io.nekohasekai.sagernet.fmt.v2ray.parseDuckSoft
+import io.nekohasekai.sagernet.fmt.v2ray.toUri
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
-// WTF
-// https://github.com/trojan-gfw/igniter/issues/318
 fun parseTrojan(server: String): TrojanBean {
 
     val link = server.replace("trojan://", "https://").toHttpUrlOrNull()
         ?: error("invalid trojan link $server")
 
     return TrojanBean().apply {
-        serverAddress = link.host
-        serverPort = link.port
-        password = link.username
-
-        if (link.password.isNotBlank()) {
-            password += ":" + link.password
-        }
-
-        security = link.queryParameter("security") ?: "tls"
-        sni = link.queryParameter("sni") ?: link.queryParameter("peer")
-        alpn = link.queryParameter("alpn")
+        parseDuckSoft(link)
         link.queryParameter("allowInsecure")
             ?.apply { if (this == "1" || this == "true") allowInsecure = true }
-        name = link.fragment
     }
 
 }
 
 fun TrojanBean.toUri(): String {
-
-    val builder = linkBuilder().username(password).host(serverAddress).port(serverPort)
-
-    if (sni.isNotBlank()) {
-        builder.addQueryParameter("sni", sni)
-    }
-    if (alpn.isNotBlank()) {
-        builder.addQueryParameter("alpn", alpn)
-    }
-
-    when (security) {
-        "tls" -> {
-        }
-    }
-
-    if (name.isNotBlank()) {
-        builder.encodedFragment(name.urlSafe())
-    }
-
-
-    return builder.toLink("trojan")
-
+    return toUri(true).replace("vmess://", "trojan://")
 }
