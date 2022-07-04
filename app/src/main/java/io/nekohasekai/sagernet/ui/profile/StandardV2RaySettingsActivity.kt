@@ -28,6 +28,7 @@ import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.preference.EditTextPreferenceModifiers
+import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
 import io.nekohasekai.sagernet.ktx.app
@@ -42,8 +43,12 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         DataStore.profileName = name
         DataStore.serverAddress = serverAddress
         DataStore.serverPort = serverPort
-        DataStore.serverUserId = uuid
-        DataStore.serverEncryption = encryption
+        if (this is TrojanBean) {
+            DataStore.serverUserId = password
+        } else {
+            DataStore.serverUserId = uuid
+            DataStore.serverEncryption = encryption
+        }
         if (this is VMessBean) {
             DataStore.serverAlterId = alterId
         }
@@ -77,8 +82,12 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         name = DataStore.profileName
         serverAddress = DataStore.serverAddress
         serverPort = DataStore.serverPort
-        uuid = DataStore.serverUserId
-        encryption = DataStore.serverEncryption
+        if (this is TrojanBean) {
+            password = DataStore.serverUserId
+        } else {
+            uuid = DataStore.serverUserId
+            encryption = DataStore.serverEncryption
+        }
         if (this is VMessBean) {
             alterId = DataStore.serverAlterId
         }
@@ -150,9 +159,14 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
             encryption.value = "auto"
         }
 
+        val uuid = findPreference<EditTextPreference>(Key.SERVER_USER_ID)!!
+        uuid.summaryProvider = PasswordSummaryProvider
 
-        findPreference<EditTextPreference>(Key.SERVER_USER_ID)!!.apply {
-            summaryProvider = PasswordSummaryProvider
+        if (bean is TrojanBean) {
+            uuid.title = resources.getString(R.string.password)
+            encryption.isVisible = false
+            alterId.isVisible = false
+            findPreference<SimpleMenuPreference>(Key.SERVER_PACKET_ENCODING)!!.isVisible = false
         }
 
         updateView(network.value)

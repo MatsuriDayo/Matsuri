@@ -506,6 +506,19 @@ fun buildV2RayConfig(
                                                 })
                                         })
                                 }
+                                is TrojanBean -> {
+                                    protocol = "trojan"
+                                    settings = LazyOutboundConfigurationObject(this,
+                                        TrojanOutboundConfigurationObject().apply {
+                                            servers =
+                                                listOf(TrojanOutboundConfigurationObject.ServerObject()
+                                                    .apply {
+                                                        address = bean.serverAddress
+                                                        port = bean.serverPort
+                                                        password = bean.password
+                                                    })
+                                        })
+                                }
                             }
 
                             streamSettings = StreamSettingsObject().apply {
@@ -707,38 +720,6 @@ fun buildV2RayConfig(
                                         }
                                     }
                                 })
-                        } else if (bean is TrojanBean) {
-                            protocol = "trojan"
-                            settings = LazyOutboundConfigurationObject(this,
-                                TrojanOutboundConfigurationObject().apply {
-                                    servers = listOf(TrojanOutboundConfigurationObject.ServerObject()
-                                        .apply {
-                                            address = bean.serverAddress
-                                            port = bean.serverPort
-                                            password = bean.password
-                                        })
-                                })
-                            streamSettings = StreamSettingsObject().apply {
-                                network = "tcp"
-                                security = "tls"
-                                tlsSettings = TLSObject().apply {
-                                    if (bean.sni.isNotBlank()) {
-                                        serverName = bean.sni
-                                    }
-                                    if (bean.alpn.isNotBlank()) {
-                                        alpn = bean.alpn.split("\n")
-                                    }
-                                }
-                                if (needKeepAliveInterval) {
-                                    sockopt = StreamSettingsObject.SockoptObject().apply {
-                                        tcpKeepAliveInterval = keepAliveInterval
-                                    }
-                                }
-                                if (bean.allowInsecure) {
-                                    tlsSettings = tlsSettings ?: TLSObject()
-                                    tlsSettings.allowInsecure = true
-                                }
-                            }
                         } else if (bean is SSHBean) {
                             protocol = "ssh"
                             settings = LazyOutboundConfigurationObject(this,
