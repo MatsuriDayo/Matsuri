@@ -19,14 +19,10 @@
 
 package io.nekohasekai.sagernet.fmt.trojan
 
-import io.nekohasekai.sagernet.IPv6Mode
-import io.nekohasekai.sagernet.database.DataStore
-import io.nekohasekai.sagernet.fmt.LOCALHOST
-import io.nekohasekai.sagernet.ktx.*
-import moe.matsuri.nya.Protocols
+import io.nekohasekai.sagernet.ktx.linkBuilder
+import io.nekohasekai.sagernet.ktx.toLink
+import io.nekohasekai.sagernet.ktx.urlSafe
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import org.json.JSONArray
-import org.json.JSONObject
 
 // WTF
 // https://github.com/trojan-gfw/igniter/issues/318
@@ -77,57 +73,4 @@ fun TrojanBean.toUri(): String {
 
     return builder.toLink("trojan")
 
-}
-
-fun TrojanBean.buildTrojanConfig(port: Int): String {
-    return JSONObject().apply {
-        put("run_type", "client")
-        put("local_addr", LOCALHOST)
-        put("local_port", port)
-        put("remote_addr", finalAddress)
-        put("remote_port", finalPort)
-        put("password", JSONArray().apply {
-            put(password)
-        })
-        put("log_level", if (DataStore.enableLog) 0 else 2)
-
-        put("ssl", JSONObject().apply {
-            if (allowInsecure) put("verify", false)
-            if (sni.isBlank() && finalAddress == LOCALHOST && !serverAddress.isIpAddress()) {
-                sni = serverAddress
-            }
-            if (sni.isNotBlank()) put("sni", sni)
-            if (alpn.isNotBlank()) put("alpn", JSONArray(alpn.split("\n")))
-        })
-    }.toStringPretty()
-}
-
-fun TrojanBean.buildTrojanGoConfig(port: Int): String {
-    return JSONObject().apply {
-        put("run_type", "client")
-        put("local_addr", LOCALHOST)
-        put("local_port", port)
-        put("remote_addr", finalAddress)
-        put("remote_port", finalPort)
-        put("password", JSONArray().apply {
-            put(password)
-        })
-        put("log_level", if (DataStore.enableLog) 0 else 2)
-        if (Protocols.shouldEnableMux("trojan")) put("mux", JSONObject().apply {
-            put("enabled", true)
-            put("concurrency", DataStore.muxConcurrency)
-        })
-        put("tcp", JSONObject().apply {
-            put("prefer_ipv4", DataStore.ipv6Mode <= IPv6Mode.ENABLE)
-        })
-
-        put("ssl", JSONObject().apply {
-            if (allowInsecure) put("verify", false)
-            if (sni.isBlank() && finalAddress == LOCALHOST && !serverAddress.isIpAddress()) {
-                sni = serverAddress
-            }
-            if (sni.isNotBlank()) put("sni", sni)
-            if (alpn.isNotBlank()) put("alpn", JSONArray(alpn.split("\n")))
-        })
-    }.toStringPretty()
 }

@@ -27,7 +27,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import io.nekohasekai.sagernet.SagerNet
-import io.nekohasekai.sagernet.TrojanProvider
 import io.nekohasekai.sagernet.bg.AbstractInstance
 import io.nekohasekai.sagernet.bg.GuardedProcessPool
 import io.nekohasekai.sagernet.database.DataStore
@@ -39,9 +38,6 @@ import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
 import io.nekohasekai.sagernet.fmt.hysteria.buildHysteriaConfig
 import io.nekohasekai.sagernet.fmt.naive.NaiveBean
 import io.nekohasekai.sagernet.fmt.naive.buildNaiveConfig
-import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
-import io.nekohasekai.sagernet.fmt.trojan.buildTrojanConfig
-import io.nekohasekai.sagernet.fmt.trojan.buildTrojanGoConfig
 import io.nekohasekai.sagernet.fmt.trojan_go.TrojanGoBean
 import io.nekohasekai.sagernet.fmt.trojan_go.buildTrojanGoConfig
 import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
@@ -102,20 +98,6 @@ abstract class V2RayInstance(
         for ((chain) in config.index) {
             chain.entries.forEachIndexed { index, (port, profile) ->
                 when (val bean = profile.requireBean()) {
-                    is TrojanBean -> {
-                        when (DataStore.providerTrojan) {
-                            TrojanProvider.TROJAN -> {
-                                initPlugin("trojan-plugin")
-                                pluginConfigs[port] = profile.type to bean.buildTrojanConfig(
-                                    port
-                                )
-                            }
-                            TrojanProvider.TROJAN_GO -> {
-                                initPlugin("trojan-go-plugin")
-                                pluginConfigs[port] = profile.type to bean.buildTrojanGoConfig(port)
-                            }
-                        }
-                    }
                     is TrojanGoBean -> {
                         initPlugin("trojan-go-plugin")
                         pluginConfigs[port] = profile.type to bean.buildTrojanGoConfig(port)
@@ -165,29 +147,11 @@ abstract class V2RayInstance(
             chain.entries.forEachIndexed { index, (port, profile) ->
                 val bean = profile.requireBean()
                 val needChain = index != chain.size - 1
-                val (profileType, config) = pluginConfigs[port] ?: 0 to ""
+                val (profileType, config) = pluginConfigs[port] ?: (0 to "")
 
                 when {
                     externalInstances.containsKey(port) -> {
                         externalInstances[port]!!.launch()
-                    }
-                    bean is TrojanBean -> {
-                        val configFile = File(
-                            cache, "trojan_" + SystemClock.elapsedRealtime() + ".json"
-                        )
-
-                        configFile.parentFile?.mkdirs()
-                        configFile.writeText(config)
-                        cacheFiles.add(configFile)
-
-                        val commands = listOf(
-                            when (DataStore.providerTrojan) {
-                                TrojanProvider.TROJAN -> initPlugin("trojan-plugin")
-                                else -> initPlugin("trojan-go-plugin")
-                            }.path, "--config", configFile.absolutePath
-                        )
-
-                        processes.start(commands)
                     }
                     bean is TrojanGoBean -> {
                         val configFile = File(

@@ -201,8 +201,6 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     // protocol
 
-    var providerTrojan by configurationStore.stringToInt(Key.PROVIDER_TROJAN)
-
     var muxProtocols by configurationStore.stringSet(Key.MUX_PROTOCOLS) { setOf("vmess") }
     var muxConcurrency by configurationStore.stringToInt(Key.MUX_CONCURRENCY) { 8 }
 
