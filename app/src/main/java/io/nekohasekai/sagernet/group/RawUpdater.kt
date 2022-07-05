@@ -361,6 +361,7 @@ object RawUpdater : GroupUpdater() {
                         }
                         "trojan" -> {
                             val bean = TrojanBean()
+                            bean.security = "tls"
                             for (opt in proxy) {
                                 when (opt.key) {
                                     "name" -> bean.name = opt.value?.toString()

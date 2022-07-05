@@ -124,7 +124,7 @@ public class HysteriaBean extends AbstractBean {
             caText = input.readString();
             streamReceiveWindow = input.readInt();
             connectionReceiveWindow = input.readInt();
-            disableMtuDiscovery = input.readBoolean();
+            if (version != 4) disableMtuDiscovery = input.readBoolean(); // note: skip 4
         }
     }
 

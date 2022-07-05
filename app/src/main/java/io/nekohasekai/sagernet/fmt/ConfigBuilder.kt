@@ -784,7 +784,8 @@ fun buildV2RayConfig(
                 // For external proxy software, their traffic must goes to v2ray-core to use protected fd.
                 if (bean.canMapping() && proxyEntity.needExternal()) {
                     // With ss protect, don't use mapping
-                    if (!isExpertFlavor && !bean.isFirstProfile && bean !is HysteriaBean) {
+                    val expertHysteria = isExpertFlavor && bean.isFirstProfile && bean is HysteriaBean
+                    if (!expertHysteria) {
                         val mappingPort = mkPort()
                         bean.finalAddress = LOCALHOST
                         bean.finalPort = mappingPort

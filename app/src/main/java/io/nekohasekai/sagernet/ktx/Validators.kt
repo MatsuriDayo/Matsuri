@@ -74,6 +74,7 @@ fun AbstractBean.isInsecure(): ValidateResult {
     } else if (this is HysteriaBean) {
         if (allowInsecure) return ResultInsecure(R.raw.insecure)
     } else if (this is TrojanBean) {
+        if (security in arrayOf("", "none")) return ResultInsecure(R.raw.not_encrypted)
         if (allowInsecure) return ResultInsecure(R.raw.insecure)
     } else if (this is NekoBean) {
         val hint = sharedStorage.optString("insecureHint")

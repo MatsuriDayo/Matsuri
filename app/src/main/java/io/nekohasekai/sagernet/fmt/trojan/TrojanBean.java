@@ -37,7 +37,7 @@ public class TrojanBean extends StandardV2RayBean {
     @Override
     public void initializeDefaultValues() {
         super.initializeDefaultValues();
-
+        if (security == null || security.isEmpty()) security = "tls";
         if (password == null) password = "";
     }
 
