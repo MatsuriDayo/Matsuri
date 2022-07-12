@@ -194,9 +194,9 @@ func (p *simpleSekaiWrapper) LookupIP(network, host string) (ret []net.IP, err e
 }
 
 // setup dialer and resolver for v2ray (v2ray options)
-func (v2ray *V2RayInstance) setupDialer() {
+func (instance *V2RayInstance) setupDialer() {
 	setupResolvers()
-	dc = v2ray.DnsClient
+	dc = instance.DnsClient
 
 	// All lookup except dnsClient -> dc.LookupIP()
 	// and also set protectedDialer

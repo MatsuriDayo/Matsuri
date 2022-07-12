@@ -19,7 +19,7 @@ func extractV2RayAssets(useOfficial BoolFunc) {
 	useOfficialAssets := useOfficial.Invoke()
 
 	extract := func(name string) {
-		err := extractAssetName(name, false, useOfficialAssets)
+		err := extractAssetName(name, useOfficialAssets)
 		if err != nil {
 			logrus.Warnf("Extract %s failed: %v", geoipDat, err)
 		}
@@ -31,7 +31,7 @@ func extractV2RayAssets(useOfficial BoolFunc) {
 }
 
 // 这里解压的是 apk 里面的
-func extractAssetName(name string, force bool, useOfficialAssets bool) error {
+func extractAssetName(name string, useOfficialAssets bool) error {
 	// 支持非官方源的，就是 replaceable，放 Android 目录
 	// 不支持非官方源的，就放 file 目录
 	replaceable := true
@@ -57,6 +57,7 @@ func extractAssetName(name string, force bool, useOfficialAssets bool) error {
 	var localVersion string
 	var assetVersion string
 
+	// loadAssetVersion from APK
 	loadAssetVersion := func() error {
 		av, err := asset.Open(assetsPrefix + version)
 		if err != nil {
@@ -70,15 +71,21 @@ func extractAssetName(name string, force bool, useOfficialAssets bool) error {
 		assetVersion = string(b)
 		return nil
 	}
+	if err := loadAssetVersion(); err != nil {
+		return err
+	}
 
 	doExtract := false
+	fileMissing := false
 
-	// check version
+	if _, err := os.Stat(dir + version); err != nil {
+		fileMissing = true
+	} else if _, err := os.Stat(dir + name); err != nil {
+		fileMissing = true
+	}
 
-	if _, versionNotFoundError := os.Stat(dir + version); versionNotFoundError != nil {
-		// 没有文件，自动解压
-		_, assetNotFoundError := os.Stat(dir + name)
-		doExtract = assetNotFoundError != nil || force
+	if fileMissing {
+		doExtract = true
 	} else if useOfficialAssets || !replaceable {
 		// 官方源升级
 		b, err := ioutil.ReadFile(dir + version)
@@ -87,31 +94,19 @@ func extractAssetName(name string, force bool, useOfficialAssets bool) error {
 			_ = os.RemoveAll(version)
 		} else {
 			localVersion = string(b)
-			err = loadAssetVersion()
-			if err != nil {
-				return err
-			}
 			av, err := strconv.ParseUint(assetVersion, 10, 64)
 			if err != nil {
-				doExtract = assetVersion != localVersion || force
+				doExtract = assetVersion != localVersion
 			} else {
 				lv, err := strconv.ParseUint(localVersion, 10, 64)
-				doExtract = err != nil || av > lv || force
+				doExtract = err != nil || av > lv
 			}
 		}
 	} else {
 		//非官方源不升级
-		doExtract = force
 	}
 
-	if doExtract {
-		if assetVersion == "" {
-			err := loadAssetVersion()
-			if err != nil {
-				return err
-			}
-		}
-	} else {
+	if !doExtract {
 		return nil
 	}
 
