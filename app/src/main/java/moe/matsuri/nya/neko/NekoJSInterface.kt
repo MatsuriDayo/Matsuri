@@ -354,7 +354,6 @@ class NekoJSInterface(val plgId: String) {
     object Default {
         val map = mutableMapOf<String, NekoJSInterface>()
 
-        @Synchronized
         suspend fun destroyJsi(plgId: String) = withContext(Dispatchers.Main) {
             if (map.containsKey(plgId)) {
                 map[plgId]!!.destroy()
@@ -363,7 +362,6 @@ class NekoJSInterface(val plgId: String) {
         }
 
         // TODO now it's manually managed
-        @Synchronized
         suspend fun destroyAllJsi() = withContext(Dispatchers.Main) {
             map.forEach { (t, u) ->
                 u.destroy()
@@ -371,7 +369,6 @@ class NekoJSInterface(val plgId: String) {
             }
         }
 
-        @Synchronized
         suspend fun requireJsi(plgId: String): NekoJSInterface = withContext(Dispatchers.Main) {
             lateinit var jsi: NekoJSInterface
             if (map.containsKey(plgId)) {

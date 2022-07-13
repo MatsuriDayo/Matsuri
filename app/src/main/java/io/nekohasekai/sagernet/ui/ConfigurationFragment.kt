@@ -171,7 +171,6 @@ class ConfigurationFragment @JvmOverloads constructor(
         }.attach()
 
         toolbar.setOnClickListener {
-
             val fragment = getCurrentGroupFragment()
 
             if (fragment != null) {
@@ -1058,13 +1057,12 @@ class ConfigurationFragment @JvmOverloads constructor(
 
         lateinit var proxyGroup: ProxyGroup
         var selected = false
-        var scrolled = false
 
         override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?,
-        ): View? {
+        ): View {
             return LayoutProfileListBinding.inflate(inflater).root
         }
 
@@ -1092,10 +1090,6 @@ class ConfigurationFragment @JvmOverloads constructor(
             get() {
                 return DataStore.serviceState.let { it.canStop || it == BaseService.State.Stopped }
             }
-
-        private fun isProfileEditable(id: Long): Boolean {
-            return DataStore.serviceState.connected || id != DataStore.selectedProxy
-        }
 
         lateinit var layoutManager: LinearLayoutManager
         lateinit var configurationListView: RecyclerView
@@ -1506,8 +1500,6 @@ class ConfigurationFragment @JvmOverloads constructor(
                         (requireActivity() as SelectCallback).returnProfile(proxyEntity.id)
                     }
                 } else {
-                    val pa = activity as MainActivity
-
                     view.setOnClickListener {
                         runOnDefaultDispatcher {
                             var update: Boolean

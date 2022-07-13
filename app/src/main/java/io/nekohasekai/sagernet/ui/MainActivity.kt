@@ -52,9 +52,6 @@ import io.nekohasekai.sagernet.group.GroupUpdater
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.plugin.PluginManager
 import io.nekohasekai.sagernet.widget.ListHolderListener
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import libcore.Libcore
 import moe.matsuri.nya.utils.Util
@@ -173,7 +170,7 @@ class MainActivity : ThemedActivity(),
         if (name.isNullOrBlank()) return
 
         group.name = group.name.takeIf { !it.isNullOrBlank() }
-            ?: "Subscription #" + System.currentTimeMillis()
+            ?: ("Subscription #" + System.currentTimeMillis())
 
         onMainDispatcher {
 
@@ -235,7 +232,8 @@ class MainActivity : ThemedActivity(),
     }
 
     override fun missingPlugin(profileName: String, pluginName: String) {
-        val pluginId = if (pluginName.startsWith("shadowsocks-")) pluginName.substringAfter("shadowsocks-") else pluginName
+        val pluginId =
+            if (pluginName.startsWith("shadowsocks-")) pluginName.substringAfter("shadowsocks-") else pluginName
         val pluginEntity = PluginEntry.find(pluginName)
         val name = if (pluginEntity == null) pluginName else getString(pluginEntity.nameId)
 
@@ -283,7 +281,6 @@ class MainActivity : ThemedActivity(),
         var index = 0
         var playIndex = -1
         var fdroidIndex = -1
-        var downloadIndex = -1
 
         val items = mutableListOf<String>()
         if (pluginEntry.downloadSource.playStore) {
@@ -296,7 +293,7 @@ class MainActivity : ThemedActivity(),
         }
 
         items.add(getString(R.string.download))
-        downloadIndex = index
+        val downloadIndex = index
 
         MaterialAlertDialogBuilder(this).setTitle(pluginEntry.name)
             .setItems(items.toTypedArray()) { _, which ->
@@ -374,8 +371,6 @@ class MainActivity : ThemedActivity(),
         }
     }
 
-    var doStop = false
-
     private fun changeState(
         state: BaseService.State,
         msg: String? = null,
@@ -407,6 +402,7 @@ class MainActivity : ThemedActivity(),
             if (binding.fab.isShown) {
                 anchorView = binding.fab
             }
+            // TODO
         }
     }
 
@@ -512,7 +508,8 @@ class MainActivity : ThemedActivity(),
         if (super.onKeyDown(keyCode, event)) return true
         if (binding.drawerLayout.isOpen) return false
 
-        val fragment = supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment
+        val fragment =
+            supportFragmentManager.findFragmentById(R.id.fragment_holder) as? ToolbarFragment
         return fragment != null && fragment.onKeyDown(keyCode, event)
     }
 

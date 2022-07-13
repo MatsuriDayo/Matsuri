@@ -1,24 +1,3 @@
-/******************************************************************************
- *                                                                            *
- * Copyright (C) 2021 by nekohasekai <contact-sagernet@sekai.icu>             *
- * Copyright (C) 2021 by Max Lv <max.c.lv@gmail.com>                          *
- * Copyright (C) 2021 by Mygod Studio <contact-shadowsocks-android@mygod.be>  *
- *                                                                            *
- * This program is free software: you can redistribute it and/or modify       *
- * it under the terms of the GNU General Public License as published by       *
- * the Free Software Foundation, either version 3 of the License, or          *
- *  (at your option) any later version.                                       *
- *                                                                            *
- * This program is distributed in the hope that it will be useful,            *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of             *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              *
- * GNU General Public License for more details.                               *
- *                                                                            *
- * You should have received a copy of the GNU General Public License          *
- * along with this program. If not, see <http://www.gnu.org/licenses/>.       *
- *                                                                            *
- ******************************************************************************/
-
 package io.nekohasekai.sagernet.widget
 
 import android.content.Context
@@ -36,10 +15,8 @@ import androidx.vectordrawable.graphics.drawable.Animatable2Compat
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.progressindicator.BaseProgressIndicator
-import com.google.android.material.progressindicator.DeterminateDrawable
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.bg.BaseService
-import io.nekohasekai.sagernet.ktx.getColorAttr
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import java.util.*
@@ -47,15 +24,9 @@ import java.util.*
 class ServiceButton @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0,
+    defStyleAttr: Int = 0
 ) :
     FloatingActionButton(context, attrs, defStyleAttr), DynamicAnimation.OnAnimationEndListener {
-    companion object {
-        private val springAnimator by lazy {
-            DeterminateDrawable::class.java.getDeclaredField("springAnimation")
-                .apply { isAccessible = true }
-        }
-    }
 
     private val callback = object : Animatable2Compat.AnimationCallback() {
         override fun onAnimationEnd(drawable: Drawable) {
@@ -71,7 +42,7 @@ class ServiceButton @JvmOverloads constructor(
 
     private inner class AnimatedState(
         @DrawableRes resId: Int,
-        private val onStart: BaseProgressIndicator<*>.() -> Unit = { hideProgress() },
+        private val onStart: BaseProgressIndicator<*>.() -> Unit = { hideProgress() }
     ) {
         val icon: AnimatedVectorDrawableCompat =
             AnimatedVectorDrawableCompat.create(context, resId)!!.apply {
@@ -80,7 +51,6 @@ class ServiceButton @JvmOverloads constructor(
 
         fun start() {
             setImageDrawable(icon)
-            setColorFilter(context.getColorAttr(R.attr.whiteOrTextPrimary))
             icon.start()
             progress.onStart()
         }
@@ -93,7 +63,7 @@ class ServiceButton @JvmOverloads constructor(
         AnimatedState(R.drawable.ic_service_connecting) {
             hideProgress()
             delayedAnimation = (context as LifecycleOwner).lifecycleScope.launchWhenStarted {
-                delay(context.resources.getInteger(android.R.integer.config_mediumAnimTime) + 100L)
+                delay(context.resources.getInteger(android.R.integer.config_mediumAnimTime) + 1000L)
                 isIndeterminate = true
                 show()
             }
@@ -113,12 +83,12 @@ class ServiceButton @JvmOverloads constructor(
     private lateinit var progress: BaseProgressIndicator<*>
     fun initProgress(progress: BaseProgressIndicator<*>) {
         this.progress = progress
-        (springAnimator.get(progress.progressDrawable) as DynamicAnimation<*>).addEndListener(this)
+        progress.progressDrawable?.addSpringAnimationEndListener(this)
     }
 
     override fun onAnimationEnd(
         animation: DynamicAnimation<out DynamicAnimation<*>>?, canceled: Boolean, value: Float,
-        velocity: Float,
+        velocity: Float
     ) {
         if (!canceled) progress.hide()
     }
@@ -130,7 +100,10 @@ class ServiceButton @JvmOverloads constructor(
 
     override fun onCreateDrawableState(extraSpace: Int): IntArray {
         val drawableState = super.onCreateDrawableState(extraSpace + 1)
-        if (checked) View.mergeDrawableStates(drawableState, intArrayOf(android.R.attr.state_checked))
+        if (checked) View.mergeDrawableStates(
+            drawableState,
+            intArrayOf(android.R.attr.state_checked)
+        )
         return drawableState
     }
 
@@ -150,8 +123,10 @@ class ServiceButton @JvmOverloads constructor(
         TooltipCompat.setTooltipText(this, description)
         val enabled = state.canStop || state == BaseService.State.Stopped
         isEnabled = enabled
-        if (Build.VERSION.SDK_INT >= 24) pointerIcon = PointerIcon.getSystemIcon(context,
-            if (enabled) PointerIcon.TYPE_HAND else PointerIcon.TYPE_WAIT)
+        if (Build.VERSION.SDK_INT >= 24) pointerIcon = PointerIcon.getSystemIcon(
+            context,
+            if (enabled) PointerIcon.TYPE_HAND else PointerIcon.TYPE_WAIT
+        )
     }
 
     private fun changeState(icon: AnimatedState, animate: Boolean) {

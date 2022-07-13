@@ -324,7 +324,7 @@ object RawUpdater : GroupUpdater() {
                                         when (wsOpt.key.lowercase()) {
                                             "headers" -> for (wsHeader in (opt.value as Map<String, Any>)) {
                                                 when (wsHeader.key.lowercase()) {
-                                                    "host" -> bean.host = wsHeader.value?.toString()
+                                                    "host" -> bean.host = wsHeader.value.toString()
                                                 }
                                             }
                                             "path" -> {
@@ -585,7 +585,7 @@ object RawUpdater : GroupUpdater() {
                         } else for (user in it.users) proxies.add(httpBeanNext.clone().apply {
                             username = user.user
                             password = user.pass
-                            name = tag ?: displayName() + " - $username"
+                            name = tag ?: (displayName() + " - $username")
                         })
                     }
                 }
@@ -611,7 +611,7 @@ object RawUpdater : GroupUpdater() {
                         } else for (user in it.users) proxies.add(socksBeanNext.clone().apply {
                             username = user.user
                             password = user.pass
-                            name = tag ?: displayName() + " - $username"
+                            name = tag ?: (displayName() + " - $username")
                         })
                     }
                 }
@@ -728,7 +728,6 @@ object RawUpdater : GroupUpdater() {
                         }
                     }
                     if (protocol == "vmess") {
-                        v2rayBean as VMessBean
                         (settings.value as? V2RayConfig.VMessOutboundConfigurationObject)?.vnext?.forEach {
                             val vmessBean = v2rayBean.clone().apply {
                                 serverAddress = it.address
@@ -739,7 +738,8 @@ object RawUpdater : GroupUpdater() {
                                     uuid = user.id
                                     encryption = user.security
                                     alterId = user.alterId
-                                    name = tag ?: displayName() + " - ${user.security} - ${user.id}"
+                                    name =
+                                        tag ?: (displayName() + " - ${user.security} - ${user.id}")
                                 })
                             }
                         }
