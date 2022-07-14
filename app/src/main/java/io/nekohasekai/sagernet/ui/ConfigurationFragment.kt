@@ -38,6 +38,7 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.PopupMenu
+import androidx.appcompat.widget.SearchView
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
@@ -100,6 +101,7 @@ class ConfigurationFragment @JvmOverloads constructor(
 ) : ToolbarFragment(R.layout.layout_group_list),
     PopupMenu.OnMenuItemClickListener,
     Toolbar.OnMenuItemClickListener,
+    SearchView.OnQueryTextListener,
     OnPreferenceDataStoreChangeListener {
 
     interface SelectCallback {
@@ -127,6 +129,13 @@ class ConfigurationFragment @JvmOverloads constructor(
         }
     }
 
+    override fun onQueryTextChange(query: String): Boolean {
+        getCurrentGroupFragment()?.adapter?.filter(query)
+        return false
+    }
+
+    override fun onQueryTextSubmit(query: String): Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -141,6 +150,7 @@ class ConfigurationFragment @JvmOverloads constructor(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         if (!select) {
             toolbar.inflateMenu(R.menu.add_profile_menu)
             toolbar.setOnMenuItemClickListener(this)
@@ -151,6 +161,9 @@ class ConfigurationFragment @JvmOverloads constructor(
                 requireActivity().finish()
             }
         }
+
+        val searchView = toolbar.findViewById<SearchView>(R.id.action_search)
+        searchView.setOnQueryTextListener(this)
 
         groupPager = view.findViewById(R.id.group_pager)
         tabLayout = view.findViewById(R.id.group_tab)
@@ -1291,6 +1304,17 @@ class ConfigurationFragment @JvmOverloads constructor(
             }
 
             private val updated = HashSet<ProxyEntity>()
+
+            fun filter(name: String) {
+                configurationIdList.clear()
+                val lower = name.lowercase()
+                configurationIdList.addAll(configurationList.filter {
+                    it.value.displayName().lowercase().contains(lower) ||
+                            it.value.displayType().lowercase().contains(lower) ||
+                            it.value.displayAddress().lowercase().contains(lower)
+                }.keys)
+                notifyDataSetChanged()
+            }
 
             fun move(from: Int, to: Int) {
                 val first = getItemAt(from)
