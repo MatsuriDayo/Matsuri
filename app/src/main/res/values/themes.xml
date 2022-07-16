@@ -135,8 +135,8 @@
     <style name="Theme.SagerNet.Pink_SSR">
         <item name="colorPrimary">@color/color_pink_ssr</item>
         <item name="colorPrimaryDark">@color/color_pink_ssr</item>
-        <item name="colorAccent">@color/color_pink_ssr</item>
-        <item name="colorMaterial100">@color/color_pink_ssr</item>
+        <item name="colorAccent">@color/material_pink_accent_200</item>
+        <item name="colorMaterial100">@color/material_pink_accent_100</item>
         <item name="colorMaterial300">@color/color_pink_ssr</item>
     </style>
 
@@ -416,8 +416,8 @@
     <style name="Theme.SagerNet.Dialog.Pink_SSR">
         <item name="colorPrimary">@color/color_pink_ssr</item>
         <item name="colorPrimaryDark">@color/color_pink_ssr</item>
-        <item name="colorAccent">@color/color_pink_ssr</item>
-        <item name="colorMaterial100">@color/color_pink_ssr</item>
+        <item name="colorAccent">@color/material_pink_accent_200</item>
+        <item name="colorMaterial100">@color/material_pink_accent_100</item>
         <item name="colorMaterial300">@color/color_pink_ssr</item>
     </style>
 

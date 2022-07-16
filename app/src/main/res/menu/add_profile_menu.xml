@@ -2,6 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_search"
+        android:title="@android:string/search_go"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_add"
         android:icon="@drawable/ic_action_note_add"
         android:title="@string/add_profile"
         app:showAsAction="ifRoom">
@@ -62,6 +69,7 @@
     </item>
 
     <item
+        android:id="@+id/action_misc"
         android:icon="@drawable/ic_baseline_more_vert_24"
         android:title=""
         app:showAsAction="always">
@@ -125,12 +133,5 @@
 
         </menu>
     </item>
-
-    <item
-        android:id="@+id/action_search"
-        android:icon="@drawable/ic_baseline_manage_search_24"
-        android:title="@android:string/search_go"
-        app:actionViewClass="androidx.appcompat.widget.SearchView"
-        app:showAsAction="always" />
 
 </menu>

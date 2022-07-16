@@ -163,7 +163,10 @@ class ConfigurationFragment @JvmOverloads constructor(
         }
 
         val searchView = toolbar.findViewById<SearchView>(R.id.action_search)
-        searchView.setOnQueryTextListener(this)
+        if (searchView != null) {
+            searchView.setOnQueryTextListener(this)
+            searchView.maxWidth = Int.MAX_VALUE
+        }
 
         groupPager = view.findViewById(R.id.group_pager)
         tabLayout = view.findViewById(R.id.group_tab)
