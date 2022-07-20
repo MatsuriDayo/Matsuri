@@ -51,7 +51,6 @@ const val TAG_SOCKS = "socks"
 const val TAG_HTTP = "http"
 const val TAG_TRANS = "trans"
 
-const val TAG_AGENT = "proxy"
 const val TAG_DIRECT = "direct"
 const val TAG_BYPASS = "bypass"
 const val TAG_BLOCK = "block"
@@ -72,7 +71,6 @@ class V2rayBuildResult(
     var outboundTagsCurrent: List<String>,
     var outboundTagsAll: Map<String, ProxyEntity>,
     var bypassTag: String,
-    var observatoryTags: Set<String>, // DELETED
     val dumpUid: Boolean,
     val alerts: List<Pair<Int, String>>,
     val tryDomains: List<String>,
@@ -114,6 +112,7 @@ fun buildV2RayConfig(
     val uidListDNSDirect = mutableListOf<Int>()
     val domainListDNSRemote = mutableListOf<String>()
     val domainListDNSDirect = mutableListOf<String>()
+    val bypassDNSBeans = hashSetOf<AbstractBean>()
 
     val allowAccess = DataStore.allowAccess
     val bind = if (!forTest && allowAccess) "0.0.0.0" else LOCALHOST
@@ -329,7 +328,7 @@ fun buildV2RayConfig(
 
         // returns outbound tag
         fun buildChain(
-            chainTag: String, profileList: List<ProxyEntity>
+            chainId: Long, profileList: List<ProxyEntity>
         ): String {
             lateinit var currentOutbound: OutboundObject
             lateinit var pastOutbound: OutboundObject
@@ -339,9 +338,9 @@ fun buildV2RayConfig(
             indexMap.add(IndexEntity(chainMap))
             val chainOutbounds = ArrayList<OutboundObject>()
 
-            // chainOutboundTag: v2ray outbound tag for this chain
-            var chainOutboundTag = chainTag
-            var muxApplied = false // nekobean 的算吗？
+            // chainTag: v2ray outbound tag for this chain
+            var chainTag = "c-$chainId"
+            var muxApplied = false
 
             // v2sekai's outbound domainStrategy
             fun genDomainStrategy(noAsIs: Boolean): String {
@@ -361,20 +360,19 @@ fun buildV2RayConfig(
                 currentOutbound = OutboundObject()
 
                 // tagOut: v2ray outbound tag for a profile
-                // profile1 (in)  tag=global-proxy-(id)
-                // profile2       tag=proxy-(id)
-                // profile3 (out) tag=proxy / proxy-(chainID)
-                // "proxy" is chainTag
-                var tagOut: String = if (index == 0) chainTag else "$chainTag-${proxyEntity.id}"
+                // profile2 (in) (global)   tag g-(id)
+                // profile1                 tag (chainTag)-(id)
+                // profile0 (out)           tag (chainTag)-(id) / single: chainTag=g-(id)
+                var tagOut = "$chainTag-${proxyEntity.id}"
 
                 // needGlobal: can only contain one?
                 var needGlobal = false
 
                 // first profile set as global
                 if (index == profileList.lastIndex) {
-                    bean.isFirstProfile = true
                     needGlobal = true
-                    if (index != 0) tagOut = "global-" + proxyEntity.id
+                    tagOut = "g-" + proxyEntity.id
+                    bypassDNSBeans += proxyEntity.requireBean()
                 }
 
                 // chain rules
@@ -394,11 +392,9 @@ fun buildV2RayConfig(
                     }
                 } else {
                     // index == 0 means last profile in chain / not chain
-                    chainOutboundTag = tagOut
+                    chainTag = tagOut
                     outboundTags.add(tagOut)
-                    if (chainTag == TAG_AGENT) {
-                        outboundTagsCurrent.add(tagOut)
-                    }
+                    outboundTagsCurrent.add(tagOut)
                 }
 
                 if (needGlobal) {
@@ -784,7 +780,7 @@ fun buildV2RayConfig(
                 // For external proxy software, their traffic must goes to v2ray-core to use protected fd.
                 if (bean.canMapping() && proxyEntity.needExternal()) {
                     // With ss protect, don't use mapping
-                    val expertHysteria = isExpertFlavor && bean.isFirstProfile && bean is HysteriaBean
+                    val expertHysteria = isExpertFlavor && index == profileList.lastIndex && bean is HysteriaBean
                     if (!expertHysteria) {
                         val mappingPort = mkPort()
                         bean.finalAddress = LOCALHOST
@@ -805,7 +801,7 @@ fun buildV2RayConfig(
                             pastInboundTag = tag
 
                             // no chain rule and not outbound, so need to set to direct
-                            if (bean.isFirstProfile) {
+                            if (index == profileList.lastIndex) {
                                 routing.rules.add(RoutingObject.RuleObject().apply {
                                     type = "field"
                                     inboundTag = listOf(tag)
@@ -822,14 +818,13 @@ fun buildV2RayConfig(
                 pastEntity = proxyEntity
             }
 
-            return chainOutboundTag
-
+            return chainTag
         }
 
-        val tagProxy = buildChain(TAG_AGENT, proxies)
+        val tagProxy = buildChain(0, proxies)
         val tagMap = mutableMapOf<Long, String>()
         extraProxies.forEach { (key, entities) ->
-            tagMap[key] = buildChain("$TAG_AGENT-$key", entities)
+            tagMap[key] = buildChain(key, entities)
         }
 
         val notVpn = DataStore.serviceMode != Key.MODE_VPN
@@ -1013,15 +1008,12 @@ fun buildV2RayConfig(
         val directLookupDomain = HashSet<String>()
 
         // Bypass Lookup for the first profile
-        (proxies + extraProxies.values.flatten()).filter { it.requireBean().isFirstProfile }
-            .forEach {
-                it.requireBean().apply {
-                    if (!serverAddress.isIpAddress()) {
-                        directLookupDomain.add("full:$serverAddress")
-                        if (DataStore.enhanceDomain) tryDomains.add(serverAddress)
-                    }
-                }
+        bypassDNSBeans.forEach {
+            if (!it.serverAddress.isIpAddress()) {
+                directLookupDomain.add("full:${it.serverAddress}")
+                if (DataStore.enhanceDomain) tryDomains.add(it.serverAddress)
             }
+        }
 
         remoteDns.forEach {
             var address = it
@@ -1087,7 +1079,6 @@ fun buildV2RayConfig(
             outboundTagsCurrent,
             outboundTagsAll,
             TAG_BYPASS,
-            it.observatory?.subjectSelector ?: HashSet(),
             dumpUid,
             alerts,
             tryDomains

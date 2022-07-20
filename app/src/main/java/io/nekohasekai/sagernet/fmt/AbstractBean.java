@@ -42,7 +42,6 @@ public abstract class AbstractBean extends Serializable {
     public Integer serverPort;
     public String name;
 
-    public transient boolean isFirstProfile = false;
     public transient String finalAddress;
     public transient int finalPort;
 
