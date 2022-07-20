@@ -1309,6 +1309,10 @@ class ConfigurationFragment @JvmOverloads constructor(
             private val updated = HashSet<ProxyEntity>()
 
             fun filter(name: String) {
+                if (name.isEmpty()) {
+                    reloadProfiles()
+                    return
+                }
                 configurationIdList.clear()
                 val lower = name.lowercase()
                 configurationIdList.addAll(configurationList.filter {
