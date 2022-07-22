@@ -200,7 +200,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     // protocol
 
-    var muxProtocols by configurationStore.stringSet(Key.MUX_PROTOCOLS) { setOf("vmess") }
+    var muxProtocols by configurationStore.stringSet(Key.MUX_PROTOCOLS)
     var muxConcurrency by configurationStore.stringToInt(Key.MUX_CONCURRENCY) { 8 }
 
     // cache
