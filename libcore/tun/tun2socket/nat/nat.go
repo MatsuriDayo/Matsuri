@@ -140,6 +140,24 @@ func Start(
 					continue
 				}
 				udp.handleUDPPacket(ip, u)
+			case tcpip.ICMP:
+				i := tcpip.ICMPPacket(ip.Payload())
+
+				if i.Type() != tcpip.ICMPTypePingRequest || i.Code() != 0 {
+					continue
+				}
+
+				i.SetType(tcpip.ICMPTypePingResponse)
+
+				source := ip.SourceIP()
+				destination := ip.DestinationIP()
+				ip.SetSourceIP(destination)
+				ip.SetDestinationIP(source)
+
+				ip.ResetChecksum()
+				i.ResetChecksum()
+
+				_, _ = device.Write(raw)
 			}
 		}
 	}()

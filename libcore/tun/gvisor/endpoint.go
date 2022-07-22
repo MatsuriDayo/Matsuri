@@ -38,7 +38,7 @@ func newRwEndpoint(dev int32, mtu int32) (*rwEndpoint, error) {
 }
 
 func (e *rwEndpoint) InjectInbound(networkProtocol tcpip.NetworkProtocolNumber, pkt *stack.PacketBuffer) {
-	go e.dispatcher.DeliverNetworkPacket("", "", networkProtocol, pkt)
+	go e.dispatcher.DeliverNetworkPacket(networkProtocol, pkt)
 }
 
 func (e *rwEndpoint) InjectOutbound(dest tcpip.Address, packet []byte) tcpip.Error {
@@ -80,94 +80,25 @@ func (e *rwEndpoint) dispatchLoop(inboundDispatcher *readVDispatcher) tcpip.Erro
 	}
 }
 
-// WritePacket writes packet back into io.ReadWriter.
-func (e *rwEndpoint) WritePacket(_ stack.RouteInfo, _ tcpip.NetworkProtocolNumber, pkt *stack.PacketBuffer) tcpip.Error {
-	return e.writePacket(pkt)
-}
-
-func (e *rwEndpoint) writePacket(pkt *stack.PacketBuffer) tcpip.Error {
-	views := pkt.Views()
-	numIovecs := len(views)
-	if numIovecs > rawfile.MaxIovs {
-		numIovecs = rawfile.MaxIovs
-	}
-	// Allocate small iovec arrays on the stack.
-	var iovecsArr [8]unix.Iovec
-	iovecs := iovecsArr[:0]
-	if numIovecs > len(iovecsArr) {
-		iovecs = make([]unix.Iovec, 0, numIovecs)
-	}
-	for _, v := range views {
-		iovecs = rawfile.AppendIovecFromBytes(iovecs, v, numIovecs)
-	}
-	return rawfile.NonBlockingWriteIovec(e.fd, iovecs)
-}
-
-func (e *rwEndpoint) sendBatch(batchFD int, pkts []*stack.PacketBuffer) (int, tcpip.Error) {
-	// Send a batch of packets through batchFD.
-	mmsgHdrsStorage := make([]rawfile.MMsgHdr, 0, len(pkts))
-	packets := 0
-	for packets < len(pkts) {
-		mmsgHdrs := mmsgHdrsStorage
-		batch := pkts[packets:]
-		for _, pkt := range batch {
-			views := pkt.Views()
-			numIovecs := len(views)
-			if numIovecs > rawfile.MaxIovs {
-				numIovecs = rawfile.MaxIovs
-			}
-
-			// We can't easily allocate iovec arrays on the stack here since
-			// they will escape this loop iteration via mmsgHdrs.
-			iovecs := make([]unix.Iovec, 0, numIovecs)
-			for _, v := range views {
-				iovecs = rawfile.AppendIovecFromBytes(iovecs, v, numIovecs)
-			}
-
-			var mmsgHdr rawfile.MMsgHdr
-			mmsgHdr.Msg.Iov = &iovecs[0]
-			mmsgHdr.Msg.SetIovlen(len(iovecs))
-			mmsgHdrs = append(mmsgHdrs, mmsgHdr)
-		}
-
-		if len(mmsgHdrs) == 0 {
-			// We can't fit batch[0] into a mmsghdr while staying under
-			// e.maxSyscallHeaderBytes. Use WritePacket, which will avoid the
-			// mmsghdr (by using writev) and re-buffer iovecs more aggressively
-			// if necessary (by using e.writevMaxIovs instead of
-			// rawfile.MaxIovs).
-			pkt := batch[0]
-			if err := e.WritePacket(pkt.EgressRoute, pkt.NetworkProtocolNumber, pkt); err != nil {
-				return packets, err
-			}
-			packets++
-		} else {
-			for len(mmsgHdrs) > 0 {
-				sent, err := rawfile.NonBlockingSendMMsg(batchFD, mmsgHdrs)
-				if err != nil {
-					return packets, err
-				}
-				packets += sent
-				mmsgHdrs = mmsgHdrs[sent:]
-			}
-		}
-	}
-
-	return packets, nil
-}
-
 // WritePackets writes packets back into io.ReadWriter.
-func (e *rwEndpoint) WritePackets(_ stack.RouteInfo, pkts stack.PacketBufferList, _ tcpip.NetworkProtocolNumber) (int, tcpip.Error) {
+func (e *rwEndpoint) WritePackets(pkts stack.PacketBufferList) (int, tcpip.Error) {
+	// Preallocate to avoid repeated reallocation as we append to batch.
+	// batchSz is 47 because when SWGSO is in use then a single 65KB TCP
+	// segment can get split into 46 segments of 1420 bytes and a single 216
+	// byte segment.
 	const batchSz = 47
-	batch := make([]*stack.PacketBuffer, 0, batchSz)
+	batch := make([]unix.Iovec, 0, batchSz)
 	for pkt := pkts.Front(); pkt != nil; pkt = pkt.Next() {
-		batch = append(batch, pkt)
+		views := pkt.Views()
+		for _, v := range views {
+			batch = rawfile.AppendIovecFromBytes(batch, v, len(views))
+		}
 	}
-	return e.sendBatch(e.fd, batch)
-}
-
-func (e *rwEndpoint) WriteRawPacket(packetBuffer *stack.PacketBuffer) tcpip.Error {
-	return e.writePacket(packetBuffer)
+	err := rawfile.NonBlockingWriteIovec(e.fd, batch)
+	if err != nil {
+		return 0, err
+	}
+	return pkts.Len(), nil
 }
 
 // MTU implements stack.LinkEndpoint.MTU.
@@ -196,8 +127,7 @@ func (*rwEndpoint) ARPHardwareType() header.ARPHardwareType {
 	return header.ARPHardwareNone
 }
 
-// AddHeader implements stack.LinkEndpoint.AddHeader.
-func (e *rwEndpoint) AddHeader(tcpip.LinkAddress, tcpip.LinkAddress, tcpip.NetworkProtocolNumber, *stack.PacketBuffer) {
+func (e *rwEndpoint) AddHeader(*stack.PacketBuffer) {
 }
 
 // Wait implements stack.LinkEndpoint.Wait.

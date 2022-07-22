@@ -138,10 +138,7 @@ func (d *readVDispatcher) dispatch() (bool, tcpip.Error) {
 	})
 	defer pkt.DecRef()
 
-	var (
-		p             tcpip.NetworkProtocolNumber
-		remote, local tcpip.LinkAddress
-	)
+	var p tcpip.NetworkProtocolNumber
 
 	// We don't get any indication of what the packet is, so try to guess
 	// if it's an IPv4 or IPv6 packet.
@@ -159,7 +156,7 @@ func (d *readVDispatcher) dispatch() (bool, tcpip.Error) {
 		return true, nil
 	}
 
-	d.e.dispatcher.DeliverNetworkPacket(remote, local, p, pkt)
+	d.e.dispatcher.DeliverNetworkPacket(p, pkt)
 
 	return true, nil
 }

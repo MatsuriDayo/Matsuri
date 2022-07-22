@@ -9,6 +9,7 @@ import (
 	"libcore/tun"
 
 	"github.com/sirupsen/logrus"
+	"github.com/v2fly/v2ray-core/v5/common/buf"
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/header"
 	"gvisor.dev/gvisor/pkg/tcpip/link/sniffer"
@@ -98,6 +99,25 @@ func New(dev int32, mtu int32, handler tun.Handler, nicId tcpip.NICID, pcap bool
 			NIC:         nicId,
 		},
 	})
+
+	bufSize := buf.Size
+	s.SetTransportProtocolOption(tcp.ProtocolNumber, &tcpip.TCPReceiveBufferSizeRangeOption{
+		Min:     1,
+		Default: bufSize,
+		Max:     bufSize,
+	})
+	s.SetTransportProtocolOption(tcp.ProtocolNumber, &tcpip.TCPSendBufferSizeRangeOption{
+		Min:     1,
+		Default: bufSize,
+		Max:     bufSize,
+	})
+
+	sOpt := tcpip.TCPSACKEnabled(true)
+	s.SetTransportProtocolOption(tcp.ProtocolNumber, &sOpt)
+
+	mOpt := tcpip.TCPModerateReceiveBufferOption(true)
+	s.SetTransportProtocolOption(tcp.ProtocolNumber, &mOpt)
+
 	gTcpHandler(s, handler)
 	gUdpHandler(s, handler)
 	gMust(s.CreateNIC(nicId, endpoint))
