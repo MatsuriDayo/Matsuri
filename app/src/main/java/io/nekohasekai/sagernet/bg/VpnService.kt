@@ -292,7 +292,6 @@ class VpnService : BaseVpnService(),
             iPv6Mode = ipv6Mode
             implementation = DataStore.tunImplementation
             sniffing = DataStore.trafficSniffing
-            overrideDestination = DataStore.destinationOverride
             fakeDNS = DataStore.enableFakeDns
             debug = DataStore.enableLog
             dumpUID = data.proxy!!.config.dumpUid

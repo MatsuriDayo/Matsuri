@@ -249,7 +249,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
 
         val tunImplementation = findPreference<SimpleMenuPreference>(Key.TUN_IMPLEMENTATION)!!
-        val destinationOverride = findPreference<SwitchPreference>(Key.DESTINATION_OVERRIDE)!!
         val resolveDestination = findPreference<SwitchPreference>(Key.RESOLVE_DESTINATION)!!
         val enablePcap = findPreference<SwitchPreference>(Key.ENABLE_PCAP)!!
         val acquireWakeLock = findPreference<SwitchPreference>(Key.ACQUIRE_WAKE_LOCK)!!
@@ -281,7 +280,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
 
         appTrafficStatistics.onPreferenceChangeListener = reloadListener
         tunImplementation.onPreferenceChangeListener = reloadListener
-        destinationOverride.onPreferenceChangeListener = reloadListener
         resolveDestination.onPreferenceChangeListener = reloadListener
         acquireWakeLock.onPreferenceChangeListener = reloadListener
 

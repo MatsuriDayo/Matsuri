@@ -54,7 +54,6 @@ object Key {
 
     const val DOMAIN_STRATEGY = "domainStrategy"
     const val TRAFFIC_SNIFFING = "trafficSniffing"
-    const val DESTINATION_OVERRIDE = "destinationOverride"
     const val RESOLVE_DESTINATION = "resolveDestination"
 
     const val BYPASS_LAN = "bypassLan"

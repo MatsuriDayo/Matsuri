@@ -27,14 +27,13 @@ import (
 var _ tun.Handler = (*Tun2ray)(nil)
 
 type Tun2ray struct {
-	access              sync.Mutex
-	dev                 tun.Tun
-	v2ray               *V2RayInstance
-	udpTable            *natTable
-	fakedns             bool
-	sniffing            bool
-	overrideDestination bool
-	debug               bool
+	access   sync.Mutex
+	dev      tun.Tun
+	v2ray    *V2RayInstance
+	udpTable *natTable
+	fakedns  bool
+	sniffing bool
+	debug    bool
 
 	dumpUid      bool
 	trafficStats bool
@@ -43,21 +42,20 @@ type Tun2ray struct {
 }
 
 type TunConfig struct {
-	FileDescriptor      int32
-	MTU                 int32
-	V2Ray               *V2RayInstance
-	IPv6Mode            int32
-	Implementation      int32
-	Sniffing            bool
-	OverrideDestination bool
-	FakeDNS             bool
-	Debug               bool
-	DumpUID             bool
-	TrafficStats        bool
-	PCap                bool
-	ErrorHandler        ErrorHandler
-	LocalResolver       LocalResolver
-	FdProtector         Protector
+	FileDescriptor int32
+	MTU            int32
+	V2Ray          *V2RayInstance
+	IPv6Mode       int32
+	Implementation int32
+	Sniffing       bool
+	FakeDNS        bool
+	Debug          bool
+	DumpUID        bool
+	TrafficStats   bool
+	PCap           bool
+	ErrorHandler   ErrorHandler
+	LocalResolver  LocalResolver
+	FdProtector    Protector
 }
 
 type Protector interface {
@@ -75,14 +73,13 @@ type LocalResolver interface {
 
 func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
 	t := &Tun2ray{
-		v2ray:               config.V2Ray,
-		udpTable:            &natTable{},
-		sniffing:            config.Sniffing,
-		overrideDestination: config.OverrideDestination,
-		fakedns:             config.FakeDNS,
-		debug:               config.Debug,
-		dumpUid:             config.DumpUID,
-		trafficStats:        config.TrafficStats,
+		v2ray:        config.V2Ray,
+		udpTable:     &natTable{},
+		sniffing:     config.Sniffing,
+		fakedns:      config.FakeDNS,
+		debug:        config.Debug,
+		dumpUid:      config.DumpUID,
+		trafficStats: config.TrafficStats,
 	}
 
 	// setup resolver first
@@ -180,7 +177,7 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 		req := session.SniffingRequest{
 			Enabled:      true,
 			MetadataOnly: t.fakedns && !t.sniffing,
-			RouteOnly:    !t.overrideDestination,
+			RouteOnly:    true,
 		}
 		if t.sniffing && t.fakedns {
 			req.OverrideDestinationForProtocol = []string{"fakedns", "http", "tls"}
@@ -386,7 +383,7 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 				Enabled:                        true,
 				MetadataOnly:                   t.fakedns && !t.sniffing,
 				OverrideDestinationForProtocol: []string{"fakedns"},
-				RouteOnly:                      !t.overrideDestination,
+				RouteOnly:                      true,
 			},
 		})
 	}

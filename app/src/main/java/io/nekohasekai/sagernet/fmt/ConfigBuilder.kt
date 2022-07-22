@@ -129,7 +129,6 @@ fun buildV2RayConfig(
     val requireTransproxy = if (forTest) false else DataStore.requireTransproxy
     val ipv6Mode = if (forTest) IPv6Mode.ENABLE else DataStore.ipv6Mode
     val resolveDestination = DataStore.resolveDestination
-    val destinationOverride = DataStore.destinationOverride
     val trafficStatistics = !forTest && DataStore.profileTrafficStatistics
     val tryDomains = mutableListOf<String>()
     var dumpUid = false
@@ -217,7 +216,7 @@ fun buildV2RayConfig(
                         else -> listOf("http", "tls")
                     }
                     metadataOnly = useFakeDns && !trafficSniffing
-                    routeOnly = !destinationOverride
+                    routeOnly = true
                 }
             }
         })
@@ -241,7 +240,7 @@ fun buildV2RayConfig(
                             else -> listOf("http", "tls")
                         }
                         metadataOnly = useFakeDns && !trafficSniffing
-                        routeOnly = !destinationOverride
+                        routeOnly = true
                     }
                 }
             })
@@ -267,7 +266,7 @@ fun buildV2RayConfig(
                             else -> listOf("http", "tls")
                         }
                         metadataOnly = useFakeDns && !trafficSniffing
-                        routeOnly = !destinationOverride
+                        routeOnly = true
                     }
                 }
                 when (DataStore.transproxyMode) {
