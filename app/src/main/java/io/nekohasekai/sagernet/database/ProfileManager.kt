@@ -209,6 +209,14 @@ object ProfileManager {
             DataStore.rulesFirstCreate = true
             createRule(
                 RuleEntity(
+                    name = app.getString(R.string.route_opt_block_quic),
+                    port = "443",
+                    network = "udp",
+                    outbound = -2
+                )
+            )
+            createRule(
+                RuleEntity(
                     name = app.getString(R.string.route_opt_block_ads),
                     domains = "geosite:category-ads-all",
                     outbound = -2

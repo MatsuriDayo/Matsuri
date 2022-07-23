@@ -175,6 +175,7 @@
     <string name="route_block">屏蔽</string>
     <string name="route_opt_bypass_lan">绕过局域网地址</string>
     <string name="route_opt_block_ads">屏蔽广告</string>
+    <string name="route_opt_block_quic">屏蔽 QUIC</string>
     <string name="domain_strategy">域名解析策略</string>
     <string name="traffic_sniffing">启用流量探测</string>
     <string name="disable">禁用</string>
