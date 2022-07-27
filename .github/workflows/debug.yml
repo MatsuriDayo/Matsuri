@@ -69,6 +69,6 @@ jobs:
           BUILD_PLUGIN: none
         run: |
           echo "sdk.dir=${ANDROID_HOME}" > local.properties
-          echo "ndk.dir=${ANDROID_HOME}/ndk/23.1.7779620" >> local.properties
+          echo "ndk.dir=${ANDROID_HOME}/ndk/23.2.8568313" >> local.properties
           ./run init action library
           ./gradlew :app:assembleOssDebug

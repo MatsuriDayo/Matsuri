@@ -10,8 +10,8 @@ import (
 	"gvisor.dev/gvisor/pkg/tcpip"
 )
 
-func NewGvisor(dev int32, mtu int32, handler tun.Handler, nicId tcpip.NICID, pcap bool, pcapFile *os.File, snapLen uint32, ipv6Mode int32) (tun.Tun, error) {
-	return gvisor.New(dev, mtu, handler, nicId, pcap, pcapFile, snapLen, ipv6Mode)
+func NewGvisor(dev int32, mtu int32, handler tun.Handler, nicId int32, pcap bool, pcapFile *os.File, snapLen uint32, ipv6Mode int32) (tun.Tun, error) {
+	return gvisor.New(dev, mtu, handler, tcpip.NICID(nicId), pcap, pcapFile, snapLen, ipv6Mode)
 }
 
 func NewSystem(dev int32, mtu int32, handler tun.Handler, ipv6Mode int32, errorHandler func(err string)) (tun.Tun, error) {

@@ -6,33 +6,7 @@ export GOPATH=$golang/gopath
 export GOROOT=$golang/go
 export PATH=$golang/go/bin:$GOPATH/bin:$PATH
 
-if [ -z "$ANDROID_HOME" ]; then
-  if [ -d "$HOME/Android/Sdk" ]; then
-    export ANDROID_HOME="$HOME/Android/Sdk"
-  elif [ -d "$HOME/.local/lib/android/sdk" ]; then
-    export ANDROID_HOME="$HOME/.local/lib/android/sdk"
-  elif [ -d "$HOME/Library/Android/sdk" ]; then
-    export ANDROID_HOME="$HOME/Library/Android/sdk"
-  fi
-fi
-
-_NDK="$ANDROID_HOME/ndk/23.1.7779620"
-[ -f "$_NDK/source.properties" ] || _NDK="$ANDROID_NDK_HOME"
-[ -f "$_NDK/source.properties" ] || _NDK="$NDK"
-[ -f "$_NDK/source.properties" ] || _NDK="$ANDROID_HOME/ndk-bundle"
-
-if [ ! -f "$_NDK/source.properties" ]; then
-  read -p "Enter your NDK version: " NDK_VERSION
-  _NDK="$ANDROID_HOME/ndk/$NDK_VERSION"
-fi
-
-if [ ! -f "$_NDK/source.properties" ]; then
-  echo "Error: NDK not found."
-  exit 1
-fi
-
-export ANDROID_NDK_HOME=$_NDK
-export NDK=$_NDK
+source buildScript/init/env_ndk.sh
 
 if [[ "$OSTYPE" =~ ^darwin ]]; then
   export PROJECT=$PWD
