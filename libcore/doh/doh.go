@@ -15,7 +15,7 @@ import (
 )
 
 var dohs = []string{
-	"https://1.0.0.1/dns-query",
+	"https://8.8.8.8/dns-query",
 	"https://101.101.101.101/dns-query",
 	"https://8.8.4.4/resolve",
 	"https://[2606:4700:4700::1111]/dns-query",

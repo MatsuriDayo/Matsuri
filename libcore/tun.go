@@ -346,8 +346,8 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 			isDns = true
 		default:
 			if isDns {
-				// unknown dns traffic send as UDP to 1.0.0.1
-				destination2.Address = v2rayNet.ParseAddress("1.0.0.1")
+				// unknown dns traffic send as UDP to 8.8.8.8
+				destination2.Address = v2rayNet.ParseAddress("8.8.8.8")
 			}
 			isDns = false
 		}

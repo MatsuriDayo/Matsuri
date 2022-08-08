@@ -946,7 +946,7 @@ fun buildV2RayConfig(
                 settings = LazyInboundConfigurationObject(this,
                     DokodemoDoorInboundConfigurationObject().apply {
                         address = if (!remoteDns.first().isIpAddress()) {
-                            "1.0.0.1"
+                            "8.8.8.8"
                         } else {
                             remoteDns.first()
                         }

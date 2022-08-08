@@ -168,7 +168,7 @@
             app:summary="@string/enhance_resolve_server_domain_summary"
             app:title="@string/enhance_resolve_server_domain" />
         <moe.matsuri.nya.ui.DnsLinkPreference
-            app:defaultValue="https://1.0.0.1/dns-query"
+            app:defaultValue="https://8.8.8.8/dns-query"
             app:icon="@drawable/ic_action_dns"
             app:key="remoteDns"
             app:title="@string/remote_dns"

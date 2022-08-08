@@ -119,7 +119,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var speedInterval by configurationStore.stringToInt(Key.SPEED_INTERVAL)
 
     var enhanceDomain by configurationStore.boolean(Key.ENHANCE_RESOLVE_SERVER_DOMAIN)
-    var remoteDns by configurationStore.string(Key.REMOTE_DNS) { "https://1.0.0.1/dns-query" }
+    var remoteDns by configurationStore.string(Key.REMOTE_DNS) { "https://8.8.8.8/dns-query" }
     var directDns by configurationStore.string(Key.DIRECT_DNS) { "https+local://223.5.5.5/dns-query" }
     var directDnsUseSystem by configurationStore.boolean(Key.DIRECT_DNS_USE_SYSTEM)
     var enableDnsRouting by configurationStore.boolean(Key.ENABLE_DNS_ROUTING) { true }
