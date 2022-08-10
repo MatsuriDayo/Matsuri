@@ -119,9 +119,6 @@ class GuardedProcessPool(private val onFatal: suspend (IOException) -> Unit) : C
 
     @MainThread
     fun start(cmd: List<String>,env: MutableMap<String,String> = mutableMapOf(), onRestartCallback: (suspend () -> Unit)? = null) {
-        if (!env.containsKey("SSL_CERT_FILE")) {
-            env["SSL_CERT_FILE"] = SagerNet.application.filesDir.absolutePath + "/ca.pem"
-        }
         Logs.i("start process: ${Commandline.toString(cmd)}")
         Guard(cmd, env).apply {
             start() // if start fails, IOException will be thrown directly

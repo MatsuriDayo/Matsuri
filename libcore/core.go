@@ -1,19 +1,13 @@
 package libcore
 
 import (
-	"crypto/x509"
 	"fmt"
-	"io/ioutil"
 	"libcore/device"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
-	_ "unsafe"
 )
-
-//go:linkname systemRoots crypto/x509.systemRoots
-var systemRoots *x509.CertPool
 
 func Setenv(key, value string) error {
 	return os.Setenv(key, value)
@@ -72,12 +66,6 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 			outdated = "Wrong system time! 系统时间错误！"
 		}
 
-		// Setup CA Certs
-		x509.SystemCertPool()
-		roots := x509.NewCertPool()
-		roots.AppendCertsFromPEM([]byte(mozillaCA))
-		systemRoots = roots
-
 		// Extract assets
 		if isBgProcess {
 			extractV2RayAssets(useOfficial)
@@ -89,20 +77,4 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 	}
 
 	device.AutoGoMaxProcs()
-
-	// CA for other programs
-	go func() {
-		defer initCoreDefer()
-		f, err := os.OpenFile(filepath.Join(internalAssets, "ca.pem"), os.O_CREATE|os.O_RDWR, 0644)
-		if err != nil {
-			ForceLog("open ca.pem: " + err.Error())
-		} else {
-			if b, _ := ioutil.ReadAll(f); b == nil || string(b) != mozillaCA {
-				f.Truncate(0)
-				f.Seek(0, 0)
-				f.Write([]byte(mozillaCA))
-			}
-			f.Close()
-		}
-	}()
 }

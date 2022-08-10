@@ -18,7 +18,7 @@
             app:title="@string/server_port"
             app:useSimpleSummaryProvider="true" />
         <com.takisoft.preferencex.SimpleMenuPreference
-            app:entries="@array/enc_method_entry"
+            app:entries="@array/enc_method_value"
             app:entryValues="@array/enc_method_value"
             app:icon="@drawable/ic_notification_enhanced_encryption"
             app:key="serverMethod"

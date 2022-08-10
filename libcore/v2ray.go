@@ -298,22 +298,18 @@ func ListV2rayConnections() string {
 					ID    uint32
 					Dest  string
 					RDest string
+					Uid   uint32
 					Start int64
 					End   int64
-					Uid   uint32
 					Tag   string
 				}{
-					ID:    c2.ID(),
-					Dest:  c2.Dest.String(),
-					Start: c2.StartTime,
-					End:   c2.EndTime,
-					Tag:   c2.Tag,
-				}
-				if c2.Inbound != nil {
-					item.Uid = c2.Inbound.Uid
-				}
-				if c2.RouteDest.IsValid() {
-					item.RDest = c2.RouteDest.String()
+					c2.ID(),
+					c2.Dest,
+					c2.RouteDest,
+					c2.InboundUid,
+					c2.StartTime,
+					c2.EndTime,
+					c2.Tag,
 				}
 				list2 = append(list2, item)
 			}
