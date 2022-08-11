@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"libcore/protect"
 	"net"
 	"net/http"
 	"strconv"
@@ -93,15 +92,17 @@ func manyWorker(ctx context.Context, domain string, queryType int, in chan strin
 	}
 }
 
-var dialer = &protect.ProtectedDialer{}
 var client = &http.Client{
 	Transport: &http.Transport{
-		DialContext:           dialer.DialContext,
 		IdleConnTimeout:       5 * time.Second,
 		TLSHandshakeTimeout:   5 * time.Second,
 		ExpectContinueTimeout: 5 * time.Second,
 		ResponseHeaderTimeout: 5 * time.Second,
 	},
+}
+
+func SetDialContext(f func(ctx context.Context, network, addr string) (net.Conn, error)) {
+	client.Transport.(*http.Transport).DialContext = f
 }
 
 func lookupDoH(ctx context.Context, doh, domain string, queryType int) interface{} {

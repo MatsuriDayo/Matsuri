@@ -5,30 +5,22 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"libcore/doh"
-	"libcore/protect"
 	"log"
-	gonet "net"
 	"sort"
-	"strconv"
 	"strings"
 	"sync"
-	"time"
+	"sync/atomic"
 	"unsafe"
 
 	core "github.com/v2fly/v2ray-core/v5"
 	"github.com/v2fly/v2ray-core/v5/app/dispatcher"
 	"github.com/v2fly/v2ray-core/v5/common/buf"
 	"github.com/v2fly/v2ray-core/v5/common/net"
-	"github.com/v2fly/v2ray-core/v5/features/dns"
 	dns_feature "github.com/v2fly/v2ray-core/v5/features/dns"
-	v2rayDns "github.com/v2fly/v2ray-core/v5/features/dns"
-	"github.com/v2fly/v2ray-core/v5/features/dns/localdns"
 	"github.com/v2fly/v2ray-core/v5/features/routing"
 	"github.com/v2fly/v2ray-core/v5/features/stats"
 	"github.com/v2fly/v2ray-core/v5/infra/conf/serial"
 	"github.com/v2fly/v2ray-core/v5/nekoutils"
-	"github.com/v2fly/v2ray-core/v5/transport/internet"
 )
 
 func GetV2RayVersion() string {
@@ -41,7 +33,8 @@ type V2RayInstance struct {
 	Core         *core.Instance
 	StatsManager stats.Manager
 	Dispatcher   *dispatcher.DefaultDispatcher
-	DnsClient    dns.Client
+	DnsClient    dns_feature.Client
+	ForTest      bool
 }
 
 func NewV2rayInstance() *V2RayInstance {
@@ -70,9 +63,11 @@ func (instance *V2RayInstance) LoadConfig(content string) error {
 	instance.Core = c
 	instance.StatsManager = c.GetFeature(stats.ManagerType()).(stats.Manager)
 	instance.Dispatcher = c.GetFeature(routing.DispatcherType()).(routing.Dispatcher).(*dispatcher.DefaultDispatcher)
-	instance.DnsClient = c.GetFeature(dns.ClientType()).(dns.Client)
+	instance.DnsClient = c.GetFeature(dns_feature.ClientType()).(dns_feature.Client)
 
-	instance.setupDialer()
+	if !instance.ForTest {
+		atomic.StorePointer(&v2rayDNSClient, unsafe.Pointer(&instance.DnsClient))
+	}
 
 	return nil
 }
@@ -109,6 +104,9 @@ func (instance *V2RayInstance) Close() error {
 	instance.access.Lock()
 	defer instance.access.Unlock()
 	if instance.started {
+		if !instance.ForTest {
+			atomic.StorePointer(&v2rayDNSClient, unsafe.Pointer(nil))
+		}
 		nekoutils.ConnectionLog_V2Ray.ResetConnections(uintptr(unsafe.Pointer(instance.Core)))
 		nekoutils.ConnectionPool_V2Ray.ResetConnections(uintptr(unsafe.Pointer(instance.Core)))
 		nekoutils.ConnectionPool_System.ResetConnections(uintptr(unsafe.Pointer(instance.Core)))
@@ -130,125 +128,6 @@ func (instance *V2RayInstance) DialContext(ctx context.Context, destination net.
 		readerOpt = buf.ConnectionOutputMultiUDP(r.Reader)
 	}
 	return buf.NewConnection(buf.ConnectionInputMulti(r.Writer), readerOpt), nil
-}
-
-// DNS & Protect
-
-var staticHosts = make(map[string][]net.IP)
-var tryDomains = make([]string, 0)                                                    // server's domain, set when enhanced domain mode
-var androidResolver = &net.Resolver{PreferGo: false}                                  // Using Android API, lookup from current network.
-var androidUnderlyingResolver = &simpleSekaiWrapper{androidResolver: androidResolver} // Using Android API, lookup from non-VPN network.
-var dc dns.Client
-
-// sekaiResolver
-type LocalResolver interface {
-	LookupIP(network string, domain string) (string, error)
-}
-
-type simpleSekaiWrapper struct {
-	androidResolver *net.Resolver
-	sekaiResolver   LocalResolver // passed from java (only when VPNService)
-}
-
-func (p *simpleSekaiWrapper) LookupIP(network, host string) (ret []net.IP, err error) {
-	isSekai := p.sekaiResolver != nil
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
-	ok := make(chan interface{})
-	defer cancel()
-
-	go func() {
-		defer func() {
-			select {
-			case <-ctx.Done():
-			default:
-				ok <- nil
-			}
-			close(ok)
-		}()
-
-		if isSekai {
-			var str string
-			str, err = p.sekaiResolver.LookupIP(network, host)
-			// java -> go
-			if err != nil {
-				rcode, err2 := strconv.Atoi(err.Error())
-				if err2 == nil {
-					err = dns_feature.RCodeError(rcode)
-				}
-				return
-			} else if str == "" {
-				err = dns_feature.ErrEmptyResponse
-				return
-			}
-			ret = make([]net.IP, 0)
-			for _, ip := range strings.Split(str, ",") {
-				ret = append(ret, net.ParseIP(ip))
-			}
-		} else {
-			ret, err = p.androidResolver.LookupIP(context.Background(), network, host)
-		}
-	}()
-
-	select {
-	case <-ctx.Done():
-		return nil, newError(fmt.Sprintf("androidUnderlyingResolver: context cancelled! (sekai=%t)", isSekai))
-	case <-ok:
-		return
-	}
-}
-
-// setup dialer and resolver for v2ray (v2ray options)
-func (instance *V2RayInstance) setupDialer() {
-	setupResolvers()
-	dc = instance.DnsClient
-
-	// All lookup except dnsClient -> dc.LookupIP()
-	// and also set protectedDialer
-	if _, ok := dc.(v2rayDns.ClientWithIPOption); ok {
-		internet.UseAlternativeSystemDialer(&protect.ProtectedDialer{
-			Resolver: func(domain string) ([]net.IP, error) {
-				if ips, ok := staticHosts[domain]; ok && ips != nil {
-					return ips, nil
-				}
-
-				if nekoutils.In(tryDomains, domain) {
-					// first try A
-					_ips, err := doh.LookupManyDoH(domain, 1)
-					if err != nil {
-						// then try AAAA
-						_ips, err = doh.LookupManyDoH(domain, 28)
-						if err != nil {
-							return nil, err
-						}
-					}
-					ips := _ips.([]net.IP)
-					staticHosts[domain] = ips
-					return ips, nil
-				}
-
-				return dc.LookupIP(&dns.MatsuriDomainStringEx{
-					Domain:     domain,
-					OptNetwork: "ip",
-				})
-			},
-		})
-	}
-}
-
-func setupResolvers() {
-	// golang lookup -> androidResolver
-	gonet.DefaultResolver = androidResolver
-
-	// dnsClient lookup -> androidUnderlyingResolver.LookupIP()
-	internet.UseAlternativeSystemDNSDialer(&protect.ProtectedDialer{
-		Resolver: func(domain string) ([]net.IP, error) {
-			return androidUnderlyingResolver.LookupIP("ip", domain)
-		},
-	})
-
-	// "localhost" localDns lookup -> androidUnderlyingResolver.LookupIP()
-	localdns.SetLookupFunc(androidUnderlyingResolver.LookupIP)
 }
 
 // Neko connections
