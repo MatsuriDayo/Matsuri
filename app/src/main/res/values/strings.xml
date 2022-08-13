@@ -462,7 +462,7 @@
     <string name="destination_override">Override Destination</string>
     <string name="destination_override_summary">Use the sniffed domain to overwrite the destination address, not just for routing</string>
     <string name="resolve_destination">Resolve Destination</string>
-    <string name="resolve_destination_summary">If the destination address is a domain, it is then passed out based on the IPv6 strategy.</string>
+    <string name="resolve_destination_summary">If the destination address is a domain, it is then passed out based on the IPv6 strategy (conflicts with FakeDNS)</string>
     <string name="pcap" translatable="false">Pcap</string>
     <string name="enable_pcap">Enable Pcap</string>
     <string name="pcap_summary">Save traffic to .pcap file</string>

@@ -117,7 +117,7 @@ fun buildV2RayConfig(
     val allowAccess = DataStore.allowAccess
     val bind = if (!forTest && allowAccess) "0.0.0.0" else LOCALHOST
 
-    val remoteDns = DataStore.remoteDns.split("\n")
+    var remoteDns = DataStore.remoteDns.split("\n")
         .mapNotNull { dns -> dns.trim().takeIf { it.isNotBlank() && !it.startsWith("#") } }
     var directDNS = DataStore.directDns.split("\n")
         .mapNotNull { dns -> dns.trim().takeIf { it.isNotBlank() && !it.startsWith("#") } }
@@ -141,15 +141,6 @@ fun buildV2RayConfig(
                 .filter { it.isNotBlank() }
                 .associate { it.substringBefore(" ") to it.substringAfter(" ") }
                 .toMutableMap()
-            servers = mutableListOf()
-
-            servers.addAll(remoteDns.map {
-                DnsObject.StringOrServerObject().apply {
-                    valueY = DnsObject.ServerObject().apply {
-                        address = it
-                    }
-                }
-            })
 
             disableFallbackIfMatch = true
 
@@ -165,7 +156,18 @@ fun buildV2RayConfig(
                         poolSize = 65535
                     })
                 }
+                remoteDns = listOf("fakedns")
             }
+
+            servers = mutableListOf()
+
+            servers.addAll(remoteDns.map {
+                DnsObject.StringOrServerObject().apply {
+                    valueY = DnsObject.ServerObject().apply {
+                        address = it
+                    }
+                }
+            })
 
             when (ipv6Mode) {
                 IPv6Mode.DISABLE -> {
@@ -1046,12 +1048,6 @@ fun buildV2RayConfig(
                     }
                 }
             })
-
-        if (useFakeDns) {
-            dns.servers.add(0, DnsObject.StringOrServerObject().apply {
-                valueX = "fakedns"
-            })
-        }
 
         if (!forTest) routing.rules.add(0, RoutingObject.RuleObject().apply {
             type = "field"
