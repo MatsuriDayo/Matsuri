@@ -93,6 +93,7 @@ class SagerNet : Application(),
 
         DataStore.init()
         Seq.setContext(this)
+        updateNotificationChannels()
 
         // matsuri: init core (sn: extract v2ray assets
         externalAssets.mkdirs()
@@ -103,7 +104,6 @@ class SagerNet : Application(),
         if (isMainProcess) {
             Theme.apply(this)
             Theme.applyNightTheme()
-            updateNotificationChannels()
         }
 
         if (isBgProcess) {
@@ -256,10 +256,6 @@ class SagerNet : Application(),
         fun stopService() =
             application.sendBroadcast(Intent(Action.CLOSE).setPackage(application.packageName))
 
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
     }
 
 }

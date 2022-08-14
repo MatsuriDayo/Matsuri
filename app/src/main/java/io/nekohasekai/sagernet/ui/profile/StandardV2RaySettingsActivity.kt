@@ -51,6 +51,8 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         }
         if (this is VMessBean) {
             DataStore.serverAlterId = alterId
+            DataStore.serverVMessExperimentalAuthenticatedLength = experimentalAuthenticatedLength
+            DataStore.serverVMessExperimentalNoTerminationSignal = experimentalNoTerminationSignal
         }
         DataStore.serverNetwork = type
         DataStore.serverHeader = headerType
@@ -90,6 +92,8 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         }
         if (this is VMessBean) {
             alterId = DataStore.serverAlterId
+            experimentalAuthenticatedLength = DataStore.serverVMessExperimentalAuthenticatedLength
+            experimentalNoTerminationSignal = DataStore.serverVMessExperimentalNoTerminationSignal
         }
         type = DataStore.serverNetwork
         headerType = DataStore.serverHeader

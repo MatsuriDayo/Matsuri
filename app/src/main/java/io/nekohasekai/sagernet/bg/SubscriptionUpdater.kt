@@ -28,8 +28,10 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.WorkerParameters
 import androidx.work.multiprocess.RemoteWorkManager
 import io.nekohasekai.sagernet.R
+import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.group.GroupUpdater
+import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.app
 import java.util.concurrent.TimeUnit
 
@@ -45,11 +47,15 @@ object SubscriptionUpdater {
         if (subscriptions.isEmpty()) return
 
         // PeriodicWorkRequest.MIN_PERIODIC_INTERVAL_MILLIS
-        var minDelay = subscriptions.minByOrNull { it.subscription!!.autoUpdateDelay }!!.subscription!!.autoUpdateDelay.toLong()
+        var minDelay =
+            subscriptions.minByOrNull { it.subscription!!.autoUpdateDelay }!!.subscription!!.autoUpdateDelay.toLong()
         val now = System.currentTimeMillis() / 1000L
-        val minInitDelay = subscriptions.minOf { now - it.subscription!!.lastUpdated - (minDelay * 60) }
+        var minInitDelay =
+            subscriptions.minOf { now - it.subscription!!.lastUpdated - (minDelay * 60) }
         if (minDelay < 15) minDelay = 15
+        if (minInitDelay > 60) minInitDelay = 60
 
+        // main process
         RemoteWorkManager.getInstance(app).enqueueUniquePeriodicWork(
             WORK_NAME,
             ExistingPeriodicWorkPolicy.REPLACE,
@@ -75,15 +81,21 @@ object SubscriptionUpdater {
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
 
         override suspend fun doWork(): Result {
-            var subscriptions = SagerDatabase.groupDao.subscriptions()
-                .filter { it.subscription!!.autoUpdate }
+            var subscriptions =
+                SagerDatabase.groupDao.subscriptions().filter { it.subscription!!.autoUpdate }
+            if (!DataStore.serviceState.connected) {
+                Logs.d("work: not connected")
+                subscriptions = subscriptions.filter { !it.subscription!!.updateWhenConnectedOnly }
+            }
 
             if (subscriptions.isNotEmpty()) for (profile in subscriptions) {
                 val subscription = profile.subscription!!
 
                 if (((System.currentTimeMillis() / 1000).toInt() - subscription.lastUpdated) < subscription.autoUpdateDelay * 60) {
+                    Logs.d("work: not updating " + profile.displayName())
                     continue
                 }
+                Logs.d("work: updating " + profile.displayName())
 
                 notification.setContentText(
                     applicationContext.getString(
@@ -100,6 +112,5 @@ object SubscriptionUpdater {
             return Result.success()
         }
     }
-
 
 }

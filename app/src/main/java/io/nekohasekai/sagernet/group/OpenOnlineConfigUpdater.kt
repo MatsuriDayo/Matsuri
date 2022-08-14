@@ -96,8 +96,7 @@ object OpenOnlineConfigUpdater : GroupUpdater() {
             if (certSha256 != null) pinnedSHA256(certSha256)
         }.newRequest().apply {
             setURL(baseLink.toString())
-            setUserAgent(subscription.customUserAgent.takeIf { it.isNotBlank() }
-                ?: USER_AGENT_ORIGIN)
+            setUserAgent(subscription.customUserAgent.takeIf { it.isNotBlank() } ?: USER_AGENT)
         }.execute()
 
         val oocResponse = JSONObject(response.contentString)

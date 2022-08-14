@@ -25,7 +25,6 @@ object Key {
 
     const val DB_PUBLIC = "configuration.db"
     const val DB_PROFILE = "sager_net.db"
-    const val DISABLE_AEAD = "V2RAY_VMESS_AEAD_DISABLED"
 
     const val PERSIST_ACROSS_REBOOT = "isAutoConnect"
     const val DIRECT_BOOT_AWARE = "directBootAware"
@@ -97,7 +96,6 @@ object Key {
     const val PROFILE_ID = "profileId"
     const val PROFILE_NAME = "profileName"
     const val PROFILE_GROUP = "profileGroup"
-    const val PROFILE_STARTED = "profileStarted"
     const val PROFILE_CURRENT = "profileCurrent"
 
     const val NEKO_PLUGIN_PREFIX = "moe.matsuri.plugin."
@@ -125,7 +123,6 @@ object Key {
     const val SERVER_HOST = "serverHost"
     const val SERVER_PATH = "serverPath"
     const val SERVER_SNI = "serverSNI"
-    const val SERVER_TLS = "serverTLS"
     const val SERVER_ENCRYPTION = "serverEncryption"
     const val SERVER_ALPN = "serverALPN"
     const val SERVER_CERTIFICATES = "serverCertificates"
@@ -152,8 +149,10 @@ object Key {
     const val SERVER_DISABLE_MTU_DISCOVERY = "serverDisableMtuDiscovery"
 
     const val SERVER_VMESS_EXPERIMENTS_CATEGORY = "serverVMessExperimentsCategory"
-    const val SERVER_VMESS_EXPERIMENTAL_AUTHENTICATED_LENGTH = "serverVMessExperimentalAuthenticatedLength"
-    const val SERVER_VMESS_EXPERIMENTAL_NO_TERMINATION_SIGNAL = "serverVMessExperimentalNoTerminationSignal"
+    const val SERVER_VMESS_EXPERIMENTAL_AUTHENTICATED_LENGTH =
+        "serverVMessExperimentalAuthenticatedLength"
+    const val SERVER_VMESS_EXPERIMENTAL_NO_TERMINATION_SIGNAL =
+        "serverVMessExperimentalNoTerminationSignal"
 
     const val SERVER_PRIVATE_KEY = "serverPrivateKey"
     const val SERVER_LOCAL_ADDRESS = "serverLocalAddress"
@@ -206,12 +205,6 @@ object IPv6Mode {
     const val ONLY = 3
 }
 
-object PacketStrategy {
-    const val DIRECT = 0
-    const val DROP = 1
-    const val REPLY = 2
-}
-
 object GroupType {
     const val BASIC = 0
     const val SUBSCRIPTION = 1
@@ -239,8 +232,5 @@ object Action {
     const val SERVICE = "io.nekohasekai.sagernet.SERVICE"
     const val CLOSE = "io.nekohasekai.sagernet.CLOSE"
     const val RELOAD = "io.nekohasekai.sagernet.RELOAD"
-    const val ABORT = "io.nekohasekai.sagernet.ABORT"
     const val SWITCH_WAKE_LOCK = "io.nekohasekai.sagernet.SWITCH_WAKELOCK"
-
-    const val EXTRA_PROFILE_ID = "io.nekohasekai.sagernet.EXTRA_PROFILE_ID"
 }

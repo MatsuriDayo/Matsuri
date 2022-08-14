@@ -85,7 +85,7 @@ abstract class GroupUpdater {
                     if (results.isEmpty()) error("empty response")
                     rewriteAddress(profile, results, ipv6First)
                 } catch (e: Exception) {
-                    Logs.d("Lookup ${profile.serverAddress} failed: ${e.readableMessage}",e)
+                    Logs.d("Lookup ${profile.serverAddress} failed: ${e.readableMessage}", e)
                 }
                 if (groupId != null) {
                     progress.progress++
@@ -151,11 +151,11 @@ abstract class GroupUpdater {
                 val connected = DataStore.serviceState.connected
                 val userInterface = GroupManager.userInterface
 
-                if ((subscription.link?.startsWith("http://") == true || subscription.updateWhenConnectedOnly) && !connected) {
+                if (byUser && (subscription.link?.startsWith("http://") == true || subscription.updateWhenConnectedOnly) && !connected) {
                     if (userInterface == null || !userInterface.confirm(app.getString(R.string.update_subscription_warning))) {
                         finishUpdate(proxyGroup)
                         cancel()
-                        return@coroutineScope false
+                        return@coroutineScope true
                     }
                 }
 

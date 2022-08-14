@@ -51,6 +51,7 @@ class HysteriaSettingsActivity : ProfileSettingsActivity<HysteriaBean>() {
         DataStore.serverDownloadSpeed = downloadMbps
         DataStore.serverStreamReceiveWindow = streamReceiveWindow
         DataStore.serverConnectionReceiveWindow = connectionReceiveWindow
+        DataStore.serverDisableMtuDiscovery = disableMtuDiscovery
     }
 
     override fun HysteriaBean.serialize() {
@@ -69,6 +70,7 @@ class HysteriaSettingsActivity : ProfileSettingsActivity<HysteriaBean>() {
         downloadMbps = DataStore.serverDownloadSpeed
         streamReceiveWindow = DataStore.serverStreamReceiveWindow
         connectionReceiveWindow = DataStore.serverConnectionReceiveWindow
+        disableMtuDiscovery = DataStore.serverDisableMtuDiscovery
     }
 
     override fun PreferenceFragmentCompat.createPreferences(

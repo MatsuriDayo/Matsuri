@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"math/rand"
 	"net"
 	"net/http"
 	"net/url"
@@ -41,7 +40,6 @@ type HTTPRequest interface {
 	SetHeader(key string, value string)
 	SetContent(content []byte)
 	SetContentString(content string)
-	RandomUserAgent()
 	SetUserAgent(userAgent string)
 	Execute() (HTTPResponse, error)
 }
@@ -161,10 +159,6 @@ func (r *httpRequest) SetMethod(method string) {
 
 func (r *httpRequest) SetHeader(key string, value string) {
 	r.request.Header.Set(key, value)
-}
-
-func (r *httpRequest) RandomUserAgent() {
-	r.request.Header.Set("User-Agent", fmt.Sprintf("curl/7.%d.%d", rand.Int()%54, rand.Int()%2))
 }
 
 func (r *httpRequest) SetUserAgent(userAgent string) {

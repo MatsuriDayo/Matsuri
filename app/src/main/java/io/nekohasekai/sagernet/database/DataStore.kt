@@ -32,7 +32,6 @@ import io.nekohasekai.sagernet.database.preference.RoomPreferenceDataStore
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.utils.DirectBoot
 import moe.matsuri.nya.TempDatabase
-import moe.matsuri.nya.utils.Util
 
 object DataStore : OnPreferenceDataStoreChangeListener {
 
@@ -232,7 +231,6 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var serverHost by profileCacheStore.string(Key.SERVER_HOST)
     var serverPath by profileCacheStore.string(Key.SERVER_PATH)
     var serverSNI by profileCacheStore.string(Key.SERVER_SNI)
-    var serverTLS by profileCacheStore.boolean(Key.SERVER_TLS)
     var serverEncryption by profileCacheStore.string(Key.SERVER_ENCRYPTION)
     var serverALPN by profileCacheStore.string(Key.SERVER_ALPN)
     var serverCertificates by profileCacheStore.string(Key.SERVER_CERTIFICATES)
@@ -295,7 +293,6 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var subscriptionAutoUpdateDelay by profileCacheStore.stringToInt(Key.SUBSCRIPTION_AUTO_UPDATE_DELAY) { 360 }
 
     var rulesFirstCreate by profileCacheStore.boolean("rulesFirstCreate")
-    var systemDnsFinal by profileCacheStore.string("systemDnsFinal")
 
     override fun onPreferenceDataStoreChanged(store: PreferenceDataStore, key: String) {
         when (key) {

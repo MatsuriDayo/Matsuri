@@ -54,11 +54,7 @@ object SIP008Updater : GroupUpdater() {
                 trySocks5(DataStore.socksPort)
             }.newRequest().apply {
                 setURL(subscription.link)
-                if (subscription.customUserAgent.isNotBlank()) {
-                    setUserAgent(subscription.customUserAgent)
-                } else {
-                    randomUserAgent()
-                }
+                setUserAgent(subscription.customUserAgent.takeIf { it.isNotBlank() } ?: USER_AGENT)
             }.execute()
 
             sip008Response = JSONObject(response.contentString)
