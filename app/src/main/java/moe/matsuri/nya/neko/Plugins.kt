@@ -17,7 +17,8 @@ object Plugins {
 
     fun isExeOrPlugin(pkg: PackageInfo): Boolean {
         if (pkg.providers == null || pkg.providers.isEmpty()) return false
-        val auth = pkg.providers[0].authority
+        val provider = pkg.providers[0] ?: return false
+        val auth = provider.authority ?: return false
         return auth.startsWith(AUTHORITIES_PREFIX_SEKAI_EXE)
                 || auth.startsWith(AUTHORITIES_PREFIX_NEKO_EXE)
                 || auth.startsWith(AUTHORITIES_PREFIX_NEKO_PLUGIN)
