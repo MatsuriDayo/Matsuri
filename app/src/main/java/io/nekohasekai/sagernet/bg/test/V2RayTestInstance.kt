@@ -19,6 +19,7 @@
 
 package io.nekohasekai.sagernet.bg.test
 
+import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.bg.GuardedProcessPool
 import io.nekohasekai.sagernet.bg.proto.V2RayInstance
 import io.nekohasekai.sagernet.database.ProxyEntity
@@ -60,6 +61,7 @@ class V2RayTestInstance(profile: ProxyEntity, val link: String, val timeout: Int
 
     override suspend fun loadConfig() {
         // don't call destroyAllJsi here
+        if (BuildConfig.DEBUG) Logs.d(config.config)
         v2rayPoint.forTest = true
         v2rayPoint.loadConfig(config.config)
     }

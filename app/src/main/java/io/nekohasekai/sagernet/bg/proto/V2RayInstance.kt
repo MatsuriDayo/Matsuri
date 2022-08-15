@@ -53,7 +53,6 @@ import moe.matsuri.nya.neko.NekoPluginManager
 import moe.matsuri.nya.neko.updateAllConfig
 import org.json.JSONObject
 import java.io.File
-import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class V2RayInstance(
     val profile: ProxyEntity
@@ -68,7 +67,6 @@ abstract class V2RayInstance(
     val externalInstances = hashMapOf<Int, AbstractInstance>()
     open lateinit var processes: GuardedProcessPool
     private var cacheFiles = ArrayList<File>()
-    var closed by AtomicBoolean()
     fun isInitialized(): Boolean {
         return ::config.isInitialized
     }

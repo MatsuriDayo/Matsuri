@@ -120,7 +120,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
             appendHttpProxy.isEnabled = requireHttp.isChecked
             requireHttp.setOnPreferenceChangeListener { _, newValue ->
                 portHttp.isEnabled = newValue as Boolean
-                appendHttpProxy.isEnabled = newValue as Boolean
+                appendHttpProxy.isEnabled = newValue
                 needReload()
                 true
             }
@@ -161,6 +161,13 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
                 needReload()
                 true
             }
+        }
+
+        remoteDns.isEnabled = !enableFakeDns.isChecked
+        enableFakeDns.setOnPreferenceChangeListener { _, newValue ->
+            remoteDns.isEnabled = !(newValue as Boolean)
+            needReload()
+            true
         }
 
         val requireTransproxy = findPreference<SwitchPreference>(Key.REQUIRE_TRANSPROXY)!!
@@ -235,7 +242,8 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
 
         val appTrafficStatistics = findPreference<SwitchPreference>(Key.APP_TRAFFIC_STATISTICS)!!
-        val profileTrafficStatistics = findPreference<SwitchPreference>(Key.PROFILE_TRAFFIC_STATISTICS)!!
+        val profileTrafficStatistics =
+            findPreference<SwitchPreference>(Key.PROFILE_TRAFFIC_STATISTICS)!!
         speedInterval.isEnabled = profileTrafficStatistics.isChecked
         profileTrafficStatistics.setOnPreferenceChangeListener { _, newValue ->
             speedInterval.isEnabled = newValue as Boolean
@@ -268,7 +276,6 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         remoteDns.onPreferenceChangeListener = reloadListener
         directDns.onPreferenceChangeListener = reloadListener
         enableDnsRouting.onPreferenceChangeListener = reloadListener
-        enableFakeDns.onPreferenceChangeListener = reloadListener
         dnsHosts.onPreferenceChangeListener = reloadListener
 
         portLocalDns.onPreferenceChangeListener = reloadListener

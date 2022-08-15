@@ -58,10 +58,7 @@ const val TAG_BLOCK = "block"
 const val TAG_DNS_IN = "dns-in"
 const val TAG_DNS_OUT = "dns-out"
 
-const val TAG_API_IN = "api-in"
-
 const val LOCALHOST = "127.0.0.1"
-const val IP6_LOCALHOST = "::1"
 
 class V2rayBuildResult(
     var config: String,
@@ -933,10 +930,6 @@ fun buildV2RayConfig(
         outbounds.add(OutboundObject().apply {
             tag = TAG_BLOCK
             protocol = "blackhole"
-            /* settings = LazyOutboundConfigurationObject(this,
-                 BlackholeOutboundConfigurationObject().apply {
-                     keepConnection = true
-                 })*/
         })
 
         if (!forTest) {
@@ -1029,8 +1022,7 @@ fun buildV2RayConfig(
         }
 
         // dns object user rules
-        // Note: "geosite:cn" matches before user rule... v2ray-core
-        if (enableDnsRouting && !forTest) {
+        if (enableDnsRouting) {
             dns.servers[0].valueY?.uidList = uidListDNSRemote.toHashSet().toList()
             dns.servers[0].valueY?.domains = domainListDNSRemote.toHashSet().toList()
             directLookupDomain += domainListDNSDirect
@@ -1048,6 +1040,9 @@ fun buildV2RayConfig(
                     }
                 }
             })
+
+        // Disable v2ray DNS for test (already remove in Go)
+        if (forTest) dns.servers.clear()
 
         if (!forTest) routing.rules.add(0, RoutingObject.RuleObject().apply {
             type = "field"
