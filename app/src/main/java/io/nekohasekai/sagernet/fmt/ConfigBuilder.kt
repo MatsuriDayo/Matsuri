@@ -702,6 +702,10 @@ fun buildV2RayConfig(
                                                 ?.let { (path, opts, _) ->
                                                     plugin = path
                                                     pluginOpts = opts.toString()
+                                                    // Shadowsocks 传统艺能
+                                                    if (DataStore.serviceMode == Key.MODE_VPN) {
+                                                        pluginArgs = listOf("-V")
+                                                    }
                                                 }
                                         } catch (e: PluginManager.PluginNotFoundException) {
                                             if (e.plugin in arrayOf("v2ray-plugin", "obfs-local")) {

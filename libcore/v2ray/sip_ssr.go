@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"bytes"
+	"context"
 	"flag"
 	"strconv"
 
@@ -36,7 +37,7 @@ type shadowsocksrPlugin struct {
 	p protocol.Protocol
 }
 
-func (p *shadowsocksrPlugin) Init(_ string, _ string, remoteHost string, remotePort string, _ string, pluginArgs []string, account *shadowsocks.MemoryAccount) error {
+func (p *shadowsocksrPlugin) Init(_ context.Context, _ string, _ string, remoteHost string, remotePort string, _ string, pluginArgs []string, account *shadowsocks.MemoryAccount) error {
 	fs := flag.NewFlagSet("shadowsocksr", flag.ContinueOnError)
 	fs.StringVar(&p.obfs, "obfs", "origin", "")
 	fs.StringVar(&p.obfsParam, "obfs-param", "", "")

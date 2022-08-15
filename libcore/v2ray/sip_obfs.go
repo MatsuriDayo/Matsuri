@@ -1,7 +1,9 @@
 package plugin
 
 import (
-	"github.com/Dreamacro/clash/transport/simple-obfs"
+	"context"
+
+	obfs "github.com/Dreamacro/clash/transport/simple-obfs"
 	"github.com/v2fly/v2ray-core/v5/proxy/shadowsocks"
 	"github.com/v2fly/v2ray-core/v5/proxy/shadowsocks/plugin/self"
 	"github.com/v2fly/v2ray-core/v5/transport/internet"
@@ -21,7 +23,7 @@ type obfsLocalPlugin struct {
 	port string
 }
 
-func (p *obfsLocalPlugin) Init(_ string, _ string, _ string, remotePort string, pluginOpts string, _ []string, _ *shadowsocks.MemoryAccount) error {
+func (p *obfsLocalPlugin) Init(_ context.Context, _ string, _ string, _ string, remotePort string, pluginOpts string, _ []string, _ *shadowsocks.MemoryAccount) error {
 	options, err := self.ParsePluginOptions(pluginOpts)
 	if err != nil {
 		return newError("obfs-local: failed to parse plugin options").Base(err)
