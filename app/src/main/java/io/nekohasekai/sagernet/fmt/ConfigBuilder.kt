@@ -45,6 +45,7 @@ import io.nekohasekai.sagernet.ktx.isExpertFlavor
 import io.nekohasekai.sagernet.ktx.isIpAddress
 import io.nekohasekai.sagernet.ktx.mkPort
 import io.nekohasekai.sagernet.utils.PackageCache
+import moe.matsuri.nya.neko.Plugins
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
 const val TAG_SOCKS = "socks"
@@ -782,8 +783,16 @@ fun buildV2RayConfig(
                 // For external proxy software, their traffic must goes to v2ray-core to use protected fd.
                 if (bean.canMapping() && proxyEntity.needExternal()) {
                     // With ss protect, don't use mapping
-                    val expertHysteria = isExpertFlavor && index == profileList.lastIndex && bean is HysteriaBean
-                    if (!expertHysteria) {
+                    var myhy = index == profileList.lastIndex && bean is HysteriaBean
+                    if (myhy) {
+                        myhy = false
+                        Plugins.getPlugin("hysteria-plugin")?.apply {
+                            if (providers[0].authority.startsWith(Plugins.AUTHORITIES_PREFIX_NEKO_EXE)) {
+                                myhy = true
+                            }
+                        }
+                    }
+                    if (!myhy) {
                         val mappingPort = mkPort()
                         bean.finalAddress = LOCALHOST
                         bean.finalPort = mappingPort

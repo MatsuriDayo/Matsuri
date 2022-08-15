@@ -542,4 +542,9 @@
 
     <string-array name="mux_select_init" />
 
+    <string-array name="exe_prefer_provider">
+        <item>Matsuri</item>
+        <item>SagerNet</item>
+    </string-array>
+
 </resources>

@@ -41,11 +41,12 @@ import com.danielstone.materialaboutlibrary.model.MaterialAboutList
 import io.nekohasekai.sagernet.BuildConfig
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.databinding.LayoutAboutBinding
-import io.nekohasekai.sagernet.fmt.PluginEntry
 import io.nekohasekai.sagernet.ktx.*
-import io.nekohasekai.sagernet.plugin.PluginManager
+import io.nekohasekai.sagernet.plugin.PluginManager.loadString
+import io.nekohasekai.sagernet.utils.PackageCache
 import io.nekohasekai.sagernet.widget.ListHolderListener
 import libcore.Libcore
+import moe.matsuri.nya.neko.Plugins
 
 class AboutFragment : ToolbarFragment(R.layout.layout_about) {
 
@@ -112,19 +113,25 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
                         .setOnClickAction { }
                         .build())
                     .apply {
-                        val m = enumValues<PluginEntry>().associateBy { it.pluginId }
-                        for (plugin in PluginManager.fetchPlugins()) {
-                            if (!m.containsKey(plugin.id)) continue
+                        for ((_, pkg) in PackageCache.installedPluginPackages) {
                             try {
+                                val pluginId = pkg.providers[0].loadString(Plugins.METADATA_KEY_ID)
+                                if (pluginId.isNullOrBlank() || pluginId.startsWith(Plugins.AUTHORITIES_PREFIX_NEKO_PLUGIN)) continue
                                 addItem(MaterialAboutActionItem.Builder()
                                     .icon(R.drawable.ic_baseline_nfc_24)
-                                    .text(getString(R.string.version_x, plugin.id))
-                                    .subText("v" + plugin.versionName)
+                                    .text(
+                                        getString(
+                                            R.string.version_x,
+                                            pluginId
+                                        ) + " (${Plugins.displayExeProvider(pkg.packageName)})"
+                                    )
+                                    .subText("v" + pkg.versionName)
                                     .setOnClickAction {
                                         startActivity(Intent().apply {
-                                            action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                                            action =
+                                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS
                                             data = Uri.fromParts(
-                                                "package", plugin.packageName, null
+                                                "package", pkg.packageName, null
                                             )
                                         })
                                     }

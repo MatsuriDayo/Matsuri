@@ -274,7 +274,15 @@
             app:key="enablePcap"
             app:summary="@string/pcap_summary"
             app:title="@string/enable_pcap" />
-    </PreferenceCategory>
+        <com.takisoft.preferencex.SimpleMenuPreference
+            app:defaultValue="0"
+            app:entries="@array/exe_prefer_provider"
+            app:entryValues="@array/int_array_2"
+            app:icon="@drawable/ic_baseline_layers_24"
+            app:key="exePreferProvider"
+            app:title="@string/exe_prefer_provider"
+            app:useSimpleSummaryProvider="true" />
+</PreferenceCategory>
 
 
 </PreferenceScreen>

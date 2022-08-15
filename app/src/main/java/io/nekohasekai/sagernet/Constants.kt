@@ -98,8 +98,8 @@ object Key {
     const val PROFILE_GROUP = "profileGroup"
     const val PROFILE_CURRENT = "profileCurrent"
 
-    const val NEKO_PLUGIN_PREFIX = "moe.matsuri.plugin."
     const val NEKO_PLUGIN_MANAGED = "nekoPlugins"
+    const val EXE_PREFER_PROVIDER = "exePreferProvider"
 
     const val SERVER_ADDRESS = "serverAddress"
     const val SERVER_PORT = "serverPort"

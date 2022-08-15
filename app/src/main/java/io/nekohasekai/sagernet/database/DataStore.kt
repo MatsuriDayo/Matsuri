@@ -98,6 +98,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     }
 
     var nekoPlugins by configurationStore.string(Key.NEKO_PLUGIN_MANAGED)
+    var exePreferProvider by configurationStore.stringToInt(Key.NEKO_PLUGIN_MANAGED)
 
     var isExpert by configurationStore.boolean(Key.APP_EXPERT)
     var appTheme by configurationStore.int(Key.APP_THEME)

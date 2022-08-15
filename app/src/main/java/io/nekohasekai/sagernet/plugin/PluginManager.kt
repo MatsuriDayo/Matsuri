@@ -21,24 +21,16 @@
 
 package io.nekohasekai.sagernet.plugin
 
-import android.annotation.SuppressLint
-import android.content.BroadcastReceiver
-import android.content.ContentResolver
-import android.content.Intent
 import android.content.pm.ComponentInfo
-import android.content.pm.PackageManager
+import android.content.pm.PackageInfo
 import android.content.pm.ProviderInfo
-import android.database.Cursor
-import android.net.Uri
-import android.os.Build
-import android.system.Os
 import android.widget.Toast
-import androidx.core.os.bundleOf
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.ktx.Logs
-import io.nekohasekai.sagernet.ktx.listenForPackageChanges
+import io.nekohasekai.sagernet.utils.PackageCache
+import moe.matsuri.nya.neko.Plugins
 import java.io.File
 import java.io.FileNotFoundException
 
@@ -50,27 +42,9 @@ object PluginManager {
             SagerNet.application.getString(R.string.plugin_unknown, plugin)
     }
 
-    private var receiver: BroadcastReceiver? = null
-    private var cachedPlugins: PluginList? = null
-    fun fetchPlugins() = synchronized(this) {
-        if (receiver == null) receiver = SagerNet.application.listenForPackageChanges {
-            synchronized(this) {
-                receiver = null
-                cachedPlugins = null
-            }
-        }
-        if (cachedPlugins == null) cachedPlugins = PluginList()
-        cachedPlugins!!
-    }
-
-    private fun buildUri(id: String) = Uri.Builder()
-        .scheme(PluginContract.SCHEME)
-        .authority(PluginContract.AUTHORITY)
-        .path("/$id")
-        .build()
-
     data class InitResult(
         val path: String,
+        val pkg: PackageInfo,
     )
 
     @Throws(Throwable::class)
@@ -89,104 +63,27 @@ object PluginManager {
     }
 
     private fun initNative(pluginId: String): InitResult? {
-        var flags = PackageManager.GET_META_DATA
-        if (Build.VERSION.SDK_INT >= 24) {
-            flags =
-                flags or PackageManager.MATCH_DIRECT_BOOT_UNAWARE or PackageManager.MATCH_DIRECT_BOOT_AWARE
-        }
-        val providers = SagerNet.application.packageManager.queryIntentContentProviders(
-            Intent(PluginContract.ACTION_NATIVE_PLUGIN, buildUri(pluginId)), flags)
-            .filter { it.providerInfo.exported }
-        if (providers.isEmpty()) return null
-        if (providers.size > 1) {
-            val message =
-                "Conflicting plugins found from: ${providers.joinToString { it.providerInfo.packageName }}"
-            Toast.makeText(SagerNet.application, message, Toast.LENGTH_LONG).show()
-            throw IllegalStateException(message)
-        }
-        val provider = providers.single().providerInfo
-        var failure: Throwable? = null
-        try {
-            initNativeFaster(provider)?.also { return InitResult(it) }
-        } catch (t: Throwable) {
-            Logs.w("Initializing native plugin faster mode failed")
-            failure = t
-        }
+        val pkg = Plugins.getPlugin(pluginId) ?: return null
 
-        val uri = Uri.Builder().apply {
-            scheme(ContentResolver.SCHEME_CONTENT)
-            authority(provider.authority)
-        }.build()
-        try {
-            return initNativeFast(SagerNet.application.contentResolver,
-                pluginId,
-                uri)?.let { InitResult(it) }
-        } catch (t: Throwable) {
-            Logs.w("Initializing native plugin fast mode failed")
-            failure?.also { t.addSuppressed(it) }
-            failure = t
-        }
+        val provider = pkg.providers[0]
 
         try {
-            return initNativeSlow(SagerNet.application.contentResolver,
-                pluginId,
-                uri)?.let { InitResult(it) }
+            initNativeFaster(provider)?.also { return InitResult(it, pkg) }
         } catch (t: Throwable) {
-            failure?.also { t.addSuppressed(it) }
-            throw t
+            Logs.w("Initializing native plugin faster mode failed", t)
         }
+
+        Logs.w("Init native returns empty result")
+        return null
     }
 
     private fun initNativeFaster(provider: ProviderInfo): String? {
-        return provider.loadString(PluginContract.METADATA_KEY_EXECUTABLE_PATH)
+        return provider.loadString(Plugins.METADATA_KEY_EXECUTABLE_PATH)
             ?.let { relativePath ->
                 File(provider.applicationInfo.nativeLibraryDir).resolve(relativePath).apply {
                     check(canExecute())
                 }.absolutePath
             }
-    }
-
-    private fun initNativeFast(cr: ContentResolver, pluginId: String, uri: Uri): String? {
-        return cr.call(uri, PluginContract.METHOD_GET_EXECUTABLE, null, bundleOf())
-            ?.getString(PluginContract.EXTRA_ENTRY)?.also {
-                check(File(it).canExecute())
-            }
-    }
-
-    @SuppressLint("Recycle")
-    private fun initNativeSlow(cr: ContentResolver, pluginId: String, uri: Uri): String? {
-        var initialized = false
-        fun entryNotFound(): Nothing =
-            throw IndexOutOfBoundsException("Plugin entry binary not found")
-
-        val pluginDir = File(SagerNet.deviceStorage.noBackupFilesDir, "plugin")
-        (cr.query(uri,
-            arrayOf(PluginContract.COLUMN_PATH, PluginContract.COLUMN_MODE),
-            null,
-            null,
-            null)
-            ?: return null).use { cursor ->
-            if (!cursor.moveToFirst()) entryNotFound()
-            pluginDir.deleteRecursively()
-            if (!pluginDir.mkdirs()) throw FileNotFoundException("Unable to create plugin directory")
-            val pluginDirPath = pluginDir.absolutePath + '/'
-            do {
-                val path = cursor.getString(0)
-                val file = File(pluginDir, path)
-                check(file.absolutePath.startsWith(pluginDirPath))
-                cr.openInputStream(uri.buildUpon().path(path).build())!!.use { inStream ->
-                    file.outputStream().use { outStream -> inStream.copyTo(outStream) }
-                }
-                Os.chmod(file.absolutePath, when (cursor.getType(1)) {
-                    Cursor.FIELD_TYPE_INTEGER -> cursor.getInt(1)
-                    Cursor.FIELD_TYPE_STRING -> cursor.getString(1).toInt(8)
-                    else -> throw IllegalArgumentException("File mode should be of type int")
-                })
-                if (path == pluginId) initialized = true
-            } while (cursor.moveToNext())
-        }
-        if (!initialized) entryNotFound()
-        return File(pluginDir, pluginId).absolutePath
     }
 
     fun ComponentInfo.loadString(key: String) = when (val value = metaData.get(key)) {

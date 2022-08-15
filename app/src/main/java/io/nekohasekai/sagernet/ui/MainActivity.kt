@@ -50,14 +50,12 @@ import io.nekohasekai.sagernet.fmt.PluginEntry
 import io.nekohasekai.sagernet.group.GroupInterfaceAdapter
 import io.nekohasekai.sagernet.group.GroupUpdater
 import io.nekohasekai.sagernet.ktx.*
-import io.nekohasekai.sagernet.plugin.PluginManager
 import io.nekohasekai.sagernet.widget.ListHolderListener
 import kotlinx.coroutines.launch
 import libcore.Libcore
 import moe.matsuri.nya.utils.Util
 import java.text.SimpleDateFormat
 import java.util.*
-import com.github.shadowsocks.plugin.PluginManager as ShadowsocksPluginPluginManager
 
 class MainActivity : ThemedActivity(),
     SagerConnection.Callback,
@@ -232,34 +230,15 @@ class MainActivity : ThemedActivity(),
     }
 
     override fun missingPlugin(profileName: String, pluginName: String) {
-        val pluginId =
-            if (pluginName.startsWith("shadowsocks-")) pluginName.substringAfter("shadowsocks-") else pluginName
         val pluginEntity = PluginEntry.find(pluginName)
-        val name = if (pluginEntity == null) pluginName else getString(pluginEntity.nameId)
 
-        val existsButOnShitSystem = if (pluginName == pluginId) {
-            PluginManager.fetchPlugins().map { it.id }.contains(pluginName)
-        } else {
-            ShadowsocksPluginPluginManager.fetchPlugins(true).map { it.id }.contains(pluginId)
-        }
-
-        if (existsButOnShitSystem) {
-            MaterialAlertDialogBuilder(this).setTitle(R.string.missing_plugin).setMessage(
-                getString(
-                    R.string.plugin_exists_but_on_shit_system, profileName, name
-                )
-            ).setPositiveButton(R.string.action_learn_more) { _, _ ->
-                launchCustomTab("https://matsuridayo.github.io/plugin/#faq")
-            }.show()
-            return
-        }
-
+        // unknown exe or neko plugin
         if (pluginEntity == null) {
             snackbar(getString(R.string.plugin_unknown, pluginName)).show()
             return
         }
 
-        // official plugins
+        // official exe
 
         MaterialAlertDialogBuilder(this).setTitle(R.string.missing_plugin)
             .setMessage(

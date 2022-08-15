@@ -126,8 +126,8 @@ object NekoPluginManager {
     }
 
     fun updatePlgConfig(plgId: String, plgConfig: JSONObject) {
-        PackageCache.installedPackages[plgId]?.apply {
-            plgConfig.put(PLUGIN_APP_VERSION, versionCode)
+        PackageCache.installedPluginPackages[plgId]?.apply {
+            plgConfig.put(PLUGIN_APP_VERSION, longVersionCode)
         }
         DataStore.configurationStore.putString(plgId, plgConfig.toString())
     }

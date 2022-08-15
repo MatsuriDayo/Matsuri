@@ -24,16 +24,17 @@ import android.annotation.SuppressLint
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
-import io.nekohasekai.sagernet.Key
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.listenForPackageChanges
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import moe.matsuri.nya.neko.Plugins
 
 object PackageCache {
 
     lateinit var installedPackages: Map<String, PackageInfo>
+    lateinit var installedPluginPackages: Map<String, PackageInfo>
     lateinit var installedApps: Map<String, ApplicationInfo>
     lateinit var packageMap: Map<String, Int>
     val uidMap = HashMap<Int, HashSet<String>>()
@@ -50,14 +51,23 @@ object PackageCache {
 
     @SuppressLint("InlinedApi")
     fun reload() {
-        installedPackages = app.packageManager.getInstalledPackages(PackageManager.GET_PERMISSIONS or PackageManager.MATCH_UNINSTALLED_PACKAGES)
-            .filter {
-                when (it.packageName) {
-                    "android" -> true
-                    else -> it.requestedPermissions?.contains(Manifest.permission.INTERNET) == true
-                } || it.packageName.startsWith(Key.NEKO_PLUGIN_PREFIX) // TODO prefix
+        val rawPackageInfo = app.packageManager.getInstalledPackages(
+            PackageManager.MATCH_UNINSTALLED_PACKAGES
+                    or PackageManager.GET_PERMISSIONS
+                    or PackageManager.GET_PROVIDERS
+                    or PackageManager.GET_META_DATA
+        )
+
+        installedPackages = rawPackageInfo.filter {
+            when (it.packageName) {
+                "android" -> true
+                else -> it.requestedPermissions?.contains(Manifest.permission.INTERNET) == true
             }
-            .associateBy { it.packageName }
+        }.associateBy { it.packageName }
+
+        installedPluginPackages = rawPackageInfo.filter {
+            Plugins.isExeOrPlugin(it)
+        }.associateBy { it.packageName }
 
         val installed = app.packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
         installedApps = installed.associateBy { it.packageName }

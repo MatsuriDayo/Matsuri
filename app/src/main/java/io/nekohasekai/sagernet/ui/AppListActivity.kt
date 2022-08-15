@@ -21,6 +21,7 @@ package io.nekohasekai.sagernet.ui
 
 import android.content.Intent
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -56,17 +57,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 import moe.matsuri.nya.neko.NekoPluginManager
+import moe.matsuri.nya.neko.Plugins
 import moe.matsuri.nya.ui.Dialogs
 import kotlin.coroutines.coroutineContext
 
 class AppListActivity : ThemedActivity() {
     companion object {
         private const val SWITCH = "switch"
-
-        private val cachedApps
-            get() = PackageCache.installedPackages.toMutableMap().apply {
-                remove(BuildConfig.APPLICATION_ID)
-            }
     }
 
     private class ProxiedApp(
@@ -94,7 +91,7 @@ class AppListActivity : ThemedActivity() {
             binding.itemicon.setImageDrawable(app.icon)
             binding.title.text = app.name
             if (forNeko) {
-                val ver = cachedApps[app.packageName]?.versionName ?: ""
+                val ver = getCachedApps()[app.packageName]?.versionName ?: ""
                 binding.desc.text = "${app.packageName} ($ver)"
             } else {
                 binding.desc.text = "${app.packageName} (${app.uid})"
@@ -137,7 +134,7 @@ class AppListActivity : ThemedActivity() {
         var filteredApps = apps
 
         suspend fun reload() {
-            apps = cachedApps.map { (packageName, packageInfo) ->
+            apps = getCachedApps().map { (packageName, packageInfo) ->
                 coroutineContext[Job]!!.ensureActive()
                 ProxiedApp(packageManager, packageInfo.applicationInfo, packageName)
             }.sortedWith(compareBy({ !isProxiedApp(it) }, { it.name.toString() }))
@@ -196,7 +193,7 @@ class AppListActivity : ThemedActivity() {
 
     private fun initProxiedUids(str: String = DataStore.routePackages) {
         proxiedUids.clear()
-        val apps = cachedApps
+        val apps = getCachedApps()
         for (line in str.lineSequence()) proxiedUids[(apps[line]
             ?: continue).applicationInfo.uid] = true
     }
@@ -216,6 +213,14 @@ class AppListActivity : ThemedActivity() {
     }
 
     private var forNeko = false
+
+    fun getCachedApps(): MutableMap<String, PackageInfo> {
+        val packages =
+            if (forNeko) PackageCache.installedPluginPackages else PackageCache.installedPackages
+        return packages.toMutableMap().apply {
+            remove(BuildConfig.APPLICATION_ID)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -251,7 +256,7 @@ class AppListActivity : ThemedActivity() {
 
         if (forNeko) {
             DataStore.routePackages = DataStore.nekoPlugins
-            binding.search.setText(Key.NEKO_PLUGIN_PREFIX)
+            binding.search.setText(Plugins.AUTHORITIES_PREFIX_NEKO_PLUGIN)
         }
 
         binding.searchLayout.isGone = forNeko
@@ -311,7 +316,8 @@ class AppListActivity : ThemedActivity() {
                 return true
             }
             R.id.action_import_clipboard -> {
-                val proxiedAppString = SagerNet.clipboard.primaryClip?.getItemAt(0)?.text?.toString()
+                val proxiedAppString =
+                    SagerNet.clipboard.primaryClip?.getItemAt(0)?.text?.toString()
                 if (!proxiedAppString.isNullOrEmpty()) {
                     val i = proxiedAppString.indexOf('\n')
                     try {
