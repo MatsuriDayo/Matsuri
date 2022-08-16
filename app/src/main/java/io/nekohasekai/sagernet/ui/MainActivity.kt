@@ -243,7 +243,7 @@ class MainActivity : ThemedActivity(),
         MaterialAlertDialogBuilder(this).setTitle(R.string.missing_plugin)
             .setMessage(
                 getString(
-                    R.string.profile_requiring_plugin, profileName, getString(pluginEntity.nameId)
+                    R.string.profile_requiring_plugin, profileName, pluginEntity.displayName
                 )
             )
             .setPositiveButton(R.string.action_download) { _, _ ->

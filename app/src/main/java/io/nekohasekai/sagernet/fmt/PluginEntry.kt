@@ -19,30 +19,44 @@
 
 package io.nekohasekai.sagernet.fmt
 
-import androidx.annotation.StringRes
 import io.nekohasekai.sagernet.R
+import io.nekohasekai.sagernet.SagerNet
 
 enum class PluginEntry(
     val pluginId: String,
-    @StringRes val nameId: Int,
-    val packageName: String,
+    val displayName: String,
+    val packageName: String, // for play and f-droid page
     val downloadSource: DownloadSource = DownloadSource()
 ) {
-    // sagernet plugins
-    TrojanGo("trojan-go-plugin", R.string.action_trojan_go, "io.nekohasekai.sagernet.plugin.trojan_go"),
-    NaiveProxy("naive-plugin", R.string.action_naive, "io.nekohasekai.sagernet.plugin.naive"),
-    Hysteria("hysteria-plugin", R.string.action_hysteria, "io.nekohasekai.sagernet.plugin.hysteria", DownloadSource(fdroid = false)),
-    WireGuard("wireguard-plugin", R.string.action_wireguard, "io.nekohasekai.sagernet.plugin.wireguard", DownloadSource(
-        fdroid = false,
-        downloadLink = "https://github.com/SagerNet/SagerNet/releases/tag/wireguard-plugin-20210424-5"
-    )),
-
-    // shadowsocks plugins
-
-    ObfsLocal("shadowsocks-obfs-local", R.string.shadowsocks_plugin_simple_obfs, "com.github.shadowsocks.plugin.obfs_local", DownloadSource(
-        fdroid = false,
-        downloadLink = "https://github.com/shadowsocks/simple-obfs-android/releases"
-    ));
+    TrojanGo(
+        "trojan-go-plugin",
+        SagerNet.application.getString(R.string.action_trojan_go),
+        "io.nekohasekai.sagernet.plugin.trojan_go"
+    ),
+    NaiveProxy(
+        "naive-plugin",
+        SagerNet.application.getString(R.string.action_naive),
+        "io.nekohasekai.sagernet.plugin.naive"
+    ),
+    Hysteria(
+        "hysteria-plugin",
+        SagerNet.application.getString(R.string.action_hysteria),
+        "moe.matsuri.exe.hysteria", DownloadSource(
+            playStore = false,
+            fdroid = false,
+            downloadLink = "https://github.com/MatsuriDayo/plugins/releases?q=Hysteria"
+        )
+    ),
+    WireGuard(
+        "wireguard-plugin",
+        SagerNet.application.getString(R.string.action_wireguard),
+        "io.nekohasekai.sagernet.plugin.wireguard",
+        DownloadSource(
+            fdroid = false,
+            downloadLink = "https://github.com/SagerNet/SagerNet/releases/tag/wireguard-plugin-20210424-5"
+        )
+    ),
+    ;
 
     data class DownloadSource(
         val playStore: Boolean = true,
