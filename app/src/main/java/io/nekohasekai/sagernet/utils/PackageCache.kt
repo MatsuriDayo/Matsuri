@@ -40,6 +40,7 @@ object PackageCache {
     val uidMap = HashMap<Int, HashSet<String>>()
     val loaded = Mutex(true)
 
+    // called from init (suspend)
     fun register() {
         reload()
         app.listenForPackageChanges(false) {

@@ -41,7 +41,6 @@ import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
 import io.nekohasekai.sagernet.fmt.v2ray.V2RayConfig
 import io.nekohasekai.sagernet.fmt.v2ray.V2RayConfig.*
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
-import io.nekohasekai.sagernet.ktx.isExpertFlavor
 import io.nekohasekai.sagernet.ktx.isIpAddress
 import io.nekohasekai.sagernet.ktx.mkPort
 import io.nekohasekai.sagernet.utils.PackageCache
@@ -787,7 +786,7 @@ fun buildV2RayConfig(
                     if (myhy) {
                         myhy = false
                         Plugins.getPlugin("hysteria-plugin")?.apply {
-                            if (providers[0].authority.startsWith(Plugins.AUTHORITIES_PREFIX_NEKO_EXE)) {
+                            if (authority.startsWith(Plugins.AUTHORITIES_PREFIX_NEKO_EXE)) {
                                 myhy = true
                             }
                         }

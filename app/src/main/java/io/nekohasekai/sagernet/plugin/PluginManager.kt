@@ -22,14 +22,11 @@
 package io.nekohasekai.sagernet.plugin
 
 import android.content.pm.ComponentInfo
-import android.content.pm.PackageInfo
 import android.content.pm.ProviderInfo
-import android.widget.Toast
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.ktx.Logs
-import io.nekohasekai.sagernet.utils.PackageCache
 import moe.matsuri.nya.neko.Plugins
 import java.io.File
 import java.io.FileNotFoundException
@@ -44,7 +41,7 @@ object PluginManager {
 
     data class InitResult(
         val path: String,
-        val pkg: PackageInfo,
+        val info: ProviderInfo,
     )
 
     @Throws(Throwable::class)
@@ -63,12 +60,10 @@ object PluginManager {
     }
 
     private fun initNative(pluginId: String): InitResult? {
-        val pkg = Plugins.getPlugin(pluginId) ?: return null
-
-        val provider = pkg.providers[0]
+        val info = Plugins.getPlugin(pluginId) ?: return null
 
         try {
-            initNativeFaster(provider)?.also { return InitResult(it, pkg) }
+            initNativeFaster(info)?.also { return InitResult(it, info) }
         } catch (t: Throwable) {
             Logs.w("Initializing native plugin faster mode failed", t)
         }

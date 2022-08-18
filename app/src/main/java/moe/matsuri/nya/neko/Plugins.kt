@@ -1,6 +1,11 @@
 package moe.matsuri.nya.neko
 
+import android.content.Intent
 import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
+import android.content.pm.ProviderInfo
+import android.net.Uri
+import android.os.Build
 import android.widget.Toast
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.database.DataStore
@@ -11,6 +16,8 @@ object Plugins {
     const val AUTHORITIES_PREFIX_SEKAI_EXE = "io.nekohasekai.sagernet.plugin."
     const val AUTHORITIES_PREFIX_NEKO_EXE = "moe.matsuri.exe."
     const val AUTHORITIES_PREFIX_NEKO_PLUGIN = "moe.matsuri.plugin."
+
+    const val ACTION_NATIVE_PLUGIN = "io.nekohasekai.sagernet.plugin.ACTION_NATIVE_PLUGIN"
 
     const val METADATA_KEY_ID = "io.nekohasekai.sagernet.plugin.id"
     const val METADATA_KEY_EXECUTABLE_PATH = "io.nekohasekai.sagernet.plugin.executable_path"
@@ -40,23 +47,55 @@ object Plugins {
         }
     }
 
-    fun getPlugin(pluginId: String): PackageInfo? {
-        var pkgs = PackageCache.installedPluginPackages
+    fun getPlugin(pluginId: String): ProviderInfo? {
+        PackageCache.awaitLoadSync()
+        val pkgs = PackageCache.installedPluginPackages
             .map { it.value }
             .filter { it.providers[0].loadString(METADATA_KEY_ID) == pluginId }
-        if (pkgs.isEmpty()) return null
 
-        if (pkgs.size > 1) {
-            val prefer = pkgs.filter {
-                it.providers[0].authority.startsWith(preferExePrefix())
-            }
-            if (prefer.size == 1) pkgs = prefer
+        var providers = if (pkgs.isEmpty()) {
+            getPluginOld(pluginId)
+        } else {
+            pkgs.map { it.providers[0] }
         }
-        if (pkgs.size > 1) {
-            val message = "Conflicting plugins found from: ${pkgs.joinToString { it.packageName }}"
+        if (providers.isEmpty()) return null
+
+        if (providers.size > 1) {
+            val prefer = providers.filter {
+                it.authority.startsWith(preferExePrefix())
+            }
+            if (prefer.size == 1) providers = prefer
+        }
+
+        if (providers.size > 1) {
+            val message =
+                "Conflicting plugins found from: ${providers.joinToString { it.packageName }}"
             Toast.makeText(SagerNet.application, message, Toast.LENGTH_LONG).show()
         }
-        return pkgs.single()
+
+        return providers[0]
     }
 
+    private fun buildUri(id: String, auth: String) = Uri.Builder()
+        .scheme("plugin")
+        .authority(auth)
+        .path("/$id")
+        .build()
+
+    fun getPluginOld(pluginId: String): List<ProviderInfo> {
+        var flags = PackageManager.GET_META_DATA
+        if (Build.VERSION.SDK_INT >= 24) {
+            flags =
+                flags or PackageManager.MATCH_DIRECT_BOOT_UNAWARE or PackageManager.MATCH_DIRECT_BOOT_AWARE
+        }
+        val list1 = SagerNet.application.packageManager.queryIntentContentProviders(
+            Intent(ACTION_NATIVE_PLUGIN, buildUri(pluginId, "io.nekohasekai.sagernet")), flags
+        )
+        val list2 = SagerNet.application.packageManager.queryIntentContentProviders(
+            Intent(ACTION_NATIVE_PLUGIN, buildUri(pluginId, "moe.matsuri.lite")), flags
+        )
+        return (list1 + list2).mapNotNull {
+            it.providerInfo
+        }.filter { it.exported }
+    }
 }

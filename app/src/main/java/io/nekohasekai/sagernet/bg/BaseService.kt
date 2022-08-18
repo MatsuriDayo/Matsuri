@@ -508,13 +508,12 @@ class BaseService {
             data.changeState(State.Connecting)
             runOnMainDispatcher {
                 try {
+                    data.notification = createNotification(profile.displayName())
+
                     Executable.killAll()    // clean up old processes
                     preInit()
-
                     proxy.init()
-
                     DataStore.currentProfile = profile.id
-                    data.notification = createNotification(profile.displayName())
 
                     proxy.processes = GuardedProcessPool {
                         Logs.w(it)
