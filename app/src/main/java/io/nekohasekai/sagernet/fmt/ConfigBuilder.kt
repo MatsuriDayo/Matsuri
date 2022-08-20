@@ -211,8 +211,8 @@ fun buildV2RayConfig(
                     enabled = true
                     destOverride = when {
                         useFakeDns && !trafficSniffing -> listOf("fakedns")
-                        useFakeDns -> listOf("fakedns", "http", "tls")
-                        else -> listOf("http", "tls")
+                        useFakeDns -> listOf("fakedns", "http", "tls", "quic")
+                        else -> listOf("http", "tls", "quic")
                     }
                     metadataOnly = useFakeDns && !trafficSniffing
                     routeOnly = true
@@ -261,8 +261,8 @@ fun buildV2RayConfig(
                         enabled = true
                         destOverride = when {
                             useFakeDns && !trafficSniffing -> listOf("fakedns")
-                            useFakeDns -> listOf("fakedns", "http", "tls")
-                            else -> listOf("http", "tls")
+                            useFakeDns -> listOf("fakedns", "http", "tls", "quic")
+                            else -> listOf("http", "tls", "quic")
                         }
                         metadataOnly = useFakeDns && !trafficSniffing
                         routeOnly = true
