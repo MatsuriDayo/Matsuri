@@ -44,9 +44,9 @@ https://matsuridayo.github.io
 * Hysteria ( hysteria-plugin )
 * WireGuard ( wireguard-plugin )
 
-### ROOT required
+请到项目主页下载插件。
 
-* Hysteria faketcp ( hysteria-plugin )
+Please go to the project homepage to download plugins.
 
 ### 订阅 / Subscription
 
@@ -60,3 +60,9 @@ https://matsuridayo.github.io
 本项目源于[SagerNet](https://github.com/SagerNet/SagerNet)，并做了很多优化和修改。由于维护者的精力有限，SagerNet的一些新功能可能不会被合并到这个项目中。
 
 This project is derived from [SagerNet](https://github.com/SagerNet/SagerNet) and has many optimizations and modifications. Some new features of SagerNet may not be merged into this project due to the limited energy of maintainers.
+
+有什么显著的不同？
+
+What is the significant difference?
+
+https://matsuridayo.github.io/m-faq/
