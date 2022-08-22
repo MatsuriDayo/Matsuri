@@ -32,6 +32,7 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.ConnectivityManager
+import android.net.Network
 import android.os.Build
 import android.os.PowerManager
 import android.os.StrictMode
@@ -46,10 +47,7 @@ import io.nekohasekai.sagernet.ktx.Logs
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
 import io.nekohasekai.sagernet.ui.MainActivity
-import io.nekohasekai.sagernet.utils.CrashHandler
-import io.nekohasekai.sagernet.utils.DeviceStorageApp
-import io.nekohasekai.sagernet.utils.PackageCache
-import io.nekohasekai.sagernet.utils.Theme
+import io.nekohasekai.sagernet.utils.*
 import kotlinx.coroutines.DEBUG_PROPERTY_NAME
 import kotlinx.coroutines.DEBUG_PROPERTY_VALUE_ON
 import libcore.Libcore
@@ -104,6 +102,11 @@ class SagerNet : Application(),
         if (isMainProcess) {
             Theme.apply(this)
             Theme.applyNightTheme()
+            runOnDefaultDispatcher {
+                DefaultNetworkListener.start(this) {
+                    underlyingNetwork = it
+                }
+            }
         }
 
         if (isBgProcess) {
@@ -255,6 +258,8 @@ class SagerNet : Application(),
 
         fun stopService() =
             application.sendBroadcast(Intent(Action.CLOSE).setPackage(application.packageName))
+
+        var underlyingNetwork: Network? = null
 
     }
 

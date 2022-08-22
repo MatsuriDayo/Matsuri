@@ -19,9 +19,7 @@
 
 package io.nekohasekai.sagernet.group
 
-import io.nekohasekai.sagernet.IPv6Mode
-import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.SubscriptionType
+import io.nekohasekai.sagernet.*
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.GroupManager
 import io.nekohasekai.sagernet.database.ProxyGroup
@@ -80,8 +78,20 @@ abstract class GroupUpdater {
 
             lookupJobs.add(GlobalScope.launch(lookupPool) {
                 try {
-                    // System DNS is enough (when VPN connected, it uses v2ray-core)
-                    val results = InetAddress.getAllByName(profile.serverAddress).toList()
+                    val results = if (
+                        SagerNet.underlyingNetwork != null &&
+                        DataStore.enableFakeDns &&
+                        DataStore.serviceState.started &&
+                        DataStore.serviceMode == Key.MODE_VPN
+                    ) {
+                        // FakeDNS
+                        SagerNet.underlyingNetwork!!
+                            .getAllByName(profile.serverAddress)
+                            .filterNotNull()
+                    } else {
+                        // System DNS is enough (when VPN connected, it uses v2ray-core)
+                        InetAddress.getAllByName(profile.serverAddress).filterNotNull()
+                    }
                     if (results.isEmpty()) error("empty response")
                     rewriteAddress(profile, results, ipv6First)
                 } catch (e: Exception) {

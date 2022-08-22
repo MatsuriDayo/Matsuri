@@ -163,7 +163,6 @@ fun HysteriaBean.buildHysteriaConfig(port: Int, cacheFile: (() -> File)?): Strin
             "socks5", JSONObject(
                 mapOf(
                     "listen" to "$LOCALHOST:$port",
-                    "timeout" to 10,
                 )
             )
         )
