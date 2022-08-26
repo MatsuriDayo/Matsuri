@@ -48,16 +48,13 @@ object Plugins {
     }
 
     fun getPlugin(pluginId: String): ProviderInfo? {
-        PackageCache.awaitLoadSync()
-        val pkgs = PackageCache.installedPluginPackages
-            .map { it.value }
-            .filter { it.providers[0].loadString(METADATA_KEY_ID) == pluginId }
+        // try queryIntentContentProviders
+        var providers = getPluginOld(pluginId)
 
-        var providers = if (pkgs.isEmpty()) {
-            getPluginOld(pluginId)
-        } else {
-            pkgs.map { it.providers[0] }
-        }
+        // try PackageCache
+        if (providers.isEmpty()) providers = getPluginNew(pluginId)
+
+        // not found
         if (providers.isEmpty()) return null
 
         if (providers.size > 1) {
@@ -74,6 +71,14 @@ object Plugins {
         }
 
         return providers[0]
+    }
+
+    fun getPluginNew(pluginId: String): List<ProviderInfo> {
+        PackageCache.awaitLoadSync()
+        val pkgs = PackageCache.installedPluginPackages
+            .map { it.value }
+            .filter { it.providers[0].loadString(METADATA_KEY_ID) == pluginId }
+        return pkgs.map { it.providers[0] }
     }
 
     private fun buildUri(id: String, auth: String) = Uri.Builder()

@@ -114,7 +114,8 @@ object NekoPluginManager {
         NekoJSInterface.Default.destroyJsi(plgId)
     }
 
-    const val PLUGIN_APP_VERSION = "_appVersionCode"
+    const val PLUGIN_APP_VERSION = "_v_vc"
+    const val PLUGIN_APP_VERSION_NAME = "_v_vn"
 
     // Return null if not managed
     fun tryGetPlgConfig(plgId: String): JSONObject? {
@@ -127,7 +128,9 @@ object NekoPluginManager {
 
     fun updatePlgConfig(plgId: String, plgConfig: JSONObject) {
         PackageCache.installedPluginPackages[plgId]?.apply {
-            plgConfig.put(PLUGIN_APP_VERSION, longVersionCode)
+            // longVersionCode requires API 28
+            plgConfig.put(PLUGIN_APP_VERSION, versionCode)
+            plgConfig.put(PLUGIN_APP_VERSION_NAME, versionName)
         }
         DataStore.configurationStore.putString(plgId, plgConfig.toString())
     }

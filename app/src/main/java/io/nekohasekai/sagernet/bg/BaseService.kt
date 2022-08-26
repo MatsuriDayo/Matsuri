@@ -27,6 +27,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Network
 import android.os.*
+import android.widget.Toast
 import io.nekohasekai.sagernet.Action
 import io.nekohasekai.sagernet.BootReceiver
 import io.nekohasekai.sagernet.R
@@ -534,10 +535,12 @@ class BaseService {
                 } catch (_: UnknownHostException) {
                     stopRunner(false, getString(R.string.invalid_server))
                 } catch (e: PluginManager.PluginNotFoundException) {
+                    Toast.makeText(this@Interface, e.readableMessage, Toast.LENGTH_SHORT).show()
                     Logs.d(e.readableMessage)
                     data.binder.missingPlugin(e.plugin)
                     stopRunner(false, null)
                 } catch (e: ShadowsocksPluginPluginManager.PluginNotFoundException) {
+                    Toast.makeText(this@Interface, e.readableMessage, Toast.LENGTH_SHORT).show()
                     Logs.d(e.readableMessage)
                     data.binder.missingPlugin("shadowsocks-" + e.plugin)
                     stopRunner(false, null)
