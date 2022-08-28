@@ -1,14 +1,20 @@
 #!/bin/bash
 
-source .github/env.sh
-
 chmod -R 777 .build 2>/dev/null
 rm -rf .build 2>/dev/null
 
 # Install gomobile
 if [ ! -f "$GOPATH/bin/gomobile" ]; then
-    go install -v github.com/sagernet/gomobile/cmd/gomobile@v0.0.0-20210905032500-701a995ff844
-    go install -v github.com/sagernet/gomobile/cmd/gobind@v0.0.0-20210905032500-701a995ff844
+    git clone https://github.com/MatsuriDayo/gomobile.git
+    pushd gomobile/cmd
+    pushd gomobile
+    go install -v
+    popd
+    pushd gobind
+    go install -v
+    popd
+    popd
+    rm -rf gomobile
 fi
 
 gomobile init

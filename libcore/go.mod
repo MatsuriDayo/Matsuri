@@ -5,12 +5,12 @@ go 1.18
 require (
 	github.com/Dreamacro/clash v1.9.0
 	github.com/miekg/dns v1.1.50
-	github.com/sagernet/gomobile v0.0.0-20210905032500-701a995ff844
 	github.com/sagernet/libping v0.1.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/ulikunitz/xz v0.5.10
 	github.com/v2fly/v2ray-core/v5 v5.0.0
 	go.uber.org/automaxprocs v1.4.0
+	golang.org/x/mobile v0.0.0-20220722155234-aaac322e2105
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a
 	gvisor.dev/gvisor v0.0.0
 )

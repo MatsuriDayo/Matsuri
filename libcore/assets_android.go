@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/sagernet/gomobile/asset"
 	"github.com/sirupsen/logrus"
 	"github.com/v2fly/v2ray-core/v5/common/platform/filesystem"
+	"golang.org/x/mobile/asset"
 )
 
 func extractV2RayAssets(useOfficial BoolFunc) {

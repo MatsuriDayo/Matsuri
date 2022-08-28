@@ -133,7 +133,7 @@
                 <data android:scheme="trojan-go" />
                 <data android:scheme="naive+https" />
                 <data android:scheme="naive+quic" />
-                <data android:scheme="pingtunnel" />
+                <data android:scheme="hysteria" />
 
             </intent-filter>
 

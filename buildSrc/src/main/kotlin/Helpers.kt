@@ -37,8 +37,8 @@ fun Project.requireFlavor(): String {
                 flavor = taskName.substringAfter("install")
                 return flavor
             }
-            taskName.contains("publish") -> {
-                flavor = taskName.substringAfter("publish").substringBefore("Bundle")
+            taskName.contains("bunlde") -> {
+                flavor = taskName.substringAfter("bunlde")
                 return flavor
             }
         }
@@ -171,7 +171,7 @@ fun Project.setupKotlinCommon() {
 }
 
 fun Project.setupNdk() {
-    android.ndkVersion = "23.2.8568313"
+    android.ndkVersion = "25.0.8775105"
 }
 
 fun Project.setupNdkLibrary() {
