@@ -307,16 +307,28 @@ object RawUpdater : GroupUpdater() {
                                     "uuid" -> bean.uuid = opt.value as String
                                     "alterId" -> bean.alterId = opt.value.toString().toInt()
                                     "cipher" -> bean.encryption = opt.value as String
-                                    "network" -> bean.type = opt.value as String
-                                    "tls" -> bean.security = if (opt.value?.toString() == "true") "tls" else ""
-                                    "skip-cert-verify" -> bean.allowInsecure = opt.value?.toString() == "true"
+                                    "network" -> {
+                                        bean.type = opt.value as String
+                                        // Clash "network" fix
+                                        when (bean.type) {
+                                            "http" -> {
+                                                bean.type = "tcp"
+                                                bean.headerType = "http"
+                                            }
+                                            "h2" -> bean.type = "http"
+                                        }
+                                    }
+                                    "tls" -> bean.security =
+                                        if (opt.value?.toString() == "true") "tls" else ""
+                                    "skip-cert-verify" -> bean.allowInsecure =
+                                        opt.value?.toString() == "true"
                                     "ws-path" -> bean.path = opt.value?.toString()
                                     "ws-headers" -> for (wsHeader in (opt.value as Map<String, Any>)) {
                                         when (wsHeader.key.lowercase()) {
                                             "host" -> bean.host = wsHeader.value.toString()
                                         }
                                     }
-                                    "ws-opts" -> for (wsOpt in (opt.value as Map<String, Any>)) {
+                                    "ws-opts", "ws-opt" -> for (wsOpt in (opt.value as Map<String, Any>)) {
                                         when (wsOpt.key.lowercase()) {
                                             "headers" -> for (wsHeader in (opt.value as Map<String, Any>)) {
                                                 when (wsHeader.key.lowercase()) {
@@ -335,20 +347,30 @@ object RawUpdater : GroupUpdater() {
                                         }
                                     }
                                     "servername" -> bean.host = opt.value?.toString()
-                                    "h2-opts" -> for (h2Opt in (opt.value as Map<String, Any>)) {
+                                    // The format of the VMessBean is wrong, so the `host` `path` has some strange transformations here.
+                                    "h2-opts", "h2-opt" -> for (h2Opt in (opt.value as Map<String, Any>)) {
                                         when (h2Opt.key.lowercase()) {
-                                            "host" -> bean.host = (h2Opt.value as List<String>).first()
+                                            "host" -> bean.host =
+                                                (h2Opt.value as List<String>).first()
                                             "path" -> bean.path = h2Opt.value.toString()
                                         }
                                     }
-                                    "http-opts" -> for (httpOpt in (opt.value as Map<String, Any>)) {
+                                    "http-opts", "http-opt" -> for (httpOpt in (opt.value as Map<String, Any>)) {
                                         when (httpOpt.key.lowercase()) {
-                                            "path" -> bean.path = (httpOpt.value as List<String>).first()
+                                            "path" -> bean.path =
+                                                (httpOpt.value as List<String>).first()
+                                            "headers" -> for (hdr in (httpOpt.value as Map<String, Any>)) {
+                                                when (hdr.key.lowercase()) {
+                                                    "host" -> bean.host =
+                                                        (hdr.value as List<String>).first()
+                                                }
+                                            }
                                         }
                                     }
-                                    "grpc-opts" -> for (grpcOpt in (opt.value as Map<String, Any>)) {
+                                    "grpc-opts", "grpc-opt" -> for (grpcOpt in (opt.value as Map<String, Any>)) {
                                         when (grpcOpt.key.lowercase()) {
-                                            "grpc-service-name" -> bean.grpcServiceName = grpcOpt.value.toString()
+                                            "grpc-service-name" -> bean.grpcServiceName =
+                                                grpcOpt.value.toString()
                                         }
                                     }
                                 }
@@ -365,7 +387,8 @@ object RawUpdater : GroupUpdater() {
                                     "port" -> bean.serverPort = opt.value.toString().toInt()
                                     "password" -> bean.password = opt.value?.toString()
                                     "sni" -> bean.sni = opt.value?.toString()
-                                    "skip-cert-verify" -> bean.allowInsecure = opt.value?.toString() == "true"
+                                    "skip-cert-verify" -> bean.allowInsecure =
+                                        opt.value?.toString() == "true"
                                 }
                             }
                             proxies.add(bean)
@@ -649,9 +672,10 @@ object RawUpdater : GroupUpdater() {
                                                                     v2rayBean.host = value.valueX
                                                                 }
                                                                 value.valueY != null -> {
-                                                                    v2rayBean.host = value.valueY.joinToString(
-                                                                        ","
-                                                                    )
+                                                                    v2rayBean.host =
+                                                                        value.valueY.joinToString(
+                                                                            ","
+                                                                        )
                                                                 }
                                                             }
                                                         }
