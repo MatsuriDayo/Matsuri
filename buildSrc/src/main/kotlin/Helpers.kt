@@ -1,11 +1,13 @@
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
-import com.github.triplet.gradle.play.PlayPublisherExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.extra
+import org.gradle.kotlin.dsl.getByName
+import org.gradle.kotlin.dsl.kotlin
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 import java.security.MessageDigest
 import java.util.*
@@ -37,8 +39,8 @@ fun Project.requireFlavor(): String {
                 flavor = taskName.substringAfter("install")
                 return flavor
             }
-            taskName.contains("bunlde") -> {
-                flavor = taskName.substringAfter("bunlde")
+            taskName.contains("bundle") -> {
+                flavor = taskName.substringAfter("bundle")
                 return flavor
             }
         }
@@ -194,48 +196,6 @@ fun Project.setupNdkLibrary() {
     }
 }
 
-fun Project.setupCMakeLibrary() {
-    setupCommon()
-    setupNdk()
-    android.apply {
-        defaultConfig {
-            externalNativeBuild.cmake {
-                val targetAbi = requireTargetAbi()
-                if (targetAbi.isNotBlank()) {
-                    abiFilters(targetAbi)
-                } else {
-                    abiFilters("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-                }
-                arguments("-j${Runtime.getRuntime().availableProcessors()}")
-            }
-        }
-
-        externalNativeBuild.cmake.path("src/main/cpp/CMakeLists.txt")
-    }
-}
-
-
-fun Project.setupPlay() {
-    val serviceAccountCredentialsFile = rootProject.file("service_account_credentials.json")
-    if (serviceAccountCredentialsFile.isFile) {
-        setupPlayInternal().serviceAccountCredentials.set(serviceAccountCredentialsFile)
-    } else if (System.getenv().containsKey("ANDROID_PUBLISHER_CREDENTIALS")) {
-        setupPlayInternal()
-    }
-}
-
-private fun Project.setupPlayInternal(): PlayPublisherExtension {
-    apply(plugin = "com.github.triplet.play")
-    return (extensions.getByName("play") as PlayPublisherExtension).apply {
-        if (android.defaultConfig.versionName?.contains("beta") == true) {
-            track.set("beta")
-        } else {
-            track.set("production")
-        }
-        defaultToAppBundles.set(true)
-    }
-}
-
 fun Project.setupAppCommon() {
     setupKotlinCommon()
 
@@ -353,5 +313,4 @@ fun Project.setupApp() {
         add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.4.0")
     }
 
-    setupPlay()
 }

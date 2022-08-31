@@ -20,6 +20,8 @@
 package io.nekohasekai.sagernet.ui.profile
 
 import android.content.DialogInterface
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.Menu
@@ -28,6 +30,9 @@ import android.view.View
 import android.widget.LinearLayout
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.preference.EditTextPreference
@@ -37,10 +42,7 @@ import com.github.shadowsocks.plugin.Empty
 import com.github.shadowsocks.plugin.fragment.AlertDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.takisoft.preferencex.PreferenceFragmentCompat
-import io.nekohasekai.sagernet.GroupType
-import io.nekohasekai.sagernet.Key
-import io.nekohasekai.sagernet.R
-import io.nekohasekai.sagernet.SagerNet
+import io.nekohasekai.sagernet.*
 import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.GroupManager
 import io.nekohasekai.sagernet.database.ProfileManager
@@ -180,6 +182,11 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
                     .filter { it.type == GroupType.BASIC }.size > 1 // have other basic group
             ) isVisible = true
         }
+        menu.findItem(R.id.action_create_shortcut)?.apply {
+            if (Build.VERSION.SDK_INT >= 26 &&
+                DataStore.editingId != 0L // not new profile
+            ) isVisible = true
+        }
         return true
     }
 
@@ -267,6 +274,30 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
                     activity.saveAndExit()
                 }
                 true
+            }
+            R.id.action_create_shortcut -> {
+                val ctx = requireContext()
+                val ent = activity.proxyEntity!!
+                val shortcut =
+                    ShortcutInfoCompat.Builder(requireContext(), "shortcut-profile-${ent.id}")
+                        .setShortLabel(ent.displayName())
+                        .setLongLabel(ent.displayName())
+                        .setIcon(
+                            IconCompat.createWithResource(
+                                ctx,
+                                R.drawable.ic_qu_shadowsocks_launcher
+                            )
+                        )
+                        .setIntent(
+                            Intent(
+                                context, QuickToggleShortcut::class.java
+                            ).apply {
+                                action = Intent.ACTION_MAIN
+                                putExtra("profile", ent.id)
+                            }
+                        )
+                        .build()
+                ShortcutManagerCompat.requestPinShortcut(ctx, shortcut, null)
             }
             R.id.action_move -> {
                 val view = LinearLayout(context).apply {

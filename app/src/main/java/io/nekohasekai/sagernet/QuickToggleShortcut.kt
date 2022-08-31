@@ -32,10 +32,12 @@ import androidx.core.graphics.drawable.IconCompat
 import io.nekohasekai.sagernet.aidl.ISagerNetService
 import io.nekohasekai.sagernet.bg.BaseService
 import io.nekohasekai.sagernet.bg.SagerConnection
+import io.nekohasekai.sagernet.database.DataStore
 
 @Suppress("DEPRECATION")
 class QuickToggleShortcut : Activity(), SagerConnection.Callback {
     private val connection = SagerConnection()
+    private var profileId = -1L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,21 +52,22 @@ class QuickToggleShortcut : Activity(), SagerConnection.Callback {
                     .build()))
             finish()
         } else {
+            profileId = intent.getLongExtra("profile", -1L)
             connection.connect(this, this)
-            if (Build.VERSION.SDK_INT >= 25) getSystemService<ShortcutManager>()!!.reportShortcutUsed(
-                "toggle")
+            if (Build.VERSION.SDK_INT >= 25) {
+                getSystemService<ShortcutManager>()!!.reportShortcutUsed(if (profileId >= 0) "shortcut-profile-$profileId" else "toggle")
+            }
         }
-    }
-
-    override fun onServiceDisconnected() {
-        super.onServiceDisconnected()
     }
 
     override fun onServiceConnected(service: ISagerNetService) {
         val state = BaseService.State.values()[service.state]
         when {
             state.canStop -> SagerNet.stopService()
-            state == BaseService.State.Stopped -> SagerNet.startService()
+            state == BaseService.State.Stopped -> {
+                if (profileId >= 0L) DataStore.selectedProxy = profileId
+                SagerNet.startService()
+            }
         }
         finish()
     }

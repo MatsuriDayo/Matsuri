@@ -467,4 +467,5 @@
     <string name="update_all_subscription">更新所有订阅</string>
     <string name="experimental_reduced_iv_head_entropy">这是 GFWReport 针对 GFW 上观察到的类似随机流的协议阻塞行为提出的对策。  这个选项将 IV 的前 6 个字节重新映射为可打印的字符，启用后，特权网络路径上的任何人都有可能识别该协议。</string>
     <string name="exe_prefer_provider">首选插件提供者</string>
+    <string name="create_shortcut">创建快捷方式</string>
 </resources>

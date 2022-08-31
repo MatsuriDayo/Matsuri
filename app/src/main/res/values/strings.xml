@@ -506,5 +506,6 @@ Anyone can write advanced plugins, which can control Matsuri. please download an
     <string name="neko_plugin_internal_error">%s internal error</string>
     <string name="move">Move</string>
     <string name="exe_prefer_provider">Plugin Preferred Provider</string>
+    <string name="create_shortcut">Create Shortcut</string>
 
 </resources>
