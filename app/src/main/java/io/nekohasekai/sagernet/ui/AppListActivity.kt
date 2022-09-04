@@ -262,7 +262,7 @@ class AppListActivity : ThemedActivity() {
         binding.searchLayout.isGone = forNeko
         binding.hintNekoPlugin.isGone = !forNeko
         binding.actionLearnMore.setOnClickListener {
-            launchCustomTab("https://matsuridayo.github.io/plugin/")
+            launchCustomTab("https://matsuridayo.github.io/m-plugin/")
         }
 
         loadApps()

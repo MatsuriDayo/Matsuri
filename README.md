@@ -18,9 +18,9 @@ A proxy toolchain for Android, written in Kotlin.
 
 [下载](https://github.com/Matsuridayo/Matsuri/releases)
 
-### F-Droid
+[F-Droid](https://f-droid.org/packages/moe.matsuri.lite)
 
-[Get it on F-Droid](https://f-droid.org/packages/moe.matsuri.lite)
+[Google Play](https://play.google.com/store/apps/details?id=moe.matsuri.lite)
 
 ## 更改记录 & 发布频道 / Changelog & Telegram channel
 

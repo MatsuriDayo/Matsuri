@@ -40,5 +40,9 @@ fun Context.launchCustomTab(link: String) {
                 setToolbarColor(getColorAttr(R.attr.colorPrimary))
             }.build()
         )
-    }.build().launchUrl(this, Uri.parse(link))
+    }.build().apply {
+        if (intent.resolveActivity(packageManager) != null) {
+            launchUrl(this@launchCustomTab, Uri.parse(link))
+        }
+    }
 }
