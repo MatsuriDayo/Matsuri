@@ -41,6 +41,7 @@ import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
 import io.nekohasekai.sagernet.fmt.v2ray.V2RayConfig
 import io.nekohasekai.sagernet.fmt.v2ray.V2RayConfig.*
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
+import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
 import io.nekohasekai.sagernet.ktx.isIpAddress
 import io.nekohasekai.sagernet.ktx.mkPort
 import io.nekohasekai.sagernet.utils.PackageCache
@@ -782,16 +783,20 @@ fun buildV2RayConfig(
                 // For external proxy software, their traffic must goes to v2ray-core to use protected fd.
                 if (bean.canMapping() && proxyEntity.needExternal()) {
                     // With ss protect, don't use mapping
-                    var myhy = index == profileList.lastIndex && bean is HysteriaBean
-                    if (myhy) {
-                        myhy = false
-                        Plugins.getPlugin("hysteria-plugin")?.apply {
+                    var needExternal = true
+                    if (index == profileList.lastIndex) {
+                        val pluginId = when (bean) {
+                            is HysteriaBean -> "hysteria-plugin"
+                            is WireGuardBean -> "wireguard-plugin"
+                            else -> ""
+                        }
+                        Plugins.getPlugin(pluginId)?.apply {
                             if (authority.startsWith(Plugins.AUTHORITIES_PREFIX_NEKO_EXE)) {
-                                myhy = true
+                                needExternal = false
                             }
                         }
                     }
-                    if (!myhy) {
+                    if (needExternal) {
                         val mappingPort = mkPort()
                         bean.finalAddress = LOCALHOST
                         bean.finalPort = mappingPort

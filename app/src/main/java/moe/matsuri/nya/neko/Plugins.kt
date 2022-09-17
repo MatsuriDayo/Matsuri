@@ -48,6 +48,8 @@ object Plugins {
     }
 
     fun getPlugin(pluginId: String): ProviderInfo? {
+        if (pluginId.isBlank()) return null
+
         // try queryIntentContentProviders
         var providers = getPluginOld(pluginId)
 
