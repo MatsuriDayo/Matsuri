@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string-array name="bypass_private_route">
         <item>1.0.0.0/8</item>
         <item>2.0.0.0/7</item>
@@ -545,6 +545,11 @@
     <string-array name="exe_prefer_provider">
         <item>Matsuri</item>
         <item>SagerNet</item>
+    </string-array>
+
+    <string-array name="app_tls_version">
+        <item>1.2</item>
+        <item>1.3</item>
     </string-array>
 
 </resources>

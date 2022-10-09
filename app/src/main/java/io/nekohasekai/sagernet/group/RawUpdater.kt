@@ -73,6 +73,9 @@ object RawUpdater : GroupUpdater() {
 
             val response = Libcore.newHttpClient().apply {
                 trySocks5(DataStore.socksPort)
+                when (DataStore.appTLSVersion) {
+                    "1.3" -> restrictedTLS()
+                }
             }.newRequest().apply {
                 setURL(subscription.link)
                 setUserAgent(subscription.customUserAgent.takeIf { it.isNotBlank() } ?: USER_AGENT)

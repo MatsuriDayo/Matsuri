@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <PreferenceCategory app:title="@string/general_settings">
         <io.nekohasekai.sagernet.widget.AppListPreference
-            app:key="nekoPlugins"
             app:icon="@drawable/ic_baseline_android_24"
+            app:key="nekoPlugins"
             app:title="@string/neko_plugin" />
         <SwitchPreference
             app:defaultValue="false"
@@ -46,12 +46,12 @@
             app:title="@string/tun_implementation"
             app:useSimpleSummaryProvider="true" />
         <moe.matsuri.nya.ui.MTUPreference
+            app:defaultValue="9000"
+            app:entries="@array/mtu_select"
+            app:entryValues="@array/mtu_select"
             app:icon="@drawable/baseline_public_24"
             app:key="mtu"
-            app:defaultValue="9000"
-            app:title="@string/mtu"
-            app:entries="@array/mtu_select"
-            app:entryValues="@array/mtu_select" />
+            app:title="@string/mtu" />
         <SwitchPreference
             app:icon="@drawable/ic_baseline_manage_search_24"
             app:key="appTrafficStatistics"
@@ -146,10 +146,10 @@
 
     <PreferenceCategory app:title="@string/protocol_settings">
         <MultiSelectListPreference
-            app:icon="@drawable/ic_baseline_compare_arrows_24"
+            app:defaultValue="@array/mux_select_init"
             app:entries="@array/mux_select_init"
             app:entryValues="@array/mux_select_init"
-            app:defaultValue="@array/mux_select_init"
+            app:icon="@drawable/ic_baseline_compare_arrows_24"
             app:key="mux"
             app:summary="@string/mux_sum"
             app:title="@string/enable_mux" />
@@ -163,8 +163,8 @@
 
     <PreferenceCategory app:title="@string/cag_dns">
         <SwitchPreference
-            app:key="enhanceDomain"
             app:icon="@drawable/ic_baseline_location_on_24"
+            app:key="enhanceDomain"
             app:summary="@string/enhance_resolve_server_domain_summary"
             app:title="@string/enhance_resolve_server_domain" />
         <moe.matsuri.nya.ui.DnsLinkPreference
@@ -282,7 +282,12 @@
             app:key="exePreferProvider"
             app:title="@string/exe_prefer_provider"
             app:useSimpleSummaryProvider="true" />
-</PreferenceCategory>
-
-
+        <com.takisoft.preferencex.SimpleMenuPreference
+            app:defaultValue="1.2"
+            app:entries="@array/app_tls_version"
+            app:entryValues="@array/app_tls_version"
+            app:key="appTLSVersion"
+            app:title="@string/app_tls_version"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
 </PreferenceScreen>

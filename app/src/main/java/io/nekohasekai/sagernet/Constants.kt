@@ -98,9 +98,6 @@ object Key {
     const val PROFILE_GROUP = "profileGroup"
     const val PROFILE_CURRENT = "profileCurrent"
 
-    const val NEKO_PLUGIN_MANAGED = "nekoPlugins"
-    const val EXE_PREFER_PROVIDER = "exePreferProvider"
-
     const val SERVER_ADDRESS = "serverAddress"
     const val SERVER_PORT = "serverPort"
     const val SERVER_USERNAME = "serverUsername"
@@ -190,6 +187,11 @@ object Key {
     const val SUBSCRIPTION_AUTO_UPDATE = "subscriptionAutoUpdate"
     const val SUBSCRIPTION_AUTO_UPDATE_DELAY = "subscriptionAutoUpdateDelay"
 
+    //
+
+    const val NEKO_PLUGIN_MANAGED = "nekoPlugins"
+    const val EXE_PREFER_PROVIDER = "exePreferProvider"
+    const val APP_TLS_VERSION = "appTLSVersion"
 }
 
 object TunImplementation {
