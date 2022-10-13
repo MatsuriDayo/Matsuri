@@ -378,6 +378,9 @@ object RawUpdater : GroupUpdater() {
                                     }
                                 }
                             }
+                            if (bean.isTLS() && bean.sni.isNullOrBlank() && bean.host.isNotBlank()) {
+                                bean.sni = bean.host
+                            }
                             proxies.add(bean)
                         }
                         "trojan" -> {
