@@ -53,6 +53,7 @@ func extractAssetName(name string, useOfficialAssets bool) error {
 	} else {
 		dir = externalAssetsPath
 	}
+	dstName := dir + name
 
 	var localVersion string
 	var assetVersion string
@@ -80,7 +81,7 @@ func extractAssetName(name string, useOfficialAssets bool) error {
 
 	if _, err := os.Stat(dir + version); err != nil {
 		fileMissing = true
-	} else if _, err := os.Stat(dir + name); err != nil {
+	} else if _, err := os.Stat(dstName); err != nil {
 		fileMissing = true
 	}
 
@@ -110,10 +111,12 @@ func extractAssetName(name string, useOfficialAssets bool) error {
 		return nil
 	}
 
-	err := extractAsset(assetsPrefix+name+".xz", dir+name)
+	assetName := assetsPrefix + name + ".xz"
+	tmpXzName := dstName + ".xz"
+	err := extractAsset(assetName, tmpXzName)
 	if err == nil {
-		err = unxz(dir + name)
-
+		err = Unxz(tmpXzName, dstName)
+		os.Remove(tmpXzName)
 	}
 	if err != nil {
 		return err

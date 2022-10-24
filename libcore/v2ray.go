@@ -149,9 +149,10 @@ func ListV2rayConnections() string {
 		ks := make([]uint32, 0)
 
 		m.Range(func(key interface{}, value interface{}) bool {
-			k := key.(uint32)
-			vs[k] = value
-			ks = append(ks, k)
+			if k, ok := key.(uint32); ok {
+				vs[k] = value
+				ks = append(ks, k)
+			}
 			return true
 		})
 

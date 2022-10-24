@@ -27,11 +27,3 @@ func Unxz(archive string, path string) error {
 	comm.CloseIgnore(i, o)
 	return err
 }
-
-func unxz(path string) error {
-	err := Unxz(path, path+".tmp")
-	if err != nil {
-		return err
-	}
-	return os.Rename(path+".tmp", path)
-}
