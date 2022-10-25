@@ -112,9 +112,6 @@ fun buildV2RayConfig(
     val domainListDNSDirect = mutableListOf<String>()
     val bypassDNSBeans = hashSetOf<AbstractBean>()
 
-    val allowAccess = DataStore.allowAccess
-    val bind = if (!forTest && allowAccess) "0.0.0.0" else LOCALHOST
-
     var remoteDns = DataStore.remoteDns.split("\n")
         .mapNotNull { dns -> dns.trim().takeIf { it.isNotBlank() && !it.startsWith("#") } }
     var directDNS = DataStore.directDns.split("\n")
@@ -126,6 +123,12 @@ fun buildV2RayConfig(
     val requireHttp = !forTest && DataStore.requireHttp
     val requireTransproxy = if (forTest) false else DataStore.requireTransproxy
     val ipv6Mode = if (forTest) IPv6Mode.ENABLE else DataStore.ipv6Mode
+
+    val allowAccess = DataStore.allowAccess
+    val bind = if (!forTest && allowAccess) {
+        if (ipv6Mode != IPv6Mode.DISABLE) "::" else "0.0.0.0"
+    } else LOCALHOST
+
     val resolveDestination = DataStore.resolveDestination
     val trafficStatistics = !forTest && DataStore.profileTrafficStatistics
     val tryDomains = mutableListOf<String>()
