@@ -20,14 +20,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Golang Status
         run: find buildScript libcore/*.sh | xargs cat | sha1sum > golang_status
       - name: Libcore Status
         run: git ls-files libcore | xargs cat | sha1sum > libcore_status
       - name: LibCore Cache
         id: cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             app/libs/libcore.aar
@@ -35,7 +35,7 @@ jobs:
           key: ${{ hashFiles('.github/workflows/*', 'golang_status', 'libcore_status') }}
       - name: Golang Cache
         if: steps.cache.outputs.cache-hit != 'true'
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: build/golang
           key: go-${{ hashFiles('.github/workflows/*', 'golang_status') }}
@@ -49,23 +49,23 @@ jobs:
       - libcore
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Golang Status
         run: find buildScript libcore/*.sh | xargs cat | sha1sum > golang_status
       - name: Libcore Status
         run: git ls-files libcore | xargs cat | sha1sum > libcore_status
       - name: LibCore Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             app/libs/libcore.aar
             build/v2ray-core
           key: ${{ hashFiles('.github/workflows/*', 'golang_status', 'libcore_status') }}
       - name: Gradle cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
-          path: ~/.gradle
-          key: gradle-${{ hashFiles('**/*.gradle.kts') }}
+          path: ${{ env.RUNNER_HOME }}/.gradle
+          key: gradle-oss-${{ hashFiles('**/*.gradle.kts') }}
       - name: Gradle Build
         env:
           BUILD_PLUGIN: none
@@ -78,7 +78,7 @@ jobs:
           APK=$(find app/build/outputs/apk -name '*arm64-v8a*.apk')
           APK=$(dirname $APK)
           echo "APK=$APK" >> $GITHUB_ENV
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: APKs
           path: ${{ env.APK }}
@@ -89,9 +89,9 @@ jobs:
     needs: build
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Donwload Artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: APKs
           path: artifacts
@@ -110,7 +110,7 @@ jobs:
     needs: build
     steps:
       - name: Donwload Artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: APKs
           path: artifacts
@@ -141,23 +141,23 @@ jobs:
       - libcore
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Golang Status
         run: find buildScript libcore/*.sh | xargs cat | sha1sum > golang_status
       - name: Libcore Status
         run: git ls-files libcore | xargs cat | sha1sum > libcore_status
       - name: LibCore Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: |
             app/libs/libcore.aar
             build/v2ray-core
           key: ${{ hashFiles('.github/workflows/*', 'golang_status', 'libcore_status') }}
       - name: Gradle cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
-          path: ~/.gradle
-          key: gradle-${{ hashFiles('**/*.gradle.kts') }}
+          path: ${{ env.RUNNER_HOME }}/.gradle
+          key: gradle-play-${{ hashFiles('**/*.gradle.kts') }}
       - name: Checkout Library
         run: |
           git submodule update --init 'app/*'
@@ -168,7 +168,7 @@ jobs:
           export LOCAL_PROPERTIES="${{ secrets.LOCAL_PROPERTIES }}"
           ./run init action library
           ./gradlew bundlePlayRelease
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
           name: AAB
           path: app/build/outputs/bundle/playRelease/app-play-release.aab
