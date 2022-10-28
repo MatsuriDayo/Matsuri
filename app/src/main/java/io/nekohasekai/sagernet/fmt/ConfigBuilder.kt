@@ -331,7 +331,8 @@ fun buildV2RayConfig(
             indexMap.add(IndexEntity(chainMap))
             val chainOutbounds = ArrayList<OutboundObject>()
 
-            // chainTag: v2ray outbound tag for this chain
+            // chainTagOut: v2ray outbound tag for this chain
+            var chainTagOut = ""
             var chainTag = "c-$chainId"
             var muxApplied = false
 
@@ -355,7 +356,7 @@ fun buildV2RayConfig(
                 // tagOut: v2ray outbound tag for a profile
                 // profile2 (in) (global)   tag g-(id)
                 // profile1                 tag (chainTag)-(id)
-                // profile0 (out)           tag (chainTag)-(id) / single: chainTag=g-(id)
+                // profile0 (out)           tag (chainTag)-(id) / single: "proxy"
                 var tagOut = "$chainTag-${proxyEntity.id}"
 
                 // needGlobal: can only contain one?
@@ -366,6 +367,11 @@ fun buildV2RayConfig(
                     needGlobal = true
                     tagOut = "g-" + proxyEntity.id
                     bypassDNSBeans += proxyEntity.requireBean()
+                }
+
+                // last profile set as "proxy"
+                if (chainId == 0L && index == 0) {
+                    tagOut = "proxy";
                 }
 
                 // chain rules
@@ -385,7 +391,7 @@ fun buildV2RayConfig(
                     }
                 } else {
                     // index == 0 means last profile in chain / not chain
-                    chainTag = tagOut
+                    chainTagOut = tagOut
                     outboundTags.add(tagOut)
                     if (chainId == 0L) outboundTagsCurrent.add(tagOut)
                 }
@@ -827,7 +833,7 @@ fun buildV2RayConfig(
                 pastEntity = proxyEntity
             }
 
-            return chainTag
+            return chainTagOut
         }
 
         val tagProxy = buildChain(0, proxies)
