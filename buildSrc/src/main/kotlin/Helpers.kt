@@ -172,30 +172,6 @@ fun Project.setupKotlinCommon() {
     }
 }
 
-fun Project.setupNdk() {
-    android.ndkVersion = "25.0.8775105"
-}
-
-fun Project.setupNdkLibrary() {
-    setupCommon()
-    setupNdk()
-    android.apply {
-        defaultConfig {
-            externalNativeBuild.ndkBuild {
-                val targetAbi = requireTargetAbi()
-                if (targetAbi.isNotBlank()) {
-                    abiFilters(targetAbi)
-                } else {
-                    abiFilters("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
-                }
-                arguments("-j${Runtime.getRuntime().availableProcessors()}")
-            }
-        }
-
-        externalNativeBuild.ndkBuild.path("src/main/jni/Android.mk")
-    }
-}
-
 fun Project.setupAppCommon() {
     setupKotlinCommon()
 
@@ -258,16 +234,11 @@ fun Project.setupApp() {
         }
 
         splits.abi {
-            if (requireFlavor().startsWith("Fdroid")) {
-                isEnable = false
-            } else {
-                isEnable = true
-                isUniversalApk = false
-
-                if (targetAbi.isNotBlank()) {
-                    reset()
-                    include(targetAbi)
-                }
+            isEnable = true
+            isUniversalApk = false
+            if (targetAbi.isNotBlank()) {
+                reset()
+                include(targetAbi)
             }
         }
 
@@ -286,7 +257,6 @@ fun Project.setupApp() {
                 outputFileName = outputFileName.replace(project.name, "Matsuri-$versionName")
                     .replace("-release", "")
                     .replace("-oss", "")
-
             }
         }
 
@@ -298,11 +268,19 @@ fun Project.setupApp() {
                 downloadAssets()
             }
         }
+
         tasks.whenTaskAdded {
             if (name == "pre${requireFlavor()}Build") {
                 dependsOn("downloadAssets")
             }
         }
+
+        for (abi in listOf("Arm64", "Arm", "X64", "X86")) {
+            tasks.create("assemble" + abi + "FdroidRelease") {
+                dependsOn("assembleFdroidRelease")
+            }
+        }
+
     }
 
     dependencies {
