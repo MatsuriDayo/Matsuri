@@ -3,6 +3,7 @@ package libcore
 import (
 	"context"
 	"fmt"
+	"libcore/device"
 	"libcore/doh"
 	"libcore/protect"
 	"net"
@@ -42,7 +43,7 @@ type simpleSekaiWrapper struct {
 }
 
 func (p *simpleSekaiWrapper) LookupIP(network, host string) (ret []net.IP, err error) {
-	// TODO only Android now
+	// NOTE only Android
 	isSekai := p.sekaiResolver != nil
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
@@ -98,7 +99,9 @@ func setupResolvers() {
 	internet.UseAlternativeSystemDNSDialer(underlyingDialer)
 
 	// "localhost" localDns lookup -> Underlying
-	localdns.SetLookupFunc(underlyingResolver.LookupIP)
+	if !device.IsNekoray {
+		localdns.SetLookupFunc(underlyingResolver.LookupIP)
+	}
 
 	// doh package
 	doh.SetDialContext(underlyingDialer.DialContext)
