@@ -138,6 +138,14 @@ public class HysteriaBean extends AbstractBean {
         bean.disableMtuDiscovery = disableMtuDiscovery;
     }
 
+    @Override
+    public String displayAddress() {
+        if (HysteriaFmtKt.isMultiPort(this)) {
+            return serverAddress;
+        }
+        return super.displayAddress();
+    }
+
     @NotNull
     @Override
     public HysteriaBean clone() {

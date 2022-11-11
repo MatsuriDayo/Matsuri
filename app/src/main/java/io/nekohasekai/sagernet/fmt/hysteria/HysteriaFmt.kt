@@ -81,12 +81,8 @@ fun HysteriaBean.toUri(): String {
     if (authPayload.isNotBlank()) {
         builder.addQueryParameter("auth", authPayload)
     }
-    if (uploadMbps != 10) {
-        builder.addQueryParameter("upmbps", "$uploadMbps")
-    }
-    if (downloadMbps != 50) {
-        builder.addQueryParameter("downmbps", "$downloadMbps")
-    }
+    builder.addQueryParameter("upmbps", "$uploadMbps")
+    builder.addQueryParameter("downmbps", "$downloadMbps")
     if (alpn.isNotBlank()) {
         builder.addQueryParameter("alpn", alpn)
     }
@@ -113,8 +109,11 @@ fun HysteriaBean.toUri(): String {
 
 fun JSONObject.parseHysteria(): HysteriaBean {
     return HysteriaBean().apply {
-        serverAddress = optString("server").substringBeforeLast(":")
-        serverPort = optString("server").substringAfterLast(":").toIntOrNull() ?: 443
+        serverAddress = optString("server")
+        if (!isMultiPort()) {
+            serverAddress = optString("server").substringBeforeLast(":")
+            serverPort = optString("server").substringAfterLast(":").toIntOrNull() ?: 443
+        }
         uploadMbps = getIntNya("up_mbps")
         downloadMbps = getIntNya("down_mbps")
         obfuscation = getStr("obfs")
@@ -148,7 +147,7 @@ fun JSONObject.parseHysteria(): HysteriaBean {
 
 fun HysteriaBean.buildHysteriaConfig(port: Int, cacheFile: (() -> File)?): String {
     return JSONObject().apply {
-        put("server", wrapUri())
+        put("server", if (isMultiPort()) serverAddress else wrapUri())
         when (protocol) {
             HysteriaBean.PROTOCOL_FAKETCP -> {
                 put("protocol", "faketcp")
@@ -193,4 +192,10 @@ fun HysteriaBean.buildHysteriaConfig(port: Int, cacheFile: (() -> File)?): Strin
         // hy 1.2.0 （不兼容）
         put("resolver", "udp://127.0.0.1:" + DataStore.localDNSPort)
     }.toStringPretty()
+}
+
+fun HysteriaBean.isMultiPort(): Boolean {
+    val p = serverAddress.substringAfterLast(":")
+    if (p.contains("-") || p.contains(",")) return true;
+    return false
 }

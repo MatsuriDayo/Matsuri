@@ -31,6 +31,7 @@ import io.nekohasekai.sagernet.fmt.V2rayBuildResult.IndexEntity
 import io.nekohasekai.sagernet.fmt.gson.gson
 import io.nekohasekai.sagernet.fmt.http.HttpBean
 import io.nekohasekai.sagernet.fmt.hysteria.HysteriaBean
+import io.nekohasekai.sagernet.fmt.hysteria.isMultiPort
 import io.nekohasekai.sagernet.fmt.internal.ChainBean
 import io.nekohasekai.sagernet.fmt.shadowsocks.ShadowsocksBean
 import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
@@ -1021,7 +1022,11 @@ fun buildV2RayConfig(
         // Bypass Lookup for the first profile
         bypassDNSBeans.forEach {
             if (!it.serverAddress.isIpAddress()) {
-                directLookupDomain.add("full:${it.serverAddress}")
+                var domain = "full:${it.serverAddress}"
+                if (it is HysteriaBean && it.isMultiPort()) {
+                    domain = "full:" + it.serverAddress.substringBeforeLast(":")
+                }
+                directLookupDomain.add(domain)
                 if (DataStore.enhanceDomain) tryDomains.add(it.serverAddress)
             }
         }
