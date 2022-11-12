@@ -195,6 +195,7 @@ fun HysteriaBean.buildHysteriaConfig(port: Int, cacheFile: (() -> File)?): Strin
 }
 
 fun HysteriaBean.isMultiPort(): Boolean {
+    if (!serverAddress.contains(":")) return false;
     val p = serverAddress.substringAfterLast(":")
     if (p.contains("-") || p.contains(",")) return true;
     return false

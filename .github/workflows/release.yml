@@ -64,7 +64,7 @@ jobs:
       - name: Gradle cache
         uses: actions/cache@v3
         with:
-          path: ${{ env.RUNNER_HOME }}/.gradle
+          path: ~/.gradle
           key: gradle-oss-${{ hashFiles('**/*.gradle.kts') }}
       - name: Gradle Build
         env:
@@ -156,7 +156,7 @@ jobs:
       - name: Gradle cache
         uses: actions/cache@v3
         with:
-          path: ${{ env.RUNNER_HOME }}/.gradle
+          path: ~/.gradle
           key: gradle-play-${{ hashFiles('**/*.gradle.kts') }}
       - name: Checkout Library
         run: |

@@ -1021,13 +1021,14 @@ fun buildV2RayConfig(
 
         // Bypass Lookup for the first profile
         bypassDNSBeans.forEach {
-            if (!it.serverAddress.isIpAddress()) {
-                var domain = "full:${it.serverAddress}"
-                if (it is HysteriaBean && it.isMultiPort()) {
-                    domain = "full:" + it.serverAddress.substringBeforeLast(":")
-                }
-                directLookupDomain.add(domain)
-                if (DataStore.enhanceDomain) tryDomains.add(it.serverAddress)
+            var serverAddr = it.serverAddress
+            if (it is HysteriaBean && it.isMultiPort()) {
+                serverAddr = it.serverAddress.substringBeforeLast(":")
+            }
+
+            if (!serverAddr.isIpAddress()) {
+                directLookupDomain.add("full:${serverAddr}")
+                if (DataStore.enhanceDomain) tryDomains.add(serverAddr)
             }
         }
 
