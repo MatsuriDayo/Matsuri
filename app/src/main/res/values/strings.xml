@@ -508,5 +508,6 @@ Anyone can write advanced plugins, which can control Matsuri. please download an
     <string name="exe_prefer_provider">Plugin Preferred Provider</string>
     <string name="create_shortcut">Create Shortcut</string>
     <string name="app_tls_version">Subscription Min TLS Version</string>
+    <string name="hop_interval">Port Hopping Interval</string>
 
 </resources>

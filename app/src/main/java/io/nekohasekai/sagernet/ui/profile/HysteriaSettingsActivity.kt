@@ -1,4 +1,3 @@
- 
 /******************************************************************************
  *                                                                            *
  * Copyright (C) 2021 by nekohasekai <contact-sagernet@sekai.icu>             *
@@ -52,6 +51,7 @@ class HysteriaSettingsActivity : ProfileSettingsActivity<HysteriaBean>() {
         DataStore.serverStreamReceiveWindow = streamReceiveWindow
         DataStore.serverConnectionReceiveWindow = connectionReceiveWindow
         DataStore.serverDisableMtuDiscovery = disableMtuDiscovery
+        DataStore.serverHopInterval = hopInterval
     }
 
     override fun HysteriaBean.serialize() {
@@ -71,6 +71,7 @@ class HysteriaSettingsActivity : ProfileSettingsActivity<HysteriaBean>() {
         streamReceiveWindow = DataStore.serverStreamReceiveWindow
         connectionReceiveWindow = DataStore.serverConnectionReceiveWindow
         disableMtuDiscovery = DataStore.serverDisableMtuDiscovery
+        hopInterval = DataStore.serverHopInterval
     }
 
     override fun PreferenceFragmentCompat.createPreferences(
@@ -106,6 +107,10 @@ class HysteriaSettingsActivity : ProfileSettingsActivity<HysteriaBean>() {
 
         findPreference<EditTextPreference>(Key.SERVER_PASSWORD)!!.apply {
             summaryProvider = PasswordSummaryProvider
+        }
+
+        findPreference<EditTextPreference>(Key.SERVER_HOP_INTERVAL)!!.apply {
+            setOnBindEditTextListener(EditTextPreferenceModifiers.Number)
         }
     }
 

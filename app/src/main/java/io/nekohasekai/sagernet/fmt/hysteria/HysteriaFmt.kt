@@ -191,6 +191,8 @@ fun HysteriaBean.buildHysteriaConfig(port: Int, cacheFile: (() -> File)?): Strin
 
         // hy 1.2.0 （不兼容）
         put("resolver", "udp://127.0.0.1:" + DataStore.localDNSPort)
+
+        put("hop_interval", hopInterval)
     }.toStringPretty()
 }
 

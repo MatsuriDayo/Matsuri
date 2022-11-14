@@ -144,6 +144,7 @@ object Key {
     const val SERVER_CONNECTION_RECEIVE_WINDOW = "serverConnectionReceiveWindow"
     const val SERVER_MTU = "serverMTU"
     const val SERVER_DISABLE_MTU_DISCOVERY = "serverDisableMtuDiscovery"
+    const val SERVER_HOP_INTERVAL = "hopInterval"
 
     const val SERVER_VMESS_EXPERIMENTS_CATEGORY = "serverVMessExperimentsCategory"
     const val SERVER_VMESS_EXPERIMENTAL_AUTHENTICATED_LENGTH =
