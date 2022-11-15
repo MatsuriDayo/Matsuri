@@ -542,6 +542,13 @@
 
     <string-array name="mux_select_init" />
 
+    <string-array name="dns_network_select">
+        <item>NoRemoteIPv4</item>
+        <item>NoRemoteIPv6</item>
+        <item>NoDirectIPv4</item>
+        <item>NoDirectIPv6</item>
+    </string-array>
+
     <string-array name="exe_prefer_provider">
         <item>Matsuri</item>
         <item>SagerNet</item>

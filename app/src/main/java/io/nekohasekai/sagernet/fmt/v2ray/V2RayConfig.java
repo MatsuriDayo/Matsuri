@@ -69,9 +69,12 @@ public class V2RayConfig {
             public String clientIp;
             public Boolean skipFallback;
             public List<String> domains;
-            public List<Integer> uidList; // Matsuri private
             public List<String> expectIPs;
 
+            // Matsuri private
+            public List<Integer> uidList;
+            public Boolean noV4;
+            public Boolean noV6;
         }
 
         public static class StringOrServerObject extends JsonOr<String, ServerObject> {

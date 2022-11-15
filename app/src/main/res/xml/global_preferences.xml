@@ -181,6 +181,13 @@
         <SwitchPreference
             app:key="directDnsUseSystem"
             app:title="@string/direct_dns_use_system" />
+        <MultiSelectListPreference
+            app:defaultValue="@array/mux_select_init"
+            app:entries="@array/dns_network_select"
+            app:entryValues="@array/dns_network_select"
+            app:key="dnsNetwork"
+            app:title="@string/dns_network"
+            app:useSimpleSummaryProvider="true" />
         <EditTextPreference
             app:defaultValue="domain:googleapis.cn googleapis.com"
             app:icon="@drawable/ic_baseline_transform_24"

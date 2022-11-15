@@ -128,6 +128,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var enableDnsRouting by configurationStore.boolean(Key.ENABLE_DNS_ROUTING) { true }
     var enableFakeDns by configurationStore.boolean(Key.ENABLE_FAKEDNS)
     var hosts by configurationStore.string(Key.DNS_HOSTS)
+    var dnsNetwork by configurationStore.stringSet(Key.DNS_NETWORK)
 
     var securityAdvisory by configurationStore.boolean(Key.SECURITY_ADVISORY) { true }
     var rulesProvider by configurationStore.stringToInt(Key.RULES_PROVIDER)

@@ -43,6 +43,7 @@ object Key {
     const val ENABLE_DNS_ROUTING = "enableDnsRouting"
     const val ENABLE_FAKEDNS = "enableFakeDns"
     const val DNS_HOSTS = "dnsHosts"
+    const val DNS_NETWORK = "dnsNetwork"
 
     const val IPV6_MODE = "ipv6Mode"
 

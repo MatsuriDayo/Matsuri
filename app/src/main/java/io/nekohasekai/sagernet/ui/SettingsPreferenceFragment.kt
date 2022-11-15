@@ -223,6 +223,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         }
 
         val dnsHosts = findPreference<EditTextPreference>(Key.DNS_HOSTS)!!
+        val dnsNetwork = findPreference<MultiSelectListPreference>(Key.DNS_NETWORK)!!
 
         portLocalDns.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
         muxConcurrency.setOnBindEditTextListener(EditTextPreferenceModifiers.Port)
@@ -277,6 +278,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         directDns.onPreferenceChangeListener = reloadListener
         enableDnsRouting.onPreferenceChangeListener = reloadListener
         dnsHosts.onPreferenceChangeListener = reloadListener
+        dnsNetwork.onPreferenceChangeListener = reloadListener
 
         portLocalDns.onPreferenceChangeListener = reloadListener
         ipv6Mode.onPreferenceChangeListener = reloadListener

@@ -51,6 +51,18 @@ Please go to the project homepage to download plugins.
 * [Open Online Config](https://github.com/Shadowsocks-NET/OpenOnlineConfig)
 * [Shadowsocks SIP008](https://shadowsocks.org/en/wiki/SIP008-Online-Configuration-Delivery.html)
 
+### 捐助 / Donate
+
+欢迎捐赠以支持项目开发。
+
+USDT TRC20
+
+`TRhnA7SXE5Sap5gSG3ijxRmdYFiD4KRhPs`
+
+XMR
+
+`49bwESYQjoRL3xmvTcjZKHEKaiGywjLYVQJMUv79bXonGiyDCs8AzE3KiGW2ytTybBCpWJUvov8SjZZEGg66a4e59GXa6k5`
+
 ## SagerNet
 
 本项目源于[SagerNet](https://github.com/SagerNet/SagerNet)，并做了很多优化和修改。由于维护者的精力有限，SagerNet的一些新功能可能不会被合并到这个项目中。

@@ -46,6 +46,7 @@ import io.nekohasekai.sagernet.fmt.wireguard.WireGuardBean
 import io.nekohasekai.sagernet.ktx.isIpAddress
 import io.nekohasekai.sagernet.ktx.mkPort
 import io.nekohasekai.sagernet.utils.PackageCache
+import moe.matsuri.nya.DNS.applyDNSNetworkSettings
 import moe.matsuri.nya.neko.Plugins
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 
@@ -158,6 +159,7 @@ fun buildV2RayConfig(
                 DnsObject.StringOrServerObject().apply {
                     valueY = DnsObject.ServerObject().apply {
                         address = it
+                        applyDNSNetworkSettings(false)
                     }
                 }
             })
@@ -1060,6 +1062,7 @@ fun buildV2RayConfig(
                         domains = directLookupDomain.toList()
                         skipFallback = true
                         uidList = uidListDNSDirect.toHashSet().toList()
+                        applyDNSNetworkSettings(true)
                     }
                 }
             })
