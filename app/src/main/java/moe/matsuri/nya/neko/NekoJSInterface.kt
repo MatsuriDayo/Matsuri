@@ -117,11 +117,11 @@ class NekoJSInterface(val plgId: String) {
                         ret = nekoInit()
                         val obj = JSONObject(ret)
                         if (!obj.getBoolean("ok")) {
-                            throw Exception("nekoInit: plugin refuse to run: ${obj.optString("reason")}")
+                            throw Exception("plugin refuse to run: ${obj.optString("reason")}")
                         }
                         val min = obj.getInt("minVersion")
                         if (min > NekoPluginManager.managerVersion) {
-                            throw Exception("nekoInit: manager ${NekoPluginManager.managerVersion} too old, min is $min")
+                            throw Exception("manager version ${NekoPluginManager.managerVersion} too old, this plugin requires >= $min")
                         }
                         plgConfig = obj
                         NekoPluginManager.updatePlgConfig(plgId, obj)
@@ -189,6 +189,10 @@ class NekoJSInterface(val plgId: String) {
         }
         jsObject.protocol = p
         return p
+    }
+
+    suspend fun getAbout(): String {
+        return callJS("nekoAbout()")
     }
 
     inner class NekoProtocol(val protocolId: String, val callJS: suspend (String) -> String) {
@@ -281,12 +285,16 @@ class NekoJSInterface(val plgId: String) {
 
         @JavascriptInterface
         fun setPreferenceVisibility(key: String, isVisible: Boolean) {
-            runBlockingOnMainDispatcher { preferenceScreen?.findPreference<Preference>(key)?.isVisible = isVisible }
+            runBlockingOnMainDispatcher {
+                preferenceScreen?.findPreference<Preference>(key)?.isVisible = isVisible
+            }
         }
 
         @JavascriptInterface
         fun setPreferenceTitle(key: String, title: String) {
-            runBlockingOnMainDispatcher { preferenceScreen?.findPreference<Preference>(key)?.title = title }
+            runBlockingOnMainDispatcher {
+                preferenceScreen?.findPreference<Preference>(key)?.title = title
+            }
         }
 
         @JavascriptInterface
@@ -349,6 +357,10 @@ class NekoJSInterface(val plgId: String) {
         webView?.removeAllViews()
         webView?.destroy()
         webView = null
+    }
+
+    suspend fun destorySuspend() = withContext(Dispatchers.Main) {
+        destroy()
     }
 
     object Default {

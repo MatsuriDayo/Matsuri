@@ -13,7 +13,7 @@ import java.util.zip.CRC32
 import java.util.zip.ZipFile
 
 object NekoPluginManager {
-    const val managerVersion = 1
+    const val managerVersion = 2
 
     val plugins get() = DataStore.nekoPlugins.split("\n").filter { it.isNotBlank() }
 

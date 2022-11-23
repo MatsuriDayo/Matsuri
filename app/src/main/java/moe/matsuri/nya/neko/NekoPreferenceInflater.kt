@@ -12,7 +12,7 @@ import io.nekohasekai.sagernet.ktx.getStr
 import io.nekohasekai.sagernet.ui.profile.ProfileSettingsActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import moe.matsuri.nya.utils.getDrawable
+import moe.matsuri.nya.utils.getDrawableByName
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -64,7 +64,7 @@ object NekoPreferenceInflater {
                         any.getStr("title")?.apply { p.title = this }
                         // Set icon
                         any.getStr("icon")?.apply {
-                            p.icon = context.getDrawable(this)
+                            p.icon = context.getDrawableByName(this)
                         }
                         // Set summary
                         any.getStr("summary")?.apply {

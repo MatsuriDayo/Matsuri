@@ -13,6 +13,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginEnd="8dp"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:padding="8dp">
@@ -57,18 +58,19 @@
 
         </LinearLayout>
 
-        <Button
+        <ImageButton
             android:id="@+id/button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/add_profile_methods_manual_settings"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:adjustViewBounds="true"
+            android:src="@drawable/ic_action_note_add"
             android:visibility="gone" />
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/itemcheck"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
             android:clickable="false"
             android:focusable="false"
             android:focusableInTouchMode="false"

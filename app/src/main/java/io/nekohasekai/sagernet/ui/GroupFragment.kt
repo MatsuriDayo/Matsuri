@@ -346,7 +346,7 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
 
             fun export(link: String) {
                 val success = SagerNet.trySetPrimaryClip(link)
-                (activity as MainActivity).snackbar(if (success) R.string.action_export_msg else R.string.action_export_err)
+                activity.snackbar(if (success) R.string.action_export_msg else R.string.action_export_err)
                     .show()
             }
 
