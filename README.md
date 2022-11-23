@@ -49,7 +49,7 @@ Please go to the project homepage to download plugins.
 * Raw: some widely used formats (like shadowsocks, clash and v2rayN)
 * 原始格式：一些广泛使用的格式（如 shadowsocks、clash 和 v2rayN）
 * [Open Online Config](https://github.com/Shadowsocks-NET/OpenOnlineConfig)
-* [Shadowsocks SIP008](https://shadowsocks.org/en/wiki/SIP008-Online-Configuration-Delivery.html)
+* [Shadowsocks SIP008](https://shadowsocks.org/guide/sip008.html)
 
 ### 捐助 / Donate
 
