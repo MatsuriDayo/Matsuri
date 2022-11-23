@@ -19,6 +19,7 @@
 
 package io.nekohasekai.sagernet.fmt.v2ray
 
+import com.google.gson.Gson
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
 import io.nekohasekai.sagernet.ktx.*
 import moe.matsuri.nya.utils.NGUtil
@@ -399,40 +400,55 @@ private fun parseCsvVMess(csv: String): VMessBean {
 
 }
 
+data class VmessQRCode(
+    var v: String = "",
+    var ps: String = "",
+    var add: String = "",
+    var port: String = "",
+    var id: String = "",
+    var aid: String = "0",
+    var scy: String = "",
+    var net: String = "",
+    var type: String = "",
+    var host: String = "",
+    var path: String = "",
+    var tls: String = "",
+    var sni: String = "",
+    var alpn: String = ""
+)
+
 fun VMessBean.toV2rayN(): String {
+    return "vmess://" + VmessQRCode().apply {
+        v = "2"
+        ps = this@toV2rayN.name
+        add = this@toV2rayN.serverAddress
+        port = this@toV2rayN.serverPort.toString()
+        id = this@toV2rayN.uuid
+        aid = this@toV2rayN.alterId.toString()
+        net = this@toV2rayN.type
+        host = this@toV2rayN.host
+        path = this@toV2rayN.path
+        type = this@toV2rayN.headerType
 
-    return "vmess://" + JSONObject().apply {
-
-        put("v", 2)
-        put("ps", name)
-        put("add", serverAddress)
-        put("port", serverPort)
-        put("id", uuid)
-        put("aid", alterId)
-        put("net", type)
-        put("host", host)
-        put("path", path)
-        put("type", headerType)
-
-        when (headerType) {
+        when (this@toV2rayN.headerType) {
             "quic" -> {
-                put("host", quicSecurity)
-                put("path", quicKey)
+                host = this@toV2rayN.quicSecurity
+                path = this@toV2rayN.quicKey
             }
             "kcp" -> {
-                put("path", mKcpSeed)
+                path = this@toV2rayN.mKcpSeed
             }
             "grpc" -> {
-                put("path", grpcServiceName)
+                path = this@toV2rayN.grpcServiceName
             }
         }
 
-        put("tls", if (security == "tls") "tls" else "")
-        put("sni", sni)
-        put("scy", encryption)
-
-    }.toStringPretty().let { NGUtil.encode(it) }
-
+        tls = if (this@toV2rayN.security == "tls") "tls" else ""
+        sni = this@toV2rayN.sni
+        scy = this@toV2rayN.encryption
+    }.let {
+        NGUtil.encode(Gson().toJson(it))
+    }
 }
 
 fun StandardV2RayBean.toUri(standard: Boolean = true): String {
