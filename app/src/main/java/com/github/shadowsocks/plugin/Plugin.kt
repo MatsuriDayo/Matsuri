@@ -31,7 +31,6 @@ abstract class Plugin {
     open val defaultConfig: String? get() = null
     open val packageName: String get() = ""
     open val trusted: Boolean get() = true
-    open val directBootAware: Boolean get() = true
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -204,13 +204,6 @@ class SagerNet : Application(),
         val power by lazy { application.getSystemService<PowerManager>()!! }
 
         val packageInfo: PackageInfo by lazy { application.getPackageInfo(application.packageName) }
-        val directBootSupported by lazy {
-            Build.VERSION.SDK_INT >= 24 && try {
-                app.getSystemService<DevicePolicyManager>()?.storageEncryptionStatus == DevicePolicyManager.ENCRYPTION_STATUS_ACTIVE_PER_USER
-            } catch (_: RuntimeException) {
-                false
-            }
-        }
 
         fun getClipboardText(): String {
             return clipboard.primaryClip?.takeIf { it.itemCount > 0 }

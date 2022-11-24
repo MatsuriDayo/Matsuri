@@ -20,15 +20,12 @@
 
 package io.nekohasekai.sagernet.bg
 
-import android.app.KeyguardManager
 import android.graphics.drawable.Icon
 import android.service.quicksettings.Tile
 import androidx.annotation.RequiresApi
-import androidx.core.content.getSystemService
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.aidl.ISagerNetService
-import io.nekohasekai.sagernet.database.DataStore
 import android.service.quicksettings.TileService as BaseTileService
 
 @RequiresApi(24)
@@ -36,10 +33,8 @@ class TileService : BaseTileService(), SagerConnection.Callback {
     private val iconIdle by lazy { Icon.createWithResource(this, R.drawable.ic_service_idle) }
     private val iconBusy by lazy { Icon.createWithResource(this, R.drawable.ic_service_busy) }
     private val iconConnected by lazy {
-        Icon.createWithResource(this,
-            R.drawable.ic_service_active)
+        Icon.createWithResource(this, R.drawable.ic_service_active)
     }
-    private val keyguard by lazy { getSystemService<KeyguardManager>()!! }
     private var tapPending = false
 
     private val connection = SagerConnection()
@@ -65,7 +60,7 @@ class TileService : BaseTileService(), SagerConnection.Callback {
     }
 
     override fun onClick() {
-        if (isLocked && !DataStore.canToggleLocked) unlockAndRun(this::toggle) else toggle()
+        toggle()
     }
 
     private fun updateTile(serviceState: BaseService.State, profileName: () -> String?) {
@@ -79,7 +74,7 @@ class TileService : BaseTileService(), SagerConnection.Callback {
                 }
                 BaseService.State.Connected -> {
                     icon = iconConnected
-                    if (!keyguard.isDeviceLocked) label = profileName()
+                    label = profileName()
                     state = Tile.STATE_ACTIVE
                 }
                 BaseService.State.Stopping -> {

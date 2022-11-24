@@ -250,13 +250,11 @@
 
         <service
             android:name="io.nekohasekai.sagernet.bg.ProxyService"
-            android:directBootAware="true"
             android:exported="false"
             android:process=":bg" />
 
         <service
             android:name="io.nekohasekai.sagernet.bg.VpnService"
-            android:directBootAware="true"
             android:exported="false"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_VPN_SERVICE"
@@ -269,7 +267,6 @@
 
         <service
             android:name="io.nekohasekai.sagernet.bg.TileService"
-            android:directBootAware="true"
             android:exported="true"
             android:icon="@drawable/ic_service_active"
             android:label="@string/tile_title"
@@ -296,7 +293,6 @@
 
         <receiver
             android:name="io.nekohasekai.sagernet.BootReceiver"
-            android:directBootAware="true"
             android:enabled="false"
             android:exported="true"
             android:process=":bg">

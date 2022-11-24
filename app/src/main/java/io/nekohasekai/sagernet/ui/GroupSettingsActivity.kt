@@ -42,7 +42,6 @@ import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeLi
 import io.nekohasekai.sagernet.ktx.applyDefaultValues
 import io.nekohasekai.sagernet.ktx.onMainDispatcher
 import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
-import io.nekohasekai.sagernet.utils.DirectBoot
 import io.nekohasekai.sagernet.widget.ListListener
 import io.nekohasekai.sagernet.widget.UserAgentPreference
 import kotlinx.parcelize.Parcelize
@@ -251,7 +250,6 @@ class GroupSettingsActivity(
             GroupManager.updateGroup(entity.apply { serialize() })
         }
 
-        if (editingId == DataStore.selectedProxy && DataStore.directBootAware) DirectBoot.update()
         finish()
 
     }

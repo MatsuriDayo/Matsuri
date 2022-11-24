@@ -24,7 +24,6 @@ import io.nekohasekai.sagernet.database.DataStore
 import io.nekohasekai.sagernet.database.ProxyEntity
 import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.ktx.Logs
-import io.nekohasekai.sagernet.utils.DirectBoot
 import kotlinx.coroutines.runBlocking
 import java.io.IOException
 
@@ -202,13 +201,7 @@ class ProxyInstance(profile: ProxyEntity, val service: BaseService.Interface) : 
                     SagerDatabase.proxyDao.updateProxy(toUpdate)
                 }
             } catch (e: IOException) {
-                if (!DataStore.directBootAware) throw e // we should only reach here because we're in direct boot
-                val profile = DirectBoot.getDeviceProfile()!!
-                profile.tx += outboundStats.uplinkTotal
-                profile.rx += outboundStats.downlinkTotal
-                profile.dirty = true
-                DirectBoot.update(profile)
-                DirectBoot.listenForUnlock()
+                throw e // we should only reach here because we're in direct boot
             }
         }
     }

@@ -74,7 +74,6 @@ class PluginPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
             text2.setTypeface(null, typeface)
             text2.isVisible = plugin.id.isNotEmpty() && label != plugin.id
             icon.setImageDrawable(plugin.icon)
-            unlock.isGone = plugin.directBootAware || !DataStore.persistAcrossReboot
         }
 
         override fun onClick(v: View?) {
