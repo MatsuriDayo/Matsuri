@@ -297,7 +297,7 @@ class MainActivity : ThemedActivity(),
         if (fragment is ConfigurationFragment) {
             binding.stats.allowShow = true
             binding.fab.show()
-        } else {
+        } else if (!DataStore.showBottomBar) {
             binding.stats.allowShow = false
             binding.stats.performHide()
             binding.fab.hide()

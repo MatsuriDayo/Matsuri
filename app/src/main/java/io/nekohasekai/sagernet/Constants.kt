@@ -86,6 +86,7 @@ object Key {
     const val TUN_IMPLEMENTATION = "tunImplementation"
     const val ENABLE_PCAP = "enablePcap"
     const val ACQUIRE_WAKE_LOCK = "acquireWakeLock"
+    const val SHOW_BOTTOM_BAR = "showBottomBar"
 
     const val APP_TRAFFIC_STATISTICS = "appTrafficStatistics"
     const val PROFILE_TRAFFIC_STATISTICS = "profileTrafficStatistics"

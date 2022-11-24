@@ -285,5 +285,8 @@
             app:key="appTLSVersion"
             app:title="@string/app_tls_version"
             app:useSimpleSummaryProvider="true" />
+        <SwitchPreference
+            app:key="showBottomBar"
+            app:title="@string/show_bottom_bar" />
     </PreferenceCategory>
 </PreferenceScreen>
