@@ -508,7 +508,7 @@ Anyone can write advanced plugins, which can control Matsuri. please download an
     <string name="exe_prefer_provider">Plugin Preferred Provider</string>
     <string name="create_shortcut">Create Shortcut</string>
     <string name="app_tls_version">Subscription Min TLS Version</string>
-    <string name="hop_interval">Port Hopping Interval</string>
+    <string name="hop_interval">Port Hopping Interval(second)</string>
     <string name="dns_network">DNS query type</string>
     <string name="show_bottom_bar">Show bottom bar like SagerNet</string>
 

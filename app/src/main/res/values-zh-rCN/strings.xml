@@ -455,7 +455,7 @@
     <string name="neko_plugin_summary">高级插件可以提供原本不支持的协议。\n\n
 任何人都可以编写高级插件，开启相当于给予其控制 Matsuri 的权限，请从信任的来源下载安装。\n\n
 普通插件在关于页面显示，无需手动开启。</string>
-    <string name="packet_encoding" translatable="false">包编码</string>
+    <string name="packet_encoding">包编码</string>
     <string name="action_switch">切换</string>
     <string name="enhance_resolve_server_domain">增强域名解析</string>
     <string name="enhance_resolve_server_domain_summary">（有副作用，仅作为备用选项）使用多个境外 DNS 查询服务器地址，防止 DNS 污染造成无法连接服务器。</string>
@@ -469,6 +469,6 @@
     <string name="experimental_reduced_iv_head_entropy">这是 GFWReport 针对 GFW 上观察到的类似随机流的协议阻塞行为提出的对策。  这个选项将 IV 的前 6 个字节重新映射为可打印的字符，启用后，特权网络路径上的任何人都有可能识别该协议。</string>
     <string name="exe_prefer_provider">首选插件提供者</string>
     <string name="create_shortcut">创建快捷方式</string>
-    <string name="hop_interval">端口跳跃间隔</string>
+    <string name="hop_interval">端口跳跃间隔(秒)</string>
     <string name="dns_network">DNS 查询类型</string>
 </resources>
