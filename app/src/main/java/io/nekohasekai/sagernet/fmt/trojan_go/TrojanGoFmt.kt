@@ -139,6 +139,7 @@ fun TrojanGoBean.buildTrojanGoConfig(port: Int): String {
 
         put("ssl", JSONObject().apply {
             if (sni.isNotBlank()) put("sni", sni)
+            if (allowInsecure) put("verify", false)
         })
 
         when {
