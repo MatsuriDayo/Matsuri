@@ -1,14 +1,8 @@
 import com.android.build.gradle.AbstractAppExtension
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.internal.api.BaseVariantOutputImpl
-import org.gradle.api.JavaVersion
 import org.gradle.api.Project
-import org.gradle.api.plugins.ExtensionAware
-import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.getByName
-import org.gradle.kotlin.dsl.kotlin
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 import java.security.MessageDigest
 import java.util.*
 import kotlin.system.exitProcess
@@ -21,7 +15,6 @@ fun sha256Hex(bytes: ByteArray): String {
 
 private val Project.android get() = extensions.getByName<BaseExtension>("android")
 
-private val javaVersion = JavaVersion.VERSION_1_8
 private lateinit var metadata: Properties
 private lateinit var localProperties: Properties
 private lateinit var flavor: String
@@ -103,10 +96,6 @@ fun Project.setupCommon() {
                 isMinifyEnabled = true
             }
         }
-        compileOptions {
-            sourceCompatibility = javaVersion
-            targetCompatibility = javaVersion
-        }
         lintOptions {
             isShowAll = true
             isCheckAllWarnings = true
@@ -162,18 +151,8 @@ fun Project.setupCommon() {
     }
 }
 
-fun Project.setupKotlinCommon() {
-    setupCommon()
-    (android as ExtensionAware).extensions.getByName<KotlinJvmOptions>("kotlinOptions").apply {
-        jvmTarget = javaVersion.toString()
-    }
-    dependencies.apply {
-        add("implementation", kotlin("stdlib-jdk8"))
-    }
-}
-
 fun Project.setupAppCommon() {
-    setupKotlinCommon()
+    setupCommon()
 
     val lp = requireLocalProperties()
     val keystorePwd = lp.getProperty("KEYSTORE_PASS") ?: System.getenv("KEYSTORE_PASS")
@@ -214,7 +193,6 @@ fun Project.setupApp() {
             applicationId = pkgName
             versionCode = verCode
             versionName = verName
-            testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
     }
     setupAppCommon()
@@ -282,13 +260,4 @@ fun Project.setupApp() {
         }
 
     }
-
-    dependencies {
-        add("implementation", kotlin("stdlib", "${rootProject.extra["kotlinVersion"]}"))
-        add("testImplementation", "junit:junit:4.13.2")
-        add("androidTestImplementation", "androidx.test.ext:junit:1.1.3")
-        add("androidTestImplementation", "androidx.test:runner:1.4.0")
-        add("androidTestImplementation", "androidx.test.espresso:espresso-core:3.4.0")
-    }
-
 }

@@ -3,7 +3,6 @@ plugins {
     id("kotlin-android")
     id("kotlin-kapt")
     id("kotlin-parcelize")
-    id("com.mikepenz.aboutlibraries.plugin")
 }
 
 setupApp()
@@ -32,8 +31,9 @@ dependencies {
     compileOnly(project(":library:stub"))
     implementation(project(":library:include"))
 
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.3")
     implementation("androidx.core:core-ktx:1.7.0")
+    implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.activity:activity-ktx:1.4.0")
     implementation("androidx.fragment:fragment-ktx:1.4.1")
     implementation("androidx.browser:browser:1.4.0")
@@ -57,7 +57,6 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.3")
     implementation("org.yaml:snakeyaml:1.30")
     implementation("com.github.daniel-stoneuk:material-about-library:3.2.0-rc01")
-    implementation("com.mikepenz:aboutlibraries:8.9.4")
     implementation("com.jakewharton:process-phoenix:2.1.2")
     implementation("com.esotericsoftware:kryo:5.2.1")
     implementation("com.google.guava:guava:31.0.1-android")
@@ -76,8 +75,6 @@ dependencies {
     implementation("androidx.room:room-ktx:2.4.2")
     implementation("com.github.MatrixDev.Roomigrant:RoomigrantLib:0.3.4")
     kapt("com.github.MatrixDev.Roomigrant:RoomigrantCompiler:0.3.4")
-
-//    implementation("io.grpc:grpc-okhttp:1.40.1")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 }
