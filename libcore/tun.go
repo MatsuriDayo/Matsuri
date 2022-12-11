@@ -141,7 +141,7 @@ func (t *Tun2ray) SetV2ray(i *V2RayInstance) {
 	}
 }
 
-//TCP
+// TCP
 func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNet.Destination, conn net.Conn) {
 	t.access.Lock()
 	if t.v2ray == nil {
@@ -157,6 +157,7 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 		Tag:    "socks",
 	}
 
+	// [TCP] dns to router
 	isDns := destination.Address.String() == tun.PRIVATE_VLAN4_ROUTER && destination.Port.Value() == 53
 	if isDns {
 		inbound.Tag = "dns-in"
@@ -193,6 +194,7 @@ func (t *Tun2ray) NewConnection(source v2rayNet.Destination, destination v2rayNe
 	ctx := core.WithContext(context.Background(), v2ray.Core)
 	ctx = session.ContextWithInbound(ctx, inbound)
 
+	// [tun-in] [TCP] sniffing
 	if !isDns && (t.sniffing || t.fakedns) {
 		req := session.SniffingRequest{
 			Enabled:      true,
@@ -279,7 +281,7 @@ func (r *connReaderWriter) Close() (err error) {
 	return r.Conn.Close()
 }
 
-//UDP
+// UDP
 func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.Destination, p *tun.UDPPacket, writeBack tun.WriteBack) {
 	natKey := source.NetAddr()
 
@@ -331,10 +333,10 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 	// change destination
 	destination2 := destination
 
-	// dns to router
+	// [UDP] dns to router
 	isDns := destination.Address.String() == tun.PRIVATE_VLAN4_ROUTER
 
-	// dns to all
+	// [UDP] dns to all
 	dnsMsg := dns.Msg{}
 	err := dnsMsg.Unpack(p.Data)
 	if err == nil && !dnsMsg.Response && len(dnsMsg.Question) > 0 {
@@ -397,6 +399,7 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 
 	ctx := session.ContextWithInbound(context.Background(), inbound)
 
+	// [tun-in] [UDP] sniffing
 	if !isDns {
 		override := []string{}
 		if t.fakedns {
@@ -461,18 +464,21 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 		}
 	}
 
+	// [FakeDNS] [UDP] must fake ip & no endpoint change
+	if tun.FAKEDNS_VLAN4_CLIENT_IPNET.Contains(destination.Address.IP()) {
+		conn.fake = true
+	}
+
 	// udp conn ok
 	t.udpTable.Set(natKey, conn)
 	t.udpTable.Delete(lockKey)
 	cond.Broadcast()
 
-	//uplink(?
+	// uplink
 	go sendTo(true)
 
-	//downlink (moved to handleDownlink)
-	select {
-	case <-conn.ctx.Done():
-	}
+	// downlink (moved to handleDownlink)
+	<-conn.ctx.Done()
 
 	// close
 	if p.PutHeader != nil {

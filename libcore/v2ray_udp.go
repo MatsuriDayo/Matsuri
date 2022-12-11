@@ -56,14 +56,16 @@ type myStats struct {
 
 type dispatcherConn struct {
 	access sync.Mutex
-	dest   net2.Destination
-	link   *transport.Link
-	timer  *signal.ActivityTimer
+
+	dest  net2.Destination
+	link  *transport.Link
+	timer *signal.ActivityTimer
+	fake  bool // fakedns 198.18.x.x
 
 	ctx    context.Context
 	cancel context.CancelFunc
 
-	writeBack tun.WriteBack //downlink
+	writeBack tun.WriteBack // downlink
 
 	stats *myStats // traffic stats
 }
@@ -92,13 +94,17 @@ func (c *dispatcherConn) handleDownlink() {
 			}
 
 			var src net2.Destination
-			if buffer.Endpoint == nil {
+			if c.fake {
 				src = c.dest
 			} else {
-				src = *buffer.Endpoint
-			}
-			if src.Address.Family().IsDomain() {
-				src.Address = net2.AnyIP
+				if buffer.Endpoint == nil {
+					src = c.dest
+				} else {
+					src = *buffer.Endpoint
+				}
+				if src.Address.Family().IsDomain() {
+					src.Address = net2.AnyIP
+				}
 			}
 
 			n, err := c.writeBack(buffer.Bytes(), &net.UDPAddr{
@@ -126,8 +132,12 @@ func (c *dispatcherConn) WriteTo(p []byte, addr net.Addr) (n int, err error) {
 	}
 
 	buffer := buf.FromBytes(p)
-	endpoint := net2.DestinationFromAddr(addr)
-	buffer.Endpoint = &endpoint
+
+	if !c.fake {
+		endpoint := net2.DestinationFromAddr(addr)
+		buffer.Endpoint = &endpoint
+	}
+
 	err = c.link.Writer.WriteMultiBuffer(buf.MultiBuffer{buffer})
 	if err == nil {
 		c.timer.Update()
