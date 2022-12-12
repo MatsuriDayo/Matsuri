@@ -395,6 +395,27 @@ object RawUpdater : GroupUpdater() {
                                     "sni" -> bean.sni = opt.value?.toString()
                                     "skip-cert-verify" -> bean.allowInsecure =
                                         opt.value?.toString() == "true"
+                                    "network" -> when (opt.value) {
+                                        "ws", "grpc" -> bean.type = opt.value?.toString()
+                                    }
+                                    "ws-opts", "ws-opt" -> for (wsOpt in (opt.value as Map<String, Any>)) {
+                                        when (wsOpt.key.lowercase()) {
+                                            "headers" -> for (wsHeader in (opt.value as Map<String, Any>)) {
+                                                when (wsHeader.key.lowercase()) {
+                                                    "host" -> bean.host = wsHeader.value.toString()
+                                                }
+                                            }
+                                            "path" -> {
+                                                bean.path = wsOpt.value.toString()
+                                            }
+                                        }
+                                    }
+                                    "grpc-opts", "grpc-opt" -> for (grpcOpt in (opt.value as Map<String, Any>)) {
+                                        when (grpcOpt.key.lowercase()) {
+                                            "grpc-service-name" -> bean.grpcServiceName =
+                                                grpcOpt.value.toString()
+                                        }
+                                    }
                                 }
                             }
                             proxies.add(bean)

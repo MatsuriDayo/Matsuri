@@ -82,6 +82,7 @@ import moe.matsuri.nya.neko.NekoJSInterface
 import moe.matsuri.nya.neko.NekoPluginManager
 import moe.matsuri.nya.neko.NekoSettingActivity
 import moe.matsuri.nya.neko.canShare
+import moe.matsuri.nya.utils.JavaUtil
 import okhttp3.internal.closeQuietly
 import java.net.InetAddress
 import java.net.InetSocketAddress
@@ -791,7 +792,6 @@ class ConfigurationFragment @JvmOverloads constructor(
                                 try {
                                     socket.soTimeout = 3000
                                     socket.bind(InetSocketAddress(0))
-                                    protectFromVpn(socket.fileDescriptor.int)
                                     val start = SystemClock.elapsedRealtime()
                                     socket.connect(
                                         InetSocketAddress(

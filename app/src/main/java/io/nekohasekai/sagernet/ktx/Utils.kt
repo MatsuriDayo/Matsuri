@@ -28,7 +28,6 @@ import android.app.Service
 import android.content.*
 import android.content.pm.PackageInfo
 import android.content.res.Resources
-import android.net.NetworkUtils
 import android.os.Build
 import android.os.SystemClock
 import android.system.Os
@@ -56,7 +55,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import moe.matsuri.nya.utils.NGUtil
-import sun.misc.Unsafe
 import java.io.FileDescriptor
 import java.net.*
 import java.util.concurrent.atomic.AtomicBoolean
@@ -294,25 +292,6 @@ val isExpertFlavor = ((BuildConfig.FLAVOR == "expert") || BuildConfig.DEBUG)
 const val isOss = BuildConfig.FLAVOR == "oss"
 const val isFdroid = BuildConfig.FLAVOR == "fdroid"
 
-val LAUNCH_DELAY = System.currentTimeMillis() - SystemClock.elapsedRealtime()
-
-private val protectDirectAvailable by lazy {
-    try {
-        NetworkUtils::class.java.getDeclaredMethod("protectFromVpn", Int::class.java)
-        true
-    } catch (e: Exception) {
-        false
-    }
-}
-
-fun Fragment.protectFromVpn(fd: Int) {
-    if (protectDirectAvailable) {
-        NetworkUtils.protectFromVpn(fd)
-    } else {
-        (requireActivity() as? MainActivity)?.connection?.service?.protect(fd)
-    }
-}
-
 fun <T> Continuation<T>.tryResume(value: T) {
     try {
         resumeWith(Result.success(value))
@@ -359,11 +338,4 @@ operator fun <K, V> MutableMap<K, V>.setValue(thisRef: K, property: KProperty<*>
 
     }
 
-}
-
-@SuppressLint("DiscouragedPrivateApi")
-val UNSAFE = try {
-    Unsafe::class.java.getDeclaredMethod("getUnsafe").invoke(null) as Unsafe?
-} catch (e: Throwable) {
-    null
 }

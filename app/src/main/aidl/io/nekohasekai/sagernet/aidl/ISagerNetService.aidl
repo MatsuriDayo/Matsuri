@@ -12,7 +12,6 @@ interface ISagerNetService {
   void startListeningForStats(in ISagerNetServiceCallback cb, long timeout);
   oneway void stopListeningForStats(in ISagerNetServiceCallback cb);
   oneway void unregisterCallback(in ISagerNetServiceCallback cb);
-  oneway void protect(int fd);
   int urlTest();
   oneway void resetTrafficStats();
   boolean getTrafficStatsEnabled();

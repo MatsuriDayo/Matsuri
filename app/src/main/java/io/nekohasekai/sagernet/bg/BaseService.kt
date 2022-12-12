@@ -271,10 +271,6 @@ class BaseService {
             callbacks.unregister(cb)
         }
 
-        override fun protect(fd: Int) {
-            (data?.proxy?.service as VpnService?)?.protect(fd)
-        }
-
         override fun urlTest(): Int {
             if (data?.proxy?.v2rayPoint == null) {
                 error("core not started")

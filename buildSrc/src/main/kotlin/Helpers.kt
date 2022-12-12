@@ -238,21 +238,6 @@ fun Project.setupApp() {
             }
         }
 
-        tasks.register("downloadAssets") {
-            outputs.upToDateWhen {
-                requireFlavor().endsWith("Debug")
-            }
-            doLast {
-                downloadAssets()
-            }
-        }
-
-        tasks.whenTaskAdded {
-            if (name == "pre${requireFlavor()}Build") {
-                dependsOn("downloadAssets")
-            }
-        }
-
         for (abi in listOf("Arm64", "Arm", "X64", "X86")) {
             tasks.create("assemble" + abi + "FdroidRelease") {
                 dependsOn("assembleFdroidRelease")
