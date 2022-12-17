@@ -123,7 +123,7 @@ class AppListActivity : ThemedActivity() {
             if (payloads.contains(SWITCH)) {
                 val selected = isProxiedApp(item)
                 binding.itemcheck.isChecked = selected
-                binding.button.isVisible = selected
+                binding.button.isVisible = forNeko && selected
             }
         }
 

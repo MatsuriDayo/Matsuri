@@ -55,9 +55,6 @@ class PluginPreferenceDialogFragment : PreferenceDialogFragmentCompat() {
         private val text1 = binding.text1
         private val text2 = binding.text2
         private val icon = binding.icon
-        private val unlock = binding.unlock.apply {
-            TooltipCompat.setTooltipText(this, getText(R.string.plugin_auto_connect_unlock_only))
-        }
 
         init {
             binding.root.setOnClickListener(this)
