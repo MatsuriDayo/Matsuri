@@ -77,6 +77,7 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         DataStore.serverWsBrowserForwarding = wsUseBrowserForwarder
         DataStore.serverAllowInsecure = allowInsecure
         DataStore.serverPacketEncoding = packetEncoding
+        DataStore.utlsFingerprint = utlsFingerprint
 
     }
 
@@ -116,6 +117,7 @@ abstract class StandardV2RaySettingsActivity : ProfileSettingsActivity<StandardV
         wsUseBrowserForwarder = DataStore.serverWsBrowserForwarding
         allowInsecure = DataStore.serverAllowInsecure
         packetEncoding = DataStore.serverPacketEncoding
+        utlsFingerprint = DataStore.utlsFingerprint
     }
 
     lateinit var encryption: SimpleMenuPreference

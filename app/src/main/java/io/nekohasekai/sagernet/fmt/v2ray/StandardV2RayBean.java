@@ -30,26 +30,10 @@ import moe.matsuri.nya.utils.JavaUtil;
  */
 public abstract class StandardV2RayBean extends AbstractBean {
 
-    /**
-     * UUID。对应配置文件该项出站中 settings.vnext[0].users[0].id 的值。
-     * <p>
-     * 不可省略，不能为空字符串。
-     */
     public String uuid;
-
-    /**
-     * 当协议为 VMess 时，对应配置文件出站中 settings.security，可选值为 auto / aes-128-gcm / chacha20-poly1305 / none。
-     * <p>
-     * 省略时默认为 auto，但不可以为空字符串。除非指定为 none，否则建议省略。
-     * <p>
-     * 当协议为 VLESS 时，对应配置文件出站中 settings.encryption，当前可选值只有 none。
-     * <p>
-     * 省略时默认为 none，但不可以为空字符串。
-     * <p>
-     * 特殊说明：之所以不使用 security 而使用 encryption，是因为后面还有一个底层传输安全类型 security 与这个冲突。
-     * 由 @huyz 提议，将此字段重命名为 encryption，这样不仅能避免命名冲突，还与 VLESS 保持了一致。
-     */
     public String encryption;
+
+    //////// End of VMess & VLESS ////////
 
     /**
      * 协议的传输方式。对应配置文件出站中 settings.vnext[0].streamSettings.network 的值。
@@ -143,6 +127,8 @@ public abstract class StandardV2RayBean extends AbstractBean {
      */
     public String alpn;
 
+    public String utlsFingerprint;
+
     // --------------------------------------- //
 
     public String grpcServiceName;
@@ -179,19 +165,20 @@ public abstract class StandardV2RayBean extends AbstractBean {
         if (JavaUtil.isNullOrBlank(alpn)) alpn = "";
 
         if (JavaUtil.isNullOrBlank(grpcServiceName)) grpcServiceName = "";
+        if (JavaUtil.isNullOrBlank(certificates)) certificates = "";
+        if (JavaUtil.isNullOrBlank(pinnedPeerCertificateChainSha256)) pinnedPeerCertificateChainSha256 = "";
+        if (JavaUtil.isNullOrBlank(earlyDataHeaderName)) earlyDataHeaderName = "";
+        if (JavaUtil.isNullOrBlank(utlsFingerprint)) utlsFingerprint = "";
+
         if (wsMaxEarlyData == null) wsMaxEarlyData = 0;
         if (wsUseBrowserForwarder == null) wsUseBrowserForwarder = false;
-        if (certificates == null) certificates = "";
-        if (pinnedPeerCertificateChainSha256 == null) pinnedPeerCertificateChainSha256 = "";
-        if (earlyDataHeaderName == null) earlyDataHeaderName = "";
         if (allowInsecure == null) allowInsecure = false;
         if (packetEncoding == null) packetEncoding = 0;
-
     }
 
     @Override
     public void serialize(ByteBufferOutput output) {
-        output.writeInt(7);
+        output.writeInt(8);
         super.serialize(output);
 
         output.writeString(uuid);
@@ -242,6 +229,7 @@ public abstract class StandardV2RayBean extends AbstractBean {
                 output.writeString(certificates);
                 output.writeString(pinnedPeerCertificateChainSha256);
                 output.writeBoolean(allowInsecure);
+                output.writeString(utlsFingerprint);
                 break;
             }
         }
@@ -311,6 +299,9 @@ public abstract class StandardV2RayBean extends AbstractBean {
                 }
                 if (version >= 3) {
                     allowInsecure = input.readBoolean();
+                }
+                if (version >= 8) {
+                    utlsFingerprint = input.readString();
                 }
                 break;
             }

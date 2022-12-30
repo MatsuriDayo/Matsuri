@@ -520,9 +520,11 @@ fun buildV2RayConfig(
 
                             streamSettings = StreamSettingsObject().apply {
                                 network = bean.type
+
                                 if (bean.security.isNotBlank()) {
                                     security = bean.security
                                 }
+                                val v5_utls = bean.utlsFingerprint.isNotBlank()
                                 if (security == "tls") {
                                     tlsSettings = TLSObject().apply {
                                         if (bean.sni.isNotBlank()) {
@@ -530,29 +532,42 @@ fun buildV2RayConfig(
                                         }
 
                                         if (bean.alpn.isNotBlank()) {
-                                            alpn = bean.alpn.split("\n")
+                                            val ds = bean.alpn.split("\n")
+                                                .filter { it.isNotBlank() }
+                                            if (v5_utls) {
+                                                nextProtocol = ds
+                                            } else {
+                                                alpn = ds
+                                            }
                                         }
 
                                         if (bean.certificates.isNotBlank()) {
                                             disableSystemRoot = true
                                             certificates = listOf(TLSObject.CertificateObject()
                                                 .apply {
-                                                    usage = "verify"
-                                                    certificate = bean.certificates.split(
-                                                        "\n"
-                                                    ).filter { it.isNotBlank() }
+                                                    usage =
+                                                        if (v5_utls) "ENCIPHERMENT" else "verify"
+                                                    certificate = bean.certificates.split("\n")
+                                                        .filter { it.isNotBlank() }
                                                 })
                                         }
 
                                         if (bean.pinnedPeerCertificateChainSha256.isNotBlank()) {
-                                            pinnedPeerCertificateChainSha256 = bean.pinnedPeerCertificateChainSha256.split(
-                                                "\n"
-                                            ).filter { it.isNotBlank() }
+                                            pinnedPeerCertificateChainSha256 =
+                                                bean.pinnedPeerCertificateChainSha256.split("\n")
+                                                    .filter { it.isNotBlank() }
                                         }
 
                                         if (bean.allowInsecure) {
                                             allowInsecure = true
                                         }
+                                    }
+                                    if (v5_utls) {
+                                        utlsSettings = UTLSObject().apply {
+                                            imitate = bean.utlsFingerprint
+                                            tlsConfig = tlsSettings
+                                        }
+                                        tlsSettings = null
                                     }
                                 }
 

@@ -559,4 +559,45 @@
         <item>1.3</item>
     </string-array>
 
+    <string-array name="utls_fingerprint_entry">
+        <item></item>
+        <item>randomized</item>
+        <item>randomizedalpn</item>
+        <item>randomizednoalpn</item>
+        <item>firefox_auto</item>
+        <item>firefox_55</item>
+        <item>firefox_56</item>
+        <item>firefox_63</item>
+        <item>firefox_65</item>
+        <item>firefox_99</item>
+        <item>firefox_102</item>
+        <item>firefox_105</item>
+        <item>chrome_auto</item>
+        <item>chrome_58</item>
+        <item>chrome_62</item>
+        <item>chrome_70</item>
+        <item>chrome_72</item>
+        <item>chrome_83</item>
+        <item>chrome_87</item>
+        <item>chrome_96</item>
+        <item>chrome_100</item>
+        <item>chrome_102</item>
+        <item>ios_auto</item>
+        <item>ios_11_1</item>
+        <item>ios_12_1</item>
+        <item>ios_13</item>
+        <item>ios_14</item>
+        <item>android_11_okhttp</item>
+        <item>edge_auto</item>
+        <item>edge_85</item>
+        <item>edge_106</item>
+        <item>safari_auto</item>
+        <item>safari_16_0</item>
+        <item>360_auto</item>
+        <item>360_7_5</item>
+        <item>360_11_0</item>
+        <item>qq_auto</item>
+        <item>qq_11_1</item>
+    </string-array>
+
 </resources>
