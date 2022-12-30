@@ -248,7 +248,6 @@ data class ProxyEntity(
 
     fun haveStandardLink(): Boolean {
         return when (requireBean()) {
-            is HysteriaBean -> !(requireBean() as HysteriaBean).isMultiPort()
             is SSHBean -> false
             is WireGuardBean -> false
             is NekoBean -> nekoBean!!.haveStandardLink()

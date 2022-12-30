@@ -38,6 +38,9 @@ fun parseHysteria(url: String): HysteriaBean {
         serverPort = link.port
         name = link.fragment
 
+        link.queryParameter("mport")?.also {
+            serverAddress = serverAddress.wrapIPV6Host() + ":" + it
+        }
         link.queryParameter("peer")?.also {
             sni = it
         }
@@ -45,9 +48,9 @@ fun parseHysteria(url: String): HysteriaBean {
             authPayloadType = HysteriaBean.TYPE_STRING
             authPayload = it
         }
-        /*link.queryParameter("insecure")?.also {
+        link.queryParameter("insecure")?.also {
             allowInsecure = it == "1"
-        }*/
+        }
         link.queryParameter("upmbps")?.also {
             uploadMbps = it.toIntOrNull() ?: uploadMbps
         }
@@ -74,7 +77,13 @@ fun parseHysteria(url: String): HysteriaBean {
 }
 
 fun HysteriaBean.toUri(): String {
-    val builder = linkBuilder().host(serverAddress).port(serverPort)
+    val builder = linkBuilder().host(serverAddress.substringBeforeLast(":")).port(serverPort)
+    if (isMultiPort()) {
+        builder.addQueryParameter("mport", serverAddress.substringAfterLast(":"))
+    }
+    if (allowInsecure) {
+        builder.addQueryParameter("insecure", "1")
+    }
     if (sni.isNotBlank()) {
         builder.addQueryParameter("peer", sni)
     }
