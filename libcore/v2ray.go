@@ -49,10 +49,21 @@ func (instance *V2RayInstance) LoadConfig(content string) error {
 	instance.access.Lock()
 	defer instance.access.Unlock()
 
-	config, err := serial.LoadJSONConfig(strings.NewReader(content))
-	if err != nil {
-		log.Println(content, err.Error())
-		return err
+	// load v4 or v5 config
+	var config *core.Config
+	var err error
+	if content2 := strings.TrimPrefix(content, "matsuri-v2ray-v5"); content2 != content {
+		config, err = core.LoadConfig("jsonv5", strings.NewReader(content2))
+		if err != nil {
+			log.Println(content, err.Error())
+			return err
+		}
+	} else {
+		config, err = serial.LoadJSONConfig(strings.NewReader(content))
+		if err != nil {
+			log.Println(content, err.Error())
+			return err
+		}
 	}
 
 	c, err := core.New(config)

@@ -67,14 +67,13 @@ public class V2RayConfig {
             public String address;
             public Integer port;
             public String clientIp;
-            public Boolean skipFallback;
+            public String fallbackStrategy;
+            public String queryStrategy;
             public List<String> domains;
             public List<String> expectIPs;
 
             // Matsuri private
             public List<Integer> uidList;
-            public Boolean noV4;
-            public Boolean noV6;
         }
 
         public static class StringOrServerObject extends JsonOr<String, ServerObject> {
@@ -84,15 +83,9 @@ public class V2RayConfig {
         }
 
         public String clientIp;
-        public Boolean disableCache;
         public String tag;
-        public List<String> domains;
-        public List<String> expectIPs;
+        public String fallbackStrategy;
         public String queryStrategy;
-
-        public Boolean disableFallback;
-        public Boolean disableFallbackIfMatch;
-
     }
 
     public RoutingObject routing;

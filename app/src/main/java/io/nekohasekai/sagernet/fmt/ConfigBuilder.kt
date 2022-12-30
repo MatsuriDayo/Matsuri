@@ -135,14 +135,13 @@ fun buildV2RayConfig(
     val alerts = mutableListOf<Pair<Int, String>>()
 
     return V2RayConfig().apply {
-
         dns = DnsObject().apply {
+            fallbackStrategy = "disabled_if_any_match"
+
             hosts = DataStore.hosts.split("\n")
                 .filter { it.isNotBlank() }
                 .associate { it.substringBefore(" ") to it.substringAfter(" ") }
                 .toMutableMap()
-
-            disableFallbackIfMatch = true
 
             if (useFakeDns) {
                 fakedns = mutableListOf()
@@ -1060,7 +1059,6 @@ fun buildV2RayConfig(
                     valueY = DnsObject.ServerObject().apply {
                         address = it.replace("https://", "https+local://")
                         domains = directLookupDomain.toList()
-                        skipFallback = true
                         uidList = uidListDNSDirect.toHashSet().toList()
                         applyDNSNetworkSettings(true)
                     }
