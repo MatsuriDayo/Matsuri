@@ -48,6 +48,8 @@ import io.nekohasekai.sagernet.fmt.trojan.toUri
 import io.nekohasekai.sagernet.fmt.trojan_go.TrojanGoBean
 import io.nekohasekai.sagernet.fmt.trojan_go.buildTrojanGoConfig
 import io.nekohasekai.sagernet.fmt.trojan_go.toUri
+import io.nekohasekai.sagernet.fmt.tuic.TuicBean
+import io.nekohasekai.sagernet.fmt.tuic.buildTuicConfig
 import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
 import io.nekohasekai.sagernet.fmt.v2ray.VMessBean
 import io.nekohasekai.sagernet.fmt.v2ray.toUri
@@ -83,6 +85,7 @@ data class ProxyEntity(
     var trojanGoBean: TrojanGoBean? = null,
     var naiveBean: NaiveBean? = null,
     var hysteriaBean: HysteriaBean? = null,
+    var tuicBean: TuicBean? = null,
     var sshBean: SSHBean? = null,
     var wgBean: WireGuardBean? = null,
     var chainBean: ChainBean? = null,
@@ -103,6 +106,8 @@ data class ProxyEntity(
 
         const val TYPE_SSH = 17
         const val TYPE_WG = 18
+
+        const val TYPE_TUIC = 20
 
         const val TYPE_CHAIN = 8
 
@@ -193,6 +198,7 @@ data class ProxyEntity(
             TYPE_HYSTERIA -> hysteriaBean = KryoConverters.hysteriaDeserialize(byteArray)
             TYPE_SSH -> sshBean = KryoConverters.sshDeserialize(byteArray)
             TYPE_WG -> wgBean = KryoConverters.wireguardDeserialize(byteArray)
+            TYPE_TUIC -> tuicBean = KryoConverters.tuicDeserialize(byteArray)
 
             TYPE_CHAIN -> chainBean = KryoConverters.chainDeserialize(byteArray)
             TYPE_NEKO -> nekoBean = KryoConverters.nekoDeserialize(byteArray)
@@ -211,6 +217,8 @@ data class ProxyEntity(
         TYPE_HYSTERIA -> "Hysteria"
         TYPE_SSH -> "SSH"
         TYPE_WG -> "WireGuard"
+        TYPE_TUIC -> "TUIC"
+
         TYPE_CHAIN -> chainName
         TYPE_NEKO -> nekoBean!!.displayType()
         else -> "Undefined type $type"
@@ -232,6 +240,7 @@ data class ProxyEntity(
             TYPE_HYSTERIA -> hysteriaBean
             TYPE_SSH -> sshBean
             TYPE_WG -> wgBean
+            TYPE_TUIC -> tuicBean
 
             TYPE_CHAIN -> chainBean
             TYPE_NEKO -> nekoBean
@@ -248,6 +257,7 @@ data class ProxyEntity(
 
     fun haveStandardLink(): Boolean {
         return when (requireBean()) {
+            is TuicBean -> false
             is SSHBean -> false
             is WireGuardBean -> false
             is NekoBean -> nekoBean!!.haveStandardLink()
@@ -268,6 +278,7 @@ data class ProxyEntity(
             is HysteriaBean -> toUri()
             is SSHBean -> toUniversalLink()
             is WireGuardBean -> toUniversalLink()
+            is TuicBean -> toUniversalLink()
             is NekoBean -> shareLink()
             else -> null
         }
@@ -300,6 +311,10 @@ data class ProxyEntity(
                                 append("\n\n")
                                 append(bean.buildHysteriaConfig(port, null))
                             }
+                            is TuicBean -> {
+                                append("\n\n")
+                                append(bean.buildTuicConfig(port, null))
+                            }
                         }
                     }
                 }
@@ -313,6 +328,7 @@ data class ProxyEntity(
             TYPE_NAIVE -> true
             TYPE_HYSTERIA -> true
             TYPE_WG -> true
+            TYPE_TUIC -> true
             TYPE_NEKO -> true
             else -> false
         }
@@ -347,6 +363,7 @@ data class ProxyEntity(
         hysteriaBean = null
         sshBean = null
         wgBean = null
+        tuicBean = null
 
         chainBean = null
 
@@ -395,6 +412,10 @@ data class ProxyEntity(
                 type = TYPE_WG
                 wgBean = bean
             }
+            is TuicBean -> {
+                type = TYPE_TUIC
+                tuicBean = bean
+            }
             is ChainBean -> {
                 type = TYPE_CHAIN
                 chainBean = bean
@@ -422,6 +443,7 @@ data class ProxyEntity(
                 TYPE_HYSTERIA -> HysteriaSettingsActivity::class.java
                 TYPE_SSH -> SSHSettingsActivity::class.java
                 TYPE_WG -> WireGuardSettingsActivity::class.java
+                TYPE_TUIC -> TuicSettingsActivity::class.java
 
                 TYPE_CHAIN -> ChainSettingsActivity::class.java
                 TYPE_NEKO -> NekoSettingActivity::class.java

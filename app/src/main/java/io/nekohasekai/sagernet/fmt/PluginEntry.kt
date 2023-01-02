@@ -56,6 +56,12 @@ enum class PluginEntry(
             downloadLink = "https://github.com/SagerNet/SagerNet/releases/tag/wireguard-plugin-20210424-5"
         )
     ),
+    TUIC(
+        "tuic-plugin",
+        SagerNet.application.getString(R.string.action_tuic),
+        "io.nekohasekai.sagernet.plugin.tuic",
+        DownloadSource(fdroid = false)
+    ),
     ;
 
     data class DownloadSource(

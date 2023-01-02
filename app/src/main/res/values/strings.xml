@@ -221,6 +221,7 @@
     <string name="action_hysteria" translatable="false">Hysteria</string>
     <string name="action_ssh" translatable="false">SSH</string>
     <string name="action_wireguard" translatable="false">WireGuard</string>
+    <string name="action_tuic" translatable="false">TUIC</string>
     <string name="proxy_chain">Proxy Chain</string>
     <string name="custom_config">Custom Config</string>
     <string name="balancer">Balancer</string>
@@ -496,6 +497,12 @@
     <string name="release_wake_lock">Release WakeLock</string>
     <string name="acquire_wake_lock_summary">Keep the CPU on</string>
     <string name="action_switch">Switch</string>
+
+    <string name="tuic_token">Token</string>
+    <string name="tuic_udp_relay_mode">UDP Relay Mode</string>
+    <string name="tuic_congestion_controller">Congestion Controller</string>
+    <string name="tuic_disable_sni">Disable SNI</string>
+    <string name="tuic_reduce_rtt">Reduce RTT</string>
 
     <string name="please_update">Your Matsuri is too old (%s). And will stop working at %s. Please update!</string>
     <string name="please_update_force">Your Matsuri is too old (%s). And has been stopped working at %s. Please update!</string>

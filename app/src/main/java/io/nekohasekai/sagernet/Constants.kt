@@ -156,6 +156,11 @@ object Key {
     const val SERVER_INSECURE_CONCURRENCY = "serverInsecureConcurrency"
     const val SERVER_REDUCED_IV_HEAD_ENTROPY = "serverReducedIvHeadEntropy"
 
+    const val SERVER_UDP_RELAY_MODE = "serverUDPRelayMode"
+    const val SERVER_CONGESTION_CONTROLLER = "serverCongestionController"
+    const val SERVER_DISABLE_SNI = "serverDisableSNI"
+    const val SERVER_REDUCE_RTT= "serverReduceRTT"
+
     const val ROUTE_NAME = "routeName"
     const val ROUTE_DOMAIN = "routeDomain"
     const val ROUTE_IP = "routeIP"

@@ -38,6 +38,7 @@ import io.nekohasekai.sagernet.fmt.shadowsocksr.ShadowsocksRBean
 import io.nekohasekai.sagernet.fmt.socks.SOCKSBean
 import io.nekohasekai.sagernet.fmt.ssh.SSHBean
 import io.nekohasekai.sagernet.fmt.trojan.TrojanBean
+import io.nekohasekai.sagernet.fmt.tuic.TuicBean
 import io.nekohasekai.sagernet.fmt.v2ray.StandardV2RayBean
 import io.nekohasekai.sagernet.fmt.v2ray.V2RayConfig
 import io.nekohasekai.sagernet.fmt.v2ray.V2RayConfig.*
@@ -805,6 +806,7 @@ fun buildV2RayConfig(
                         val pluginId = when (bean) {
                             is HysteriaBean -> "hysteria-plugin"
                             is WireGuardBean -> "wireguard-plugin"
+                            is TuicBean -> "tuic-plugin"
                             else -> ""
                         }
                         Plugins.getPlugin(pluginId)?.apply {

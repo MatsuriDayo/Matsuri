@@ -260,6 +260,11 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var serverInsecureConcurrency by profileCacheStore.stringToInt(Key.SERVER_INSECURE_CONCURRENCY)
     var serverReducedIvHeadEntropy by profileCacheStore.boolean(Key.SERVER_REDUCED_IV_HEAD_ENTROPY)
 
+    var serverUDPRelayMode by profileCacheStore.string(Key.SERVER_UDP_RELAY_MODE)
+    var serverCongestionController by profileCacheStore.string(Key.SERVER_CONGESTION_CONTROLLER)
+    var serverDisableSNI by profileCacheStore.boolean(Key.SERVER_DISABLE_SNI)
+    var serverReduceRTT by profileCacheStore.boolean(Key.SERVER_REDUCE_RTT)
+
     var routeName by profileCacheStore.string(Key.ROUTE_NAME)
     var routeDomain by profileCacheStore.string(Key.ROUTE_DOMAIN)
     var routeIP by profileCacheStore.string(Key.ROUTE_IP)
