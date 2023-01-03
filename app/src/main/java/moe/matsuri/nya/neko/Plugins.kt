@@ -37,6 +37,15 @@ object Plugins {
         return prefix
     }
 
+    fun isUsingMatsuriExe(pluginId: String): Boolean {
+        getPlugin(pluginId)?.apply {
+            if (authority.startsWith(Plugins.AUTHORITIES_PREFIX_NEKO_EXE)) {
+                return true
+            }
+        }
+        return false;
+    }
+
     fun displayExeProvider(pkgName: String): String {
         return if (pkgName.startsWith(AUTHORITIES_PREFIX_SEKAI_EXE)) {
             "SagerNet"
@@ -89,7 +98,7 @@ object Plugins {
         .path("/$id")
         .build()
 
-    fun getPluginOld(pluginId: String): List<ProviderInfo> {
+    private fun getPluginOld(pluginId: String): List<ProviderInfo> {
         var flags = PackageManager.GET_META_DATA
         if (Build.VERSION.SDK_INT >= 24) {
             flags =

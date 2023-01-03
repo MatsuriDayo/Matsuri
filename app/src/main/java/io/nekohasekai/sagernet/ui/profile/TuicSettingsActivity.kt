@@ -48,7 +48,7 @@ class TuicSettingsActivity : ProfileSettingsActivity<TuicBean>() {
         DataStore.serverSNI = sni
         DataStore.serverReduceRTT = reduceRTT
         DataStore.serverMTU = mtu
-
+        DataStore.serverFastConnect = fastConnect
     }
 
     override fun TuicBean.serialize() {
@@ -64,6 +64,7 @@ class TuicSettingsActivity : ProfileSettingsActivity<TuicBean>() {
         sni = DataStore.serverSNI
         reduceRTT = DataStore.serverReduceRTT
         mtu = DataStore.serverMTU
+        fastConnect = DataStore.serverFastConnect
     }
 
     override fun PreferenceFragmentCompat.createPreferences(

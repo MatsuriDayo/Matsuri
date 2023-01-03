@@ -62,6 +62,11 @@
             app:icon="@drawable/baseline_flight_takeoff_24"
             app:key="serverReduceRTT"
             app:title="@string/tuic_reduce_rtt" />
+        <SwitchPreference
+            app:icon="@drawable/baseline_flight_takeoff_24"
+            app:key="serverFastConnect"
+            app:summary="@string/tuic_fast_connect_summary"
+            app:title="@string/tuic_fast_connect" />
         <EditTextPreference
             app:icon="@drawable/baseline_public_24"
             app:key="serverMTU"

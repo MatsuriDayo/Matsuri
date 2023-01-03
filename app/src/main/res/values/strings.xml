@@ -502,7 +502,9 @@
     <string name="tuic_udp_relay_mode">UDP Relay Mode</string>
     <string name="tuic_congestion_controller">Congestion Controller</string>
     <string name="tuic_disable_sni">Disable SNI</string>
-    <string name="tuic_reduce_rtt">Reduce RTT</string>
+    <string name="tuic_reduce_rtt">UDP Reduce RTT</string>
+    <string name="tuic_fast_connect">TCP Fast Connect</string>
+    <string name="tuic_fast_connect_summary">Requires plugin and server support</string>
 
     <string name="please_update">Your Matsuri is too old (%s). And will stop working at %s. Please update!</string>
     <string name="please_update_force">Your Matsuri is too old (%s). And has been stopped working at %s. Please update!</string>

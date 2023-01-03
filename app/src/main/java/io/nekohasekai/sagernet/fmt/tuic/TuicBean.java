@@ -39,6 +39,7 @@ public class TuicBean extends AbstractBean {
     public Boolean reduceRTT;
     public Integer mtu;
     public String sni;
+    public Boolean fastConnect;
 
     @Override
     public void initializeDefaultValues() {
@@ -52,6 +53,7 @@ public class TuicBean extends AbstractBean {
         if (reduceRTT == null) reduceRTT = false;
         if (mtu == null) mtu = 1400;
         if (sni == null) sni = "";
+        if (fastConnect == null) fastConnect = false;
     }
 
     @Override
@@ -67,6 +69,7 @@ public class TuicBean extends AbstractBean {
         output.writeBoolean(reduceRTT);
         output.writeInt(mtu);
         output.writeString(sni);
+        output.writeBoolean(fastConnect);
     }
 
     @Override
@@ -82,6 +85,7 @@ public class TuicBean extends AbstractBean {
         reduceRTT = input.readBoolean();
         mtu = input.readInt();
         sni = input.readString();
+        fastConnect = input.readBoolean();
     }
 
     @NotNull

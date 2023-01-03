@@ -809,10 +809,8 @@ fun buildV2RayConfig(
                             is TuicBean -> "tuic-plugin"
                             else -> ""
                         }
-                        Plugins.getPlugin(pluginId)?.apply {
-                            if (authority.startsWith(Plugins.AUTHORITIES_PREFIX_NEKO_EXE)) {
-                                needExternal = false
-                            }
+                        if (Plugins.isUsingMatsuriExe(pluginId)) {
+                            needExternal = false
                         }
                     }
                     if (needExternal) {
