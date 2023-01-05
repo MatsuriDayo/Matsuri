@@ -2,8 +2,10 @@ package libcore
 
 import (
 	"net"
+	"runtime"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/v2fly/v2ray-core/v5/nekoutils"
 )
 
@@ -31,4 +33,11 @@ func SetConfig(tryDomainStr string, disableExtraCoreLog bool, nekoConnLog bool) 
 	} else {
 		v2rayLogHook = nil
 	}
+}
+
+func ForceGc() {
+	go func() {
+		logrus.Infoln("[APP] request force GC")
+		runtime.GC()
+	}()
 }

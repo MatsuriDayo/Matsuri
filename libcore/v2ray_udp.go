@@ -23,7 +23,7 @@ import (
 // dispatcherConn (for zero-copy)
 
 func (instance *V2RayInstance) newDispatcherConn(ctx context.Context, destinationConn net2.Destination, destinationV2ray net2.Destination,
-	writeBack tun.WriteBack, timeout time.Duration, workerN int,
+	writeBack tun.WriteBackFunc, timeout time.Duration, workerN int,
 ) (*dispatcherConn, error) {
 	ctx, cancel := context.WithCancel(core.WithContext(ctx, instance.Core))
 	link, err := instance.Dispatcher.Dispatch(ctx, destinationV2ray)
@@ -65,7 +65,7 @@ type dispatcherConn struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 
-	writeBack tun.WriteBack // downlink
+	writeBack tun.WriteBackFunc // downlink
 
 	stats *myStats // traffic stats
 }

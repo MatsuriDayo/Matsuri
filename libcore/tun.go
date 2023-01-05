@@ -31,6 +31,8 @@ type Tun2ray struct {
 	dev      tun.Tun
 	v2ray    *V2RayInstance
 	udpTable *natTable
+	udpQueue chan *tun.UDPPacket
+
 	fakedns  bool
 	sniffing bool
 	debug    bool
@@ -38,7 +40,6 @@ type Tun2ray struct {
 	dumpUid      bool
 	trafficStats bool
 	appStats     map[uint16]*appStats
-	pcap         bool
 
 	fdProtector Protector
 }
@@ -72,12 +73,17 @@ func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
 	t := &Tun2ray{
 		v2ray:        config.V2Ray,
 		udpTable:     &natTable{},
+		udpQueue:     make(chan *tun.UDPPacket, 200),
 		sniffing:     config.Sniffing,
 		fakedns:      config.FakeDNS,
 		debug:        config.Debug,
 		dumpUid:      config.DumpUID,
 		trafficStats: config.TrafficStats,
 		fdProtector:  config.FdProtector,
+	}
+
+	for i := 0; i < device.NumUDPWorkers(); i++ {
+		go t.udpHandleUplink()
 	}
 
 	// setup resolver first
@@ -93,12 +99,13 @@ func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
 	if config.Implementation == 0 { // gvisor
 		var pcapFile *os.File
 		if config.PCap {
-			path := time.Now().UTC().String()
-			path = externalAssetsPath + "/pcap/" + path + ".pcap"
+			path := externalAssetsPath + "/pcap/"
+			os.RemoveAll(path) // remove old pcap
 			err = os.MkdirAll(filepath.Dir(path), 0755)
 			if err != nil {
 				return nil, newError("unable to create pcap dir").Base(err)
 			}
+			path = path + time.Now().UTC().String() + ".pcap"
 			pcapFile, err = os.Create(path)
 			if err != nil {
 				return nil, newError("unable to create pcap file").Base(err)
@@ -123,6 +130,7 @@ func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
 func (t *Tun2ray) Close() {
 	t.access.Lock()
 	defer t.access.Unlock()
+	defer close(t.udpQueue)
 
 	underlyingResolver.sekaiResolver = nil
 	if t.fdProtector != nil {
@@ -282,18 +290,26 @@ func (r *connReaderWriter) Close() (err error) {
 }
 
 // UDP
-func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.Destination, p *tun.UDPPacket, writeBack tun.WriteBack) {
-	natKey := source.NetAddr()
+
+func (t *Tun2ray) HandlePacket(p *tun.UDPPacket) {
+	t.udpQueue <- p
+}
+
+func (t *Tun2ray) udpHandleUplink() {
+	for p := range t.udpQueue {
+		t.udpHandleUplinkInternal(p)
+	}
+}
+
+func (t *Tun2ray) udpHandleUplinkInternal(p *tun.UDPPacket) {
+	natKey := p.Src.String()
 
 	sendTo := func(firstPkt bool) bool {
 		conn := t.udpTable.Get(natKey)
 		if conn == nil {
 			return false
 		}
-		_, err := conn.WriteTo(p.Data, &net.UDPAddr{
-			IP:   destination.Address.IP(),
-			Port: int(destination.Port),
-		})
+		_, err := conn.WriteTo(p.Data, p.Dst)
 		if p.Put != nil {
 			p.Put()
 		}
@@ -325,6 +341,8 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 	}
 
 	// new udp conn
+	source := v2rayNet.DestinationFromAddr(p.Src)
+	destination := v2rayNet.DestinationFromAddr(p.Dst)
 	inbound := &session.Inbound{
 		Source: source,
 		Tag:    "socks",
@@ -432,7 +450,7 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 		return
 	}
 
-	conn, err := t.v2ray.newDispatcherConn(ctx, destination, destination2, writeBack, timeout, workerN)
+	conn, err := t.v2ray.newDispatcherConn(ctx, destination, destination2, p.WriteBack, timeout, workerN)
 
 	if err != nil {
 		logrus.Errorf("[UDP] dial failed: %s", err.Error())
@@ -475,17 +493,20 @@ func (t *Tun2ray) NewPacket(source v2rayNet.Destination, destination v2rayNet.De
 	cond.Broadcast()
 
 	// uplink
-	go sendTo(true)
+	sendTo(true)
 
-	// downlink (moved to handleDownlink)
-	<-conn.ctx.Done()
+	// wait for connection ends
+	go func() {
+		// downlink (moved to handleDownlink)
+		<-conn.ctx.Done()
 
-	// close
-	if p.PutHeader != nil {
-		p.PutHeader()
-	}
-	comm.CloseIgnore(conn)
-	t.udpTable.Delete(natKey)
+		// close
+		if p.PutHeader != nil {
+			p.PutHeader()
+		}
+		comm.CloseIgnore(conn)
+		t.udpTable.Delete(natKey)
+	}()
 }
 
 type natTable struct {

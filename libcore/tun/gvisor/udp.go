@@ -3,11 +3,9 @@ package gvisor
 import (
 	"fmt"
 	"net"
-	"strconv"
 
 	"libcore/tun"
 
-	v2rayNet "github.com/v2fly/v2ray-core/v5/common/net"
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/buffer"
 	"gvisor.dev/gvisor/pkg/tcpip/header"
@@ -24,17 +22,13 @@ func gUdpHandler(s *stack.Stack, handler tun.Handler) {
 			return true
 		}
 
-		srcAddr := net.JoinHostPort(id.RemoteAddress.String(), strconv.Itoa(int(id.RemotePort)))
-		src, err := v2rayNet.ParseDestination(fmt.Sprint("udp:", srcAddr))
-		if err != nil {
-			newError("[UDP] parse source address ", srcAddr, " failed: ", err).AtWarning().WriteToLog()
-			return true
+		srcAddr := &net.UDPAddr{
+			IP:   net.ParseIP(id.RemoteAddress.String()),
+			Port: int(id.RemotePort),
 		}
-		dstAddr := net.JoinHostPort(id.LocalAddress.String(), strconv.Itoa(int(id.LocalPort)))
-		dst, err := v2rayNet.ParseDestination(fmt.Sprint("udp:", dstAddr))
-		if err != nil {
-			newError("[UDP] parse destination address ", dstAddr, " failed: ", err).AtWarning().WriteToLog()
-			return true
+		dstAddr := &net.UDPAddr{
+			IP:   net.ParseIP(id.LocalAddress.String()),
+			Port: int(id.LocalPort),
 		}
 
 		data := buffer.Data().ExtractVV()
@@ -45,21 +39,16 @@ func gUdpHandler(s *stack.Stack, handler tun.Handler) {
 			netHdr:   buffer.Network(),
 			netProto: buffer.NetworkProtocolNumber,
 		}
-		destUdpAddr := &net.UDPAddr{
-			IP:   dst.Address.IP(),
-			Port: int(dst.Port),
-		}
-		go handler.NewPacket(src, dst,
-			&tun.UDPPacket{
-				Data: data.ToView(),
-				Put:  nil, // DecRef by dispatcher
-			},
-			func(bytes []byte, addr *net.UDPAddr) (int, error) {
-				if addr == nil {
-					addr = destUdpAddr
-				}
+
+		handler.HandlePacket(&tun.UDPPacket{
+			Src:  srcAddr,
+			Dst:  dstAddr,
+			Data: data.ToView(),
+			Put:  nil, // DecRef by dispatcher
+			WriteBack: func(bytes []byte, addr *net.UDPAddr) (int, error) {
 				return packet.WriteBack(bytes, addr)
-			})
+			},
+		})
 		return true
 	})
 }

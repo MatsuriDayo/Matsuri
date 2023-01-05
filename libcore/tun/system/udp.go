@@ -2,9 +2,9 @@ package system
 
 import (
 	"libcore/tun"
+	"net"
 
 	"github.com/v2fly/v2ray-core/v5/common/buf"
-	v2rayNet "github.com/v2fly/v2ray-core/v5/common/net"
 	"gvisor.dev/gvisor/pkg/tcpip"
 	"gvisor.dev/gvisor/pkg/tcpip/buffer"
 	"gvisor.dev/gvisor/pkg/tcpip/header"
@@ -16,15 +16,13 @@ func (t *SystemTun) processIPv4UDP(cache *buf.Buffer, ipHdr header.IPv4, hdr hea
 	sourcePort := hdr.SourcePort()
 	destinationPort := hdr.DestinationPort()
 
-	source := v2rayNet.Destination{
-		Address: v2rayNet.IPAddress([]byte(sourceAddress)),
-		Port:    v2rayNet.Port(sourcePort),
-		Network: v2rayNet.Network_UDP,
+	source := &net.UDPAddr{
+		IP:   []byte(sourceAddress),
+		Port: int(sourcePort),
 	}
-	destination := v2rayNet.Destination{
-		Address: v2rayNet.IPAddress([]byte(destinationAddress)),
-		Port:    v2rayNet.Port(destinationPort),
-		Network: v2rayNet.Network_UDP,
+	destination := &net.UDPAddr{
+		IP:   []byte(destinationAddress),
+		Port: int(destinationPort),
 	}
 
 	ipHdr.SetDestinationAddress(sourceAddress)
@@ -35,12 +33,12 @@ func (t *SystemTun) processIPv4UDP(cache *buf.Buffer, ipHdr header.IPv4, hdr hea
 	headerCache.Write(ipHdr[:headerLength+header.UDPMinimumSize])
 
 	cache.Advance(int32(headerLength + header.UDPMinimumSize))
-	go t.handler.NewPacket(source, destination,
-		&tun.UDPPacket{
-			Data:      cache.Bytes(),
-			PutHeader: headerCache.Release,
-		},
-		func(bytes []byte, addr *v2rayNet.UDPAddr) (int, error) {
+	t.handler.HandlePacket(&tun.UDPPacket{
+		Src:       source,
+		Dst:       destination,
+		Data:      cache.Bytes(),
+		PutHeader: headerCache.Release,
+		WriteBack: func(bytes []byte, addr *net.UDPAddr) (int, error) {
 			index := headerCache.Len()
 			newHeader := headerCache.ExtendCopy(headerCache.Bytes())
 			headerCache.Advance(index)
@@ -82,7 +80,8 @@ func (t *SystemTun) processIPv4UDP(cache *buf.Buffer, ipHdr header.IPv4, hdr hea
 			}
 
 			return len(bytes), nil
-		})
+		},
+	})
 }
 
 func (t *SystemTun) processIPv6UDP(cache *buf.Buffer, ipHdr header.IPv6, hdr header.UDP) {
@@ -91,15 +90,13 @@ func (t *SystemTun) processIPv6UDP(cache *buf.Buffer, ipHdr header.IPv6, hdr hea
 	sourcePort := hdr.SourcePort()
 	destinationPort := hdr.DestinationPort()
 
-	source := v2rayNet.Destination{
-		Address: v2rayNet.IPAddress([]byte(sourceAddress)),
-		Port:    v2rayNet.Port(sourcePort),
-		Network: v2rayNet.Network_UDP,
+	source := &net.UDPAddr{
+		IP:   []byte(sourceAddress),
+		Port: int(sourcePort),
 	}
-	destination := v2rayNet.Destination{
-		Address: v2rayNet.IPAddress([]byte(destinationAddress)),
-		Port:    v2rayNet.Port(destinationPort),
-		Network: v2rayNet.Network_UDP,
+	destination := &net.UDPAddr{
+		IP:   []byte(destinationAddress),
+		Port: int(destinationPort),
 	}
 
 	ipHdr.SetDestinationAddress(sourceAddress)
@@ -110,12 +107,12 @@ func (t *SystemTun) processIPv6UDP(cache *buf.Buffer, ipHdr header.IPv6, hdr hea
 	headerCache.Write(ipHdr[:headerLength+header.UDPMinimumSize])
 
 	cache.Advance(int32(headerLength + header.UDPMinimumSize))
-	go t.handler.NewPacket(source, destination,
-		&tun.UDPPacket{
-			Data:      cache.Bytes(),
-			PutHeader: headerCache.Release,
-		},
-		func(bytes []byte, addr *v2rayNet.UDPAddr) (int, error) {
+	t.handler.HandlePacket(&tun.UDPPacket{
+		Src:       source,
+		Dst:       destination,
+		Data:      cache.Bytes(),
+		PutHeader: headerCache.Release,
+		WriteBack: func(bytes []byte, addr *net.UDPAddr) (int, error) {
 			index := headerCache.Len()
 			newHeader := headerCache.ExtendCopy(headerCache.Bytes())
 			headerCache.Advance(index)
@@ -155,5 +152,6 @@ func (t *SystemTun) processIPv6UDP(cache *buf.Buffer, ipHdr header.IPv6, hdr hea
 			}
 
 			return len(bytes), nil
-		})
+		},
+	})
 }

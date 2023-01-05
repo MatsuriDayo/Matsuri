@@ -68,26 +68,16 @@ func New(fd int32, handler tun.Handler) (*Tun2Socket, error) {
 				continue
 			}
 
-			source := v2rayNet.Destination{
-				Address: v2rayNet.IPAddress(lAddr.IP),
-				Port:    v2rayNet.Port(lAddr.Port),
-				Network: v2rayNet.Network_UDP,
-			}
-			destination := v2rayNet.Destination{
-				Address: v2rayNet.IPAddress(rAddr.IP),
-				Port:    v2rayNet.Port(rAddr.Port),
-				Network: v2rayNet.Network_UDP,
-			}
-
-			go handler.NewPacket(source, destination,
-				&tun.UDPPacket{
-					Data: raw,
-					Put:  func() { pool.Put(buf) },
-				},
-				func(b []byte, addr *net.UDPAddr) (int, error) {
+			handler.HandlePacket(&tun.UDPPacket{
+				Src:  lAddr,
+				Dst:  rAddr,
+				Data: raw,
+				Put:  func() { pool.Put(buf) },
+				WriteBack: func(b []byte, addr *net.UDPAddr) (int, error) {
 					// this is downlink
 					return stack.UDP().WriteTo(b, addr, lAddr)
-				})
+				},
+			})
 		}
 	}
 
