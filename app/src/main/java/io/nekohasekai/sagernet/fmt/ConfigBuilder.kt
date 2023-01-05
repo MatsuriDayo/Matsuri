@@ -569,6 +569,7 @@ fun buildV2RayConfig(
                                             tlsConfig = tlsSettings
                                         }
                                         tlsSettings = null
+                                        security = "utls"
                                     }
                                 }
 
