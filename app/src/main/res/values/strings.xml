@@ -502,7 +502,7 @@
     <string name="tuic_udp_relay_mode">UDP Relay Mode</string>
     <string name="tuic_congestion_controller">Congestion Controller</string>
     <string name="tuic_disable_sni">Disable SNI</string>
-    <string name="tuic_reduce_rtt">UDP Reduce RTT</string>
+    <string name="tuic_reduce_rtt">Enable 0-RTT QUIC handshake</string>
     <string name="tuic_fast_connect">TCP Fast Connect</string>
     <string name="tuic_fast_connect_summary">Requires plugin and server support</string>
 
