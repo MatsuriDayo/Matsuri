@@ -49,6 +49,7 @@ class TuicSettingsActivity : ProfileSettingsActivity<TuicBean>() {
         DataStore.serverReduceRTT = reduceRTT
         DataStore.serverMTU = mtu
         DataStore.serverFastConnect = fastConnect
+        DataStore.serverAllowInsecure = allowInsecure
     }
 
     override fun TuicBean.serialize() {
@@ -65,6 +66,7 @@ class TuicSettingsActivity : ProfileSettingsActivity<TuicBean>() {
         reduceRTT = DataStore.serverReduceRTT
         mtu = DataStore.serverMTU
         fastConnect = DataStore.serverFastConnect
+        allowInsecure = DataStore.serverAllowInsecure
     }
 
     override fun PreferenceFragmentCompat.createPreferences(

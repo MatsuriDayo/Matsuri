@@ -71,6 +71,7 @@ fun TuicBean.buildTuicConfig(port: Int, cacheFile: (() -> File)?): String {
             put("reduce_rtt", reduceRTT)
             put("max_udp_relay_packet_size", mtu)
             if (fastConnect) put("fast_connect", true)
+            if (allowInsecure) put("insecure", true)
         })
         put("local", JSONObject().apply {
             put("ip", LOCALHOST)

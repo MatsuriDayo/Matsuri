@@ -67,6 +67,11 @@
             app:key="serverFastConnect"
             app:summary="@string/tuic_fast_connect_summary"
             app:title="@string/tuic_fast_connect" />
+        <SwitchPreference
+            app:icon="@drawable/ic_notification_enhanced_encryption"
+            app:key="serverAllowInsecure"
+            app:summary="@string/tuic_fast_connect_summary"
+            app:title="@string/allow_insecure" />
         <EditTextPreference
             app:icon="@drawable/baseline_public_24"
             app:key="serverMTU"
