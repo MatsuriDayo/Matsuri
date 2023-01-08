@@ -32,6 +32,7 @@ fun parseTrojan(server: String): TrojanBean {
         parseDuckSoft(link)
         link.queryParameter("allowInsecure")
             ?.apply { if (this == "1" || this == "true") allowInsecure = true }
+        link.queryParameter("peer")?.apply { if (this.isNotBlank()) sni = this }
     }
 
 }
