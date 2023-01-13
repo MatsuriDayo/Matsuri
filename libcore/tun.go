@@ -400,7 +400,7 @@ func (t *Tun2ray) udpHandleUplinkInternal(p *tun.UDPPacket) {
 				}
 
 				if info == nil {
-					logrus.Infof("[%s] %s ==> %s", tag, source.NetAddr(), destination.NetAddr())
+					logrus.Infof("[%s] [uid:%d] %s ==> %s", tag, uid, source.NetAddr(), destination.NetAddr())
 				} else {
 					logrus.Infof("[%s][%s (%d/%s)] %s ==> %s", tag, info.Label, uid, info.PackageName, source.NetAddr(), destination.NetAddr())
 				}
