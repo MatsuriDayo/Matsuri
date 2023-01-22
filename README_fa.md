@@ -1,32 +1,32 @@
-# Matsuri (茉莉) for Android
+# برای اندروید Matsuri
 
 [![API](https://img.shields.io/badge/API-21%2B-brightgreen.svg?style=flat)](https://android-arsenal.com/api?level=21)
 [![Releases](https://img.shields.io/github/v/release/MatsuriDayo/Matsuri)](https://github.com/MatsuriDayo/Matsuri/releases)
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-orange.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-V2Ray / universal proxy toolchain for Android.
+زنجیره ابزار پراکسی جهانی برای اندروید / V2Ray
 
-## 下载 / Downloads
+## دانلود / Downloads
 
-### GitHub Releases
+### نسخه های GitHub
 
 [![GitHub All Releases](https://img.shields.io/github/downloads/Matsuridayo/Matsuri/total?label=downloads-total&logo=github&style=flat-square)](https://github.com/Matsuridayo/Matsuri/releases)
 
-[下载](https://github.com/Matsuridayo/Matsuri/releases)
+[دانلود](https://github.com/Matsuridayo/Matsuri/releases)
 
 [F-Droid](https://f-droid.org/packages/moe.matsuri.lite)
 
-[Google Play](https://play.google.com/store/apps/details?id=moe.matsuri.lite)
+[گوگل پلی](https://play.google.com/store/apps/details?id=moe.matsuri.lite)
 
-## 更改记录 & 发布频道 / Changelog & Telegram channel
+## گزارش تغییرات و گروه تلگرام / Changelog & Telegram channel
 
 https://t.me/Matsuridayo
 
-## 项目主页 & 文档 / Homepage & Documents
+## صفحه خانه و اسناد / Homepage & Documents
 
 https://matsuridayo.github.io
 
-## 代理 / Proxy
+## پروکسی / Proxy
 
 * SOCKS (4/4a/5)
 * HTTP(S)
@@ -40,20 +40,18 @@ https://matsuridayo.github.io
 * Hysteria ( hysteria-plugin )
 * WireGuard ( wireguard-plugin )
 
-请到项目主页下载插件。
 
-Please go to the project homepage to download plugins.
+لطفا برای دانلود پلاگین ها به صفحه اصلی پروژه بروید.
 
-### 订阅 / Subscription
+### اشتراک / Subscription
 
-* Raw: some widely used formats (like shadowsocks, clash and v2rayN)
-* 原始格式：一些广泛使用的格式（如 shadowsocks、clash 和 v2rayN）
+* خام: بعضی از فرمت های پرکاربرد (مثل شدوساکس، clash و V2RayN) 
 * [Open Online Config](https://github.com/Shadowsocks-NET/OpenOnlineConfig)
 * [Shadowsocks SIP008](https://shadowsocks.org/guide/sip008.html)
 
-### 捐助 / Donate
+### حمایت / Donate
 
-欢迎捐赠以支持项目开发。
+از کمک های مالی برای حمایت از توسعه پروژه استقبال می شود.
 
 USDT TRC20
 
@@ -65,12 +63,8 @@ XMR
 
 ## SagerNet
 
-本项目源于[SagerNet](https://github.com/SagerNet/SagerNet)，并做了很多优化和修改。由于维护者的精力有限，SagerNet的一些新功能可能不会被合并到这个项目中。
+این پروژه از [SagerNet]([url](https://github.com/SagerNet/SagerNet)) نشات گرفته است و دارای بهینه سازی و تغییرات زیادی است. بعضی از قابلیت های جدید SagerNet ممکن است به این پروژه نیایند به خاطر محدودیت انرژی توسعه دهنده ها. 
 
-This project is derived from [SagerNet](https://github.com/SagerNet/SagerNet) and has many optimizations and modifications. Some new features of SagerNet may not be merged into this project due to the limited energy of maintainers.
-
-有什么显著的不同？
-
-What is the significant difference?
+تفاوت قابل توجه چیست؟
 
 https://matsuridayo.github.io/m-faq/
