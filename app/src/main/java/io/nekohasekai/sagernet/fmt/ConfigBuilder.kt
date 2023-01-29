@@ -1076,6 +1076,7 @@ fun buildV2RayConfig(
                         address = it.replace("https://", "https+local://")
                         domains = directLookupDomain.toList()
                         uidList = uidListDNSDirect.toHashSet().toList()
+                        fallbackStrategy = "disabled"
                         applyDNSNetworkSettings(true)
                     }
                 }
