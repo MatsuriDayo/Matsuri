@@ -76,21 +76,16 @@ func extractAssetName(name string, useOfficialAssets bool) error {
 		return err
 	}
 
-	doExtract := false
-	fileMissing := false
+	var doExtract bool
 
-	if _, err := os.Stat(dir + version); err != nil {
-		fileMissing = true
-	} else if _, err := os.Stat(dstName); err != nil {
-		fileMissing = true
-	}
-
-	if fileMissing {
+	if _, err := os.Stat(dstName); err != nil {
+		// assetFileMissing
 		doExtract = true
 	} else if useOfficialAssets || !replaceable {
 		// 官方源升级
 		b, err := ioutil.ReadFile(dir + version)
 		if err != nil {
+			// versionFileMissing
 			doExtract = true
 			_ = os.RemoveAll(version)
 		} else {
