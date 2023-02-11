@@ -12,10 +12,7 @@ require (
 	go.uber.org/automaxprocs v1.4.0
 	golang.org/x/mobile v0.0.0-20220722155234-aaac322e2105
 	golang.org/x/sys v0.3.0
-	gvisor.dev/gvisor v0.0.0
 )
-
-replace gvisor.dev/gvisor => github.com/sagernet/gvisor v0.0.0-20220402114650-763d12dc953e
 
 replace github.com/v2fly/v2ray-core/v5 v5.0.0 => ../../v2ray-core
 
@@ -29,7 +26,6 @@ require (
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/btree v1.0.1 // indirect
 	github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/jhump/protoreflect v1.14.0 // indirect
@@ -55,7 +51,6 @@ require (
 	golang.org/x/mod v0.6.0 // indirect
 	golang.org/x/net v0.4.0 // indirect
 	golang.org/x/text v0.5.0 // indirect
-	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
 	golang.org/x/tools v0.2.0 // indirect
 	google.golang.org/genproto v0.0.0-20211223182754-3ac035c7e7cb // indirect
 	google.golang.org/grpc v1.51.0 // indirect
