@@ -6,17 +6,15 @@ import (
 	"strings"
 
 	"github.com/sirupsen/logrus"
-	"github.com/v2fly/v2ray-core/v5/nekoutils"
 )
 
-func SetConfig(tryDomainStr string, disableExtraCoreLog bool, nekoConnLog bool) {
+func SetConfig(tryDomainStr string, filterCoreLog bool) {
+	// this is orphan
+
 	tryDomains = strings.Split(tryDomainStr, ",")
 	staticHosts = make(map[string][]net.IP)
 
-	nekoutils.Connection_V2Ray_Enabled = nekoConnLog
-	ResetAllConnections(false)
-
-	if disableExtraCoreLog {
+	if filterCoreLog {
 		v2rayLogHook = func(s string) string {
 			patterns := []string{
 				"Logger closing",

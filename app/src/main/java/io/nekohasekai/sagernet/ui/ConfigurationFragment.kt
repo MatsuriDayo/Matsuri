@@ -865,7 +865,7 @@ class ConfigurationFragment @JvmOverloads constructor(
 
     fun urlTest() {
         stopService()
-        Libcore.setConfig("", true, false)
+        Libcore.setConfig("", true)
 
         val test = TestDialog()
         val dialog = test.builder.show()
@@ -937,7 +937,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                 NekoJSInterface.Default.destroyAllJsi()
                 mainJob.cancel()
                 testJobs.forEach { it.cancel() }
-                Libcore.setConfig("", false, false)
+                Libcore.setConfig("", false)
             }
         }
     }

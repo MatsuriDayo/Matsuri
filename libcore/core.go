@@ -30,9 +30,7 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 	isBgProcess := strings.HasSuffix(process, ":bg")
 
 	// Working dir
-	if !device.IsNekoray {
-		os.Chdir(filepath.Join(cachePath, "../no_backup"))
-	}
+	os.Chdir(filepath.Join(cachePath, "../no_backup"))
 
 	// Set up log
 	SetEnableLog(enableLog, maxKB)
@@ -60,7 +58,7 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 		setupV2rayFileSystem(internalAssets, externalAssets)
 		setupResolvers()
 
-		if time.Now().Unix() >= GetExpireTime() && !device.IsNekoray {
+		if time.Now().Unix() >= GetExpireTime() {
 			outdated = "Your version is too old! Please update!! 版本太旧，请升级！"
 		} else if time.Now().Unix() < (GetBuildTime() - 86400) {
 			outdated = "Wrong system time! 系统时间错误！"

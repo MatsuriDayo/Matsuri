@@ -3,7 +3,6 @@ package libcore
 import (
 	"context"
 	"fmt"
-	"libcore/device"
 	"libcore/doh"
 	"libcore/protect"
 	"net"
@@ -99,9 +98,7 @@ func setupResolvers() {
 	internet.UseAlternativeSystemDNSDialer(underlyingDialer)
 
 	// "localhost" localDns lookup -> Underlying
-	if !device.IsNekoray {
-		localdns.SetLookupFunc(underlyingResolver.LookupIP)
-	}
+	localdns.SetLookupFunc(underlyingResolver.LookupIP)
 
 	// doh package
 	doh.SetDialContext(underlyingDialer.DialContext)
@@ -143,12 +140,10 @@ func setupResolvers() {
 	})
 
 	// UDP ListenPacket
-	if !device.IsNekoray {
-		internet.RegisterListenerController(func(network, address string, fd uintptr) error {
-			if protect.FdProtector != nil {
-				protect.FdProtector.Protect(int32(fd))
-			}
-			return nil
-		})
-	}
+	internet.RegisterListenerController(func(network, address string, fd uintptr) error {
+		if protect.FdProtector != nil {
+			protect.FdProtector.Protect(int32(fd))
+		}
+		return nil
+	})
 }

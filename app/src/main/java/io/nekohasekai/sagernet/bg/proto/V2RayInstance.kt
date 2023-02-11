@@ -84,11 +84,8 @@ abstract class V2RayInstance(
     protected open suspend fun loadConfig() {
         NekoJSInterface.Default.destroyAllJsi()
         Libcore.setEnableLog(DataStore.enableLog, DataStore.logBufSize)
-        Libcore.setConfig(
-            config.tryDomains.joinToString(","),
-            false,
-            isExpertFlavor && DataStore.appTrafficStatistics
-        )
+        Libcore.setConfig(config.tryDomains.joinToString(","), false)
+        v2rayPoint.setConnectionPoolEnabled(isExpertFlavor && DataStore.appTrafficStatistics)
         v2rayPoint.loadConfig(config.config)
     }
 

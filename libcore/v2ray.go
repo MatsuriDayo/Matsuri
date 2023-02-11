@@ -2,11 +2,9 @@ package libcore
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
-	"sort"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -118,9 +116,7 @@ func (instance *V2RayInstance) Close() error {
 		if !instance.ForTest {
 			atomic.StorePointer(&v2rayDNSClient, unsafe.Pointer(nil))
 		}
-		nekoutils.ConnectionLog_V2Ray.ResetConnections(uintptr(unsafe.Pointer(instance.Core)))
-		nekoutils.ConnectionPool_V2Ray.ResetConnections(uintptr(unsafe.Pointer(instance.Core)))
-		nekoutils.ConnectionPool_System.ResetConnections(uintptr(unsafe.Pointer(instance.Core)))
+		nekoutils.ResetConnections(uintptr(unsafe.Pointer(instance.Core)))
 		return instance.Core.Close()
 	}
 	return nil
@@ -143,75 +139,17 @@ func (instance *V2RayInstance) DialContext(ctx context.Context, destination net.
 
 // Neko connections
 
+func (instance *V2RayInstance) SetConnectionPoolEnabled(enable bool) {
+	nekoutils.SetConnectionPoolV2RayEnabled(uintptr(unsafe.Pointer(instance.Core)), enable)
+	nekoutils.ResetAllConnections(false)
+}
+
 func ResetAllConnections(system bool) {
-	if system {
-		nekoutils.ConnectionPool_System.ResetConnections(0)
-	} else {
-		nekoutils.ConnectionPool_V2Ray.ResetConnections(0)
-		nekoutils.ConnectionLog_V2Ray.ResetConnections(0)
-	}
+	nekoutils.ResetAllConnections(system)
 }
 
 func ListV2rayConnections() string {
-	list2 := make([]interface{}, 0)
-
-	rangeMap := func(m *sync.Map) []interface{} {
-		vs := make(map[uint32]interface{}, 0)
-		ks := make([]uint32, 0)
-
-		m.Range(func(key interface{}, value interface{}) bool {
-			if k, ok := key.(uint32); ok {
-				vs[k] = value
-				ks = append(ks, k)
-			}
-			return true
-		})
-
-		sort.Slice(ks, func(i, j int) bool { return ks[i] > ks[j] })
-
-		ret := make([]interface{}, 0)
-		for _, id := range ks {
-			ret = append(ret, vs[id])
-		}
-		return ret
-	}
-
-	addToList := func(list interface{}) {
-		for i, c := range list.([]interface{}) {
-			if i >= 100 { // too much
-				return
-			}
-			if c2, ok := c.(*nekoutils.ManagedV2rayConn); ok {
-				if c2.Tag == "dns-out" || c2.Tag == "direct" {
-					continue
-				}
-				item := &struct {
-					ID    uint32
-					Dest  string
-					RDest string
-					Uid   uint32
-					Start int64
-					End   int64
-					Tag   string
-				}{
-					c2.ID(),
-					c2.Dest,
-					c2.RouteDest,
-					c2.InboundUid,
-					c2.StartTime,
-					c2.EndTime,
-					c2.Tag,
-				}
-				list2 = append(list2, item)
-			}
-		}
-	}
-
-	addToList(rangeMap(&nekoutils.ConnectionPool_V2Ray.Map))
-	addToList(rangeMap(&nekoutils.ConnectionLog_V2Ray.Map))
-
-	b, _ := json.Marshal(&list2)
-	return string(b)
+	return nekoutils.ListConnections(0)
 }
 
 func CloseV2rayConnection(id uint32) {
