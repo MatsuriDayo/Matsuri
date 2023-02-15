@@ -90,12 +90,16 @@ func extractAssetName(name string, useOfficialAssets bool) error {
 			_ = os.RemoveAll(version)
 		} else {
 			localVersion = string(b)
-			av, err := strconv.ParseUint(assetVersion, 10, 64)
-			if err != nil {
-				doExtract = assetVersion != localVersion
+			if localVersion == "Custom" {
+				doExtract = false
 			} else {
-				lv, err := strconv.ParseUint(localVersion, 10, 64)
-				doExtract = err != nil || av > lv
+				av, err := strconv.ParseUint(assetVersion, 10, 64)
+				if err != nil {
+					doExtract = assetVersion != localVersion
+				} else {
+					lv, err := strconv.ParseUint(localVersion, 10, 64)
+					doExtract = err != nil || av > lv
+				}
 			}
 		}
 	} else {
