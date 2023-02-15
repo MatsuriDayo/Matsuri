@@ -40,6 +40,7 @@ import libcore.Libcore
 import org.json.JSONObject
 import java.io.File
 import java.io.FileNotFoundException
+import java.io.FileWriter
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -137,6 +138,10 @@ class AssetsActivity : ThemedActivity() {
 
                 File(outFile.parentFile, outFile.nameWithoutExtension + ".version.txt").apply {
                     if (isFile) delete()
+                    createNewFile()
+                    val fw = FileWriter(this)
+                    fw.write("Custom")
+                    fw.close()
                 }
 
                 adapter.reloadAssets()
