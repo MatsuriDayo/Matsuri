@@ -130,7 +130,6 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var rulesProvider by configurationStore.stringToInt(Key.RULES_PROVIDER)
     var enableLog by configurationStore.boolean(Key.ENABLE_LOG)
     var logBufSize by configurationStore.int(Key.LOG_BUF_SIZE) { 0 }
-    var enablePcap by configurationStore.boolean(Key.ENABLE_PCAP)
     var acquireWakeLock by configurationStore.boolean(Key.ACQUIRE_WAKE_LOCK)
     var showBottomBar by configurationStore.boolean(Key.SHOW_BOTTOM_BAR)
 
@@ -189,8 +188,6 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var transproxyMode by configurationStore.stringToInt(Key.TRANSPROXY_MODE)
     var connectionTestURL by configurationStore.string(Key.CONNECTION_TEST_URL) { CONNECTION_TEST_URL }
     var alwaysShowAddress by configurationStore.boolean(Key.ALWAYS_SHOW_ADDRESS)
-
-    var tunImplementation by configurationStore.stringToInt(Key.TUN_IMPLEMENTATION) { TunImplementation.SYSTEM }
 
     var appTrafficStatistics by configurationStore.boolean(Key.APP_TRAFFIC_STATISTICS)
     var profileTrafficStatistics by configurationStore.boolean(Key.PROFILE_TRAFFIC_STATISTICS) { true }

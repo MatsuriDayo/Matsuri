@@ -26,14 +26,6 @@
             app:key="serviceMode"
             app:title="@string/service_mode"
             app:useSimpleSummaryProvider="true" />
-        <com.takisoft.preferencex.SimpleMenuPreference
-            app:defaultValue="2"
-            app:entries="@array/tun_implementation"
-            app:entryValues="@array/int_array_3"
-            app:icon="@drawable/ic_baseline_flip_camera_android_24"
-            app:key="tunImplementation"
-            app:title="@string/tun_implementation"
-            app:useSimpleSummaryProvider="true" />
         <moe.matsuri.nya.ui.MTUPreference
             app:defaultValue="9000"
             app:entries="@array/mtu_select"
@@ -265,11 +257,6 @@
             app:key="tcpKeepAliveInterval"
             app:title="@string/tcp_keep_alive_interval"
             app:useSimpleSummaryProvider="true" />
-        <SwitchPreference
-            app:icon="@drawable/baseline_save_24"
-            app:key="enablePcap"
-            app:summary="@string/pcap_summary"
-            app:title="@string/enable_pcap" />
         <com.takisoft.preferencex.SimpleMenuPreference
             app:defaultValue="0"
             app:entries="@array/exe_prefer_provider"

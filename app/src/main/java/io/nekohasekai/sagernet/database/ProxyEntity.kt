@@ -345,7 +345,7 @@ data class ProxyEntity(
     fun needCoreMux(): Boolean {
         return when (type) {
             TYPE_VMESS -> Protocols.shouldEnableMux("vmess") && isV2RayNetworkTcp()
-            TYPE_TROJAN -> Protocols.shouldEnableMux("trojan")
+            TYPE_TROJAN -> Protocols.shouldEnableMux("trojan") && isV2RayNetworkTcp()
             TYPE_TROJAN_GO -> false
             else -> false
         }

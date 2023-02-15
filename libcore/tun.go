@@ -10,7 +10,6 @@ import (
 	"math"
 	"net"
 	"os"
-	"path/filepath"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -55,7 +54,6 @@ type TunConfig struct {
 	Debug          bool
 	DumpUID        bool
 	TrafficStats   bool
-	PCap           bool
 	ErrorHandler   ErrorHandler
 	LocalResolver  LocalResolver
 	FdProtector    Protector
@@ -97,22 +95,7 @@ func NewTun2ray(config *TunConfig) (*Tun2ray, error) {
 	}
 	var err error
 	if config.Implementation == 0 { // gvisor
-		var pcapFile *os.File
-		if config.PCap {
-			path := externalAssetsPath + "/pcap/"
-			os.RemoveAll(path) // remove old pcap
-			err = os.MkdirAll(filepath.Dir(path), 0755)
-			if err != nil {
-				return nil, newError("unable to create pcap dir").Base(err)
-			}
-			path = path + time.Now().UTC().String() + ".pcap"
-			pcapFile, err = os.Create(path)
-			if err != nil {
-				return nil, newError("unable to create pcap file").Base(err)
-			}
-		}
-
-		t.dev, err = tuns.NewGvisor(config.FileDescriptor, config.MTU, t, 0x01, config.PCap, pcapFile, math.MaxUint32, config.IPv6Mode)
+		t.dev, err = tuns.NewGvisor(config.FileDescriptor, config.MTU, t, 0x01, math.MaxUint32, config.IPv6Mode)
 	} else if config.Implementation == 1 { // SYSTEM
 		t.dev, err = tuns.NewSystem(config.FileDescriptor, config.MTU, t, config.IPv6Mode, config.ErrorHandler.HandleError)
 	} else if config.Implementation == 2 { // Tun2Socket
