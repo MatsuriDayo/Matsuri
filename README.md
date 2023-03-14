@@ -6,6 +6,15 @@
 
 V2Ray / universal proxy toolchain for Android.
 
+## 替代方案 / Alternatives
+
+本项目已不活跃，请关注以下类似项目。
+
+This project is no longer active, please pay attention to the following similar projects.
+
+1. [NekoBox for Android](https://github.com/MatsuriDayo/NekoBoxForAndroid)
+2. [NekoRay / NekoBox for PC](https://github.com/MatsuriDayo/nekoray)
+
 ## 下载 / Downloads
 
 ### GitHub Releases
