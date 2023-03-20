@@ -2,7 +2,6 @@ package libcore
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -40,10 +39,6 @@ func NewV2rayInstance() *V2RayInstance {
 }
 
 func (instance *V2RayInstance) LoadConfig(content string) error {
-	if outdated != "" {
-		return errors.New(outdated)
-	}
-
 	instance.access.Lock()
 	defer instance.access.Unlock()
 

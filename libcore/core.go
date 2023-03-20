@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 func Setenv(key, value string) error {
@@ -57,12 +56,6 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 
 		setupV2rayFileSystem(internalAssets, externalAssets)
 		setupResolvers()
-
-		if time.Now().Unix() >= GetExpireTime() {
-			outdated = "Your version is too old! Please update!! 版本太旧，请升级！"
-		} else if time.Now().Unix() < (GetBuildTime() - 86400) {
-			outdated = "Wrong system time! 系统时间错误！"
-		}
 
 		// Extract assets
 		if isBgProcess {
