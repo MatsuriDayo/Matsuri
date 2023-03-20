@@ -3,7 +3,6 @@ package libcore
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"sort"
@@ -42,10 +41,6 @@ func NewV2rayInstance() *V2RayInstance {
 }
 
 func (instance *V2RayInstance) LoadConfig(content string) error {
-	if outdated != "" {
-		return errors.New(outdated)
-	}
-
 	instance.access.Lock()
 	defer instance.access.Unlock()
 
