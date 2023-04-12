@@ -786,6 +786,7 @@ class ConfigurationFragment @JvmOverloads constructor(
         if (DataStore.serviceState.started) SagerNet.stopService()
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     @Suppress("EXPERIMENTAL_API_USAGE")
     fun pingTest(icmpPing: Boolean) {
         stopService()
@@ -816,8 +817,11 @@ class ConfigurationFragment @JvmOverloads constructor(
             }
             test.proxyN = profilesUnfiltered.size
             val profiles = ConcurrentLinkedQueue(profilesUnfiltered)
-            val testPool = newFixedThreadPoolContext(5, "Connection test pool")
-            repeat(5) {
+            val testPool = newFixedThreadPoolContext(
+                DataStore.connectionTestConcurrent,
+                "Connection test pool"
+            )
+            repeat(DataStore.connectionTestConcurrent) {
                 testJobs.add(launch(testPool) {
                     while (isActive) {
                         val profile = profiles.poll() ?: break
@@ -986,7 +990,7 @@ class ConfigurationFragment @JvmOverloads constructor(
             val profiles = ConcurrentLinkedQueue(profilesUnfiltered)
             val urlTest = UrlTest() // note: this is NOT in bg process
 
-            repeat(5) {
+            repeat(DataStore.connectionTestConcurrent) {
                 testJobs.add(launch {
                     while (isActive) {
                         val profile = profiles.poll() ?: break
