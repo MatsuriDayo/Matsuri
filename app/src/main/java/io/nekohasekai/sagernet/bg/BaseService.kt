@@ -48,6 +48,7 @@ import libcore.AppStats
 import libcore.Libcore
 import libcore.TrafficListener
 import moe.matsuri.nya.Protocols
+import moe.matsuri.nya.utils.Util
 import java.net.UnknownHostException
 import com.github.shadowsocks.plugin.PluginManager as ShadowsocksPluginPluginManager
 import io.nekohasekai.sagernet.aidl.AppStats as AidlAppStats
@@ -78,11 +79,20 @@ class BaseService {
         var proxy: ProxyInstance? = null
         var notification: ServiceNotification? = null
 
-        val receiver = broadcastReceiver { _, intent ->
+        val receiver = broadcastReceiver { ctx, intent ->
             when (intent.action) {
                 Intent.ACTION_SHUTDOWN -> service.persistStats()
                 Action.RELOAD -> service.forceLoad()
-                Action.SWITCH_WAKE_LOCK -> service.switchWakeLock()
+//                Action.SWITCH_WAKE_LOCK -> service.switchWakeLock()
+                Action.RESET_UPSTREAM_CONNECTIONS -> runOnDefaultDispatcher {
+                    Libcore.resetAllConnections(true)
+                    runOnMainDispatcher {
+                        Util.collapseStatusBar(ctx)
+                        Toast.makeText(ctx, "Reset upstream connections done", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
+
                 else -> service.stopRunner()
             }
         }
@@ -113,8 +123,10 @@ class BaseService {
         // statsListeners: TODO add links
         // bandwidthListeners: only for UI update, don't save data
 
-        private val bandwidthListeners = mutableMapOf<IBinder, Long>()  // the binder is the real identifier
-        private val statsListeners = mutableMapOf<IBinder, Long>()  // the binder is the real identifier
+        private val bandwidthListeners =
+            mutableMapOf<IBinder, Long>()  // the binder is the real identifier
+        private val statsListeners =
+            mutableMapOf<IBinder, Long>()  // the binder is the real identifier
         override val coroutineContext = Dispatchers.Main.immediate + Job()
         private var looper: Job? = null
         private var statsLooper: Job? = null
@@ -196,7 +208,8 @@ class BaseService {
                 val delayMs = statsListeners.values.minOrNull()
                 if (delayMs == 0L) return
                 val queryTime = System.currentTimeMillis()
-                val sinceLastQueryInSeconds = ((queryTime - lastQueryTime).toDouble() / 1000).toLong()
+                val sinceLastQueryInSeconds =
+                    ((queryTime - lastQueryTime).toDouble() / 1000).toLong()
                 lastQueryTime = queryTime
 
                 appStats.clear()
@@ -495,7 +508,7 @@ class BaseService {
                     addAction(Action.RELOAD)
                     addAction(Intent.ACTION_SHUTDOWN)
                     addAction(Action.CLOSE)
-                    addAction(Action.SWITCH_WAKE_LOCK)
+                    addAction(Action.RESET_UPSTREAM_CONNECTIONS)
                 }, "$packageName.SERVICE", null)
                 data.closeReceiverRegistered = true
             }

@@ -1,6 +1,7 @@
 package moe.matsuri.nya.utils
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.util.Base64
 import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
@@ -119,6 +120,16 @@ object Util {
 
     fun timeStamp2Text(t: Long): String {
         return sdf1.format(Date(t))
+    }
+
+    @SuppressLint("WrongConstant")
+    fun collapseStatusBar(context: Context) {
+        try {
+            val statusBarManager = context.getSystemService("statusbar")
+            val collapse = statusBarManager.javaClass.getMethod("collapsePanels")
+            collapse.invoke(statusBarManager)
+        } catch (_: Exception) {
+        }
     }
 
 }
