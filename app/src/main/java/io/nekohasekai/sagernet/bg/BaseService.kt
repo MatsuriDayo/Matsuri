@@ -503,7 +503,7 @@ class BaseService {
             data.changeState(State.Connecting)
             runOnMainDispatcher {
                 try {
-                    data.notification = createNotification(profile.displayName())
+                    data.notification = createNotification(ServiceNotification.genTitle(profile))
 
                     Executable.killAll()    // clean up old processes
                     preInit()

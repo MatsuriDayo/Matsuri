@@ -38,6 +38,8 @@ import io.nekohasekai.sagernet.aidl.AppStatsList
 import io.nekohasekai.sagernet.aidl.ISagerNetServiceCallback
 import io.nekohasekai.sagernet.aidl.TrafficStats
 import io.nekohasekai.sagernet.database.DataStore
+import io.nekohasekai.sagernet.database.ProxyEntity
+import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.ktx.app
 import io.nekohasekai.sagernet.ktx.getColorAttr
 import io.nekohasekai.sagernet.ui.SwitchActivity
@@ -59,7 +61,14 @@ class ServiceNotification(
 ) : BroadcastReceiver() {
     companion object {
         const val notificationId = 1
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+        val flags =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) PendingIntent.FLAG_IMMUTABLE else 0
+
+        fun genTitle(ent: ProxyEntity): String {
+            val gn = if (DataStore.showGroupInNotification)
+                SagerDatabase.groupDao.getById(ent.groupId)?.displayName() else null
+            return if (gn == null) ent.displayName() else "[$gn] ${ent.displayName()}"
+        }
     }
 
     val trafficStatistics = DataStore.profileTrafficStatistics
@@ -119,7 +128,8 @@ class ServiceNotification(
 
             override fun updateWakeLockStatus(acquired: Boolean) {
                 updateActions(acquired)
-                builder.priority = if (acquired) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_LOW
+                builder.priority =
+                    if (acquired) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_LOW
                 update()
             }
         }

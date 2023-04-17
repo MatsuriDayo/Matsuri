@@ -116,6 +116,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
 
     var allowAccess by configurationStore.boolean(Key.ALLOW_ACCESS)
     var speedInterval by configurationStore.stringToInt(Key.SPEED_INTERVAL)
+    var showGroupInNotification by configurationStore.boolean("showGroupInNotification")
 
     var enhanceDomain by configurationStore.boolean(Key.ENHANCE_RESOLVE_SERVER_DOMAIN)
     var remoteDns by configurationStore.string(Key.REMOTE_DNS) { "https://8.8.8.8/dns-query" }

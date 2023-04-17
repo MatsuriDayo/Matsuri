@@ -522,5 +522,6 @@ Anyone can write advanced plugins, which can control Matsuri. please download an
     <string name="bypass_lan_in_core">Bypass LAN in Core</string>
     <string name="ads">Ads</string>
     <string name="share_subscription">Share Subscription</string>
+    <string name="show_group_in_notification">Show group name in in notification</string>
 
 </resources>
