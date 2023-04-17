@@ -501,6 +501,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                     }
                 }
             }
+
             R.id.action_remove_duplicate -> {
                 runOnDefaultDispatcher {
                     val profiles = SagerDatabase.proxyDao.getByGroup(DataStore.currentGroupId())
@@ -552,6 +553,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                     }
                 }
             }
+
             R.id.action_connection_icmp_ping -> {
                 pingTest(true)
             }
@@ -724,37 +726,38 @@ class ConfigurationFragment @JvmOverloads constructor(
 
         suspend fun update(profile: ProxyEntity) {
             fragment?.configurationListView?.post {
+                val context = context ?: return@post
+                if (!isAdded) return@post
+
                 var profileStatusText: String? = null
                 var profileStatusColor = 0
 
                 when (profile.status) {
                     -1 -> {
                         profileStatusText = profile.error
-                        profileStatusColor =
-                            requireContext().getColorAttr(android.R.attr.textColorSecondary)
+                        profileStatusColor = context.getColorAttr(android.R.attr.textColorSecondary)
                     }
 
                     0 -> {
                         profileStatusText = getString(R.string.connection_test_testing)
-                        profileStatusColor =
-                            requireContext().getColorAttr(android.R.attr.textColorSecondary)
+                        profileStatusColor = context.getColorAttr(android.R.attr.textColorSecondary)
                     }
 
                     1 -> {
                         profileStatusText = getString(R.string.available, profile.ping)
-                        profileStatusColor = requireContext().getColour(R.color.material_green_500)
+                        profileStatusColor = context.getColour(R.color.material_green_500)
                     }
 
                     2 -> {
                         profileStatusText = profile.error
-                        profileStatusColor = requireContext().getColour(R.color.material_red_500)
+                        profileStatusColor = context.getColour(R.color.material_red_500)
                     }
 
                     3 -> {
                         val err = profile.error ?: ""
                         val msg = Protocols.genFriendlyMsg(err)
                         profileStatusText = if (msg != err) msg else getString(R.string.unavailable)
-                        profileStatusColor = requireContext().getColour(R.color.material_red_500)
+                        profileStatusColor = context.getColour(R.color.material_red_500)
                     }
                 }
 
@@ -763,7 +766,7 @@ class ConfigurationFragment @JvmOverloads constructor(
                     append("\n")
                     append(
                         profile.displayType(),
-                        ForegroundColorSpan(requireContext().getProtocolColor(profile.type)),
+                        ForegroundColorSpan(context.getProtocolColor(profile.type)),
                         SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                     append(" ")
@@ -1508,16 +1511,20 @@ class ConfigurationFragment @JvmOverloads constructor(
             }
 
             override suspend fun onUpdated(profileId: Long, trafficStats: TrafficStats) {
-                val index = configurationIdList.indexOf(profileId)
-                if (index != -1) {
-                    val holder = layoutManager.findViewByPosition(index)
-                        ?.let { configurationListView.getChildViewHolder(it) } as ConfigurationHolder?
-                    if (holder != null) {
-                        holder.entity.stats = trafficStats
-                        onMainDispatcher {
-                            holder.bind(holder.entity)
+                try {
+                    val index = configurationIdList.indexOf(profileId)
+                    if (index != -1) {
+                        val holder = layoutManager.findViewByPosition(index)
+                            ?.let { configurationListView.getChildViewHolder(it) } as ConfigurationHolder?
+                        if (holder != null) {
+                            holder.entity.stats = trafficStats
+                            onMainDispatcher {
+                                holder.bind(holder.entity)
+                            }
                         }
                     }
+                } catch (e: Exception) {
+                    Logs.w(e)
                 }
             }
 

@@ -28,6 +28,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
+import android.widget.ScrollView
+import android.widget.Toast
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.pm.ShortcutInfoCompat
@@ -50,10 +52,7 @@ import io.nekohasekai.sagernet.database.SagerDatabase
 import io.nekohasekai.sagernet.database.preference.OnPreferenceDataStoreChangeListener
 import io.nekohasekai.sagernet.databinding.LayoutGroupItemBinding
 import io.nekohasekai.sagernet.fmt.AbstractBean
-import io.nekohasekai.sagernet.ktx.applyDefaultValues
-import io.nekohasekai.sagernet.ktx.onMainDispatcher
-import io.nekohasekai.sagernet.ktx.runOnDefaultDispatcher
-import io.nekohasekai.sagernet.ktx.runOnMainDispatcher
+import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.ui.ThemedActivity
 import io.nekohasekai.sagernet.widget.ListListener
 import kotlinx.parcelize.Parcelize
@@ -229,12 +228,17 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
 
         override fun onCreatePreferencesFix(savedInstanceState: Bundle?, rootKey: String?) {
             preferenceManager.preferenceDataStore = DataStore.profileCacheStore
-            activity.apply {
-                createPreferences(savedInstanceState, rootKey)
-
-                if (isSubscription) {
-//                    findPreference<Preference>(Key.PROFILE_NAME)?.isEnabled = false
+            try {
+                activity.apply {
+                    createPreferences(savedInstanceState, rootKey)
                 }
+            } catch (e: Exception) {
+                Toast.makeText(
+                    SagerNet.application,
+                    "Error on createPreferences, please try again.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                Logs.e(e)
             }
         }
 
@@ -267,12 +271,14 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
                 }
                 true
             }
+
             R.id.action_apply -> {
                 runOnDefaultDispatcher {
                     activity.saveAndExit()
                 }
                 true
             }
+
             R.id.action_create_shortcut -> {
                 val ctx = requireContext()
                 val ent = activity.proxyEntity!!
@@ -297,6 +303,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
                         .build()
                 ShortcutManagerCompat.requestPinShortcut(ctx, shortcut, null)
             }
+
             R.id.action_move -> {
                 val view = LinearLayout(context).apply {
                     val ent = activity.proxyEntity!!
@@ -327,9 +334,13 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
                             }
                         }
                 }
-                MaterialAlertDialogBuilder(activity).setView(view).show()
+                val scrollView = ScrollView(context).apply {
+                    addView(view)
+                }
+                MaterialAlertDialogBuilder(activity).setView(scrollView).show()
                 true
             }
+
             else -> false
         }
 

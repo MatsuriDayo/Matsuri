@@ -45,7 +45,7 @@ class OOCv1TokenPreference : EditTextPreference {
 
 
     init {
-        dialogLayoutResource = R.layout.layout_link_dialog
+        dialogLayoutResource = R.layout.layout_urltest_preference_dialog
 
         setOnBindEditTextListener { editText ->
             editText.isSingleLine = false
@@ -75,14 +75,17 @@ class OOCv1TokenPreference : EditTextPreference {
                                 linkLayout.error = "Missing field: baseUrl"
                                 isValid = false
                             }
+
                             baseUrl.endsWith("/") -> {
                                 linkLayout.error = "baseUrl must not contain a trailing slash"
                                 isValid = false
                             }
+
                             !baseUrl.startsWith("https://") -> {
                                 isValid = false
                                 linkLayout.error = "Protocol scheme must be https"
                             }
+
                             else -> try {
                                 baseUrl.toHttpUrl()
                             } catch (e: Exception) {
@@ -105,7 +108,8 @@ class OOCv1TokenPreference : EditTextPreference {
                             when {
                                 certSha256.length != 64 -> {
                                     isValid = false
-                                    linkLayout.error = "certSha256 must be a SHA-256 hexadecimal string"
+                                    linkLayout.error =
+                                        "certSha256 must be a SHA-256 hexadecimal string"
                                 }
                             }
                         }
