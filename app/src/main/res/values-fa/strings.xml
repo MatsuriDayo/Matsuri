@@ -311,8 +311,6 @@
     <string name="connection_test_timeout">تایم اوت</string>
     <string name="append_http_proxy">پروکسی HTTP را به VPN اضافه کنید</string>
     <string name="append_http_proxy_sum">پروکسی HTTP مستقیماً از (مرورگر/برخی برنامه‌های پشتیبانی‌شده) بدون استفاده از دستگاه NIC مجازی (Android 10+) استفاده می‌شود.</string>
-    <string name="bypass_lan_in_core_only">دور زدن LAN در Core</string>
-    <string name="bypass_lan_in_core_only_sum">اگر Lineage \"اجازه دادن به سرویس گیرندگان هات اسپات برای استفاده از VPN\" کار نمی کند، این را امتحان کنید.</string>
     <string name="protocol_settings">تنظیمات پروتکل</string>
     <string name="trojan_provider">ارائه دهنده تروجان</string>
     <string name="group_basic">پایه ای</string>

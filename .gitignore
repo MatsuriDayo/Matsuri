@@ -10,6 +10,7 @@ build/
 local.properties
 /app/libs/
 /app/src/main/assets/v2ray
+/app/src/main/assets/sing-box
 /service_account_credentials.json
 jniLibs/
 /library/libcore_build/

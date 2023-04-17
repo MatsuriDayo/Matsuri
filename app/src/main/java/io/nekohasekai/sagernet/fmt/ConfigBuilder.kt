@@ -313,7 +313,7 @@ fun buildV2RayConfig(
 
             rules.addAll(wsRules.values)
 
-            if (!forTest && DataStore.bypassLan && (requireHttp || DataStore.bypassLanInCoreOnly)) {
+            if (!forTest && (requireHttp || DataStore.bypassLanInCore)) {
                 rules.add(RoutingObject.RuleObject().apply {
                     type = "field"
                     outboundTag = TAG_BYPASS

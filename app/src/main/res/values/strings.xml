@@ -334,8 +334,6 @@
     <string name="connection_test_timeout">Timeout</string>
     <string name="append_http_proxy">Append HTTP Proxy to VPN</string>
     <string name="append_http_proxy_sum">HTTP proxy will be used directly from (browser/ some supported apps), without going through the virtual NIC device (Android 10+)</string>
-    <string name="bypass_lan_in_core_only">Bypass LAN in Core Only</string>
-    <string name="bypass_lan_in_core_only_sum">If Lineage\'s "Allow hotspot clients to use VPNs" does not work, try this.</string>
     <string name="protocol_settings">Protocol Settings</string>
     <string name="trojan_provider">Trojan Provider</string>
     <string name="group_basic">Basic</string>
@@ -521,5 +519,7 @@ Anyone can write advanced plugins, which can control Matsuri. please download an
     <string name="dns_network">DNS query type</string>
     <string name="show_bottom_bar">Show bottom bar like SagerNet</string>
     <string name="utls_fingerprint">uTLS fingerprint</string>
+    <string name="bypass_lan_in_core">Bypass LAN in Core</string>
+    <string name="ads">Ads</string>
 
 </resources>

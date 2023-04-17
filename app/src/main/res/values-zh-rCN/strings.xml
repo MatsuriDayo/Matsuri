@@ -296,8 +296,6 @@
     <string name="append_http_proxy">追加 HTTP 代理至 VPN</string>
     <string name="append_http_proxy_sum">浏览器 / 一些支持的应用 将直接使用 HTTP 代理, 而不经过虚拟网卡设备 (Android 10+)</string>
     <string name="connection_test_icmp_ping_unavailable">ICMPing 不可用</string>
-    <string name="bypass_lan_in_core_only">仅在 Core 中绕过局域网</string>
-    <string name="bypass_lan_in_core_only_sum">如果 Lineage 之 \"允许热点客户端使用 VPN\" 无法使用, 尝试启用此项.</string>
     <string name="protocol_settings">协议设置</string>
     <string name="trojan_provider">Trojan 提供程序</string>
     <string name="group_basic">基本</string>
@@ -469,6 +467,7 @@
     <string name="experimental_reduced_iv_head_entropy">这是 GFWReport 针对 GFW 上观察到的类似随机流的协议阻塞行为提出的对策。  这个选项将 IV 的前 6 个字节重新映射为可打印的字符，启用后，特权网络路径上的任何人都有可能识别该协议。</string>
     <string name="exe_prefer_provider">首选插件提供者</string>
     <string name="create_shortcut">创建快捷方式</string>
+    <string name="app_tls_version">订阅最低 TLS 版本</string>
     <string name="hop_interval">端口跳跃间隔(秒)</string>
     <string name="dns_network">DNS 查询类型</string>
     <string name="tuic_disable_sni">禁用 SNI</string>
@@ -478,4 +477,8 @@
     <string name="tuic_congestion_controller">拥塞控制</string>
     <string name="tuic_udp_relay_mode">UDP 转发模式</string>
     <string name="tuic_token">令牌</string>
+    <string name="show_bottom_bar">像 SagerNet 一样显示底栏</string>
+    <string name="utls_fingerprint">uTLS 指纹</string>
+    <string name="bypass_lan_in_core">在核心中绕过 LAN</string>
+    <string name="ads">推广</string>
 </resources>

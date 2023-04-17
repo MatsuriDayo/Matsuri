@@ -146,8 +146,6 @@
     <string name="group_basic">Grunnleggende</string>
     <string name="trojan_provider">Trojansk leverandør</string>
     <string name="protocol_settings">Protokollinnstillinger</string>
-    <string name="bypass_lan_in_core_only_sum">Hvis Lineage\'s Tillat hotspot -klienter å bruke VPN -er ikke fungerer, kan du prøve dette.</string>
-    <string name="bypass_lan_in_core_only">Omgå LAN i Core bare</string>
     <string name="append_http_proxy_sum">HTTP -proxy brukes direkte fra (nettleser/ noen støttede apper), uten å gå gjennom den virtuelle NIC -enheten (Android 10+)</string>
     <string name="append_http_proxy">Legg til HTTP -proxy til VPN</string>
     <string name="connection_test_unreachable">Uoppnåelig</string>

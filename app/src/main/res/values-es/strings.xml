@@ -330,10 +330,8 @@
     <string name="connection_test_unreachable">Inalcanzable</string> 
     <string name="connection_test_timeout">Se acabó el tiempo</string> 
     <string name="append_http_proxy">Añadir proxy HTTP a la VPN</string> 
-    <string name="append_http_proxy_sum">El proxy HTTP se utilizará directamente desde (navegador/algunas aplicaciones compatibles), sin pasar por el dispositivo NIC virtual (Android 10+)</string> 
-    <string name="bypass_lan_in_core_only">Omitir LAN solo en núcleo</string> 
-    <string name="bypass_lan_in_core_only_sum">Si la opción "Permitir que los clientes de hotspot usen VPN" de Lineage no funciona, intente esto.</string> 
-    <string name="protocol_settings">Ajustes de protocolo</string> 
+    <string name="append_http_proxy_sum">El proxy HTTP se utilizará directamente desde (navegador/algunas aplicaciones compatibles), sin pasar por el dispositivo NIC virtual (Android 10+)</string>
+    <string name="protocol_settings">Ajustes de protocolo</string>
     <string name="trojan_provider">Proveedor Trojan</string> 
     <string name="group_basic">Básico</string> 
     <string name="group_settings">Ajustes de grupo</string> 

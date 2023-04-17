@@ -135,14 +135,7 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         val tcpKeepAliveInterval = findPreference<EditTextPreference>(Key.TCP_KEEP_ALIVE_INTERVAL)!!
 
         val bypassLan = findPreference<SwitchPreference>(Key.BYPASS_LAN)!!
-        val bypassLanInCoreOnly = findPreference<SwitchPreference>(Key.BYPASS_LAN_IN_CORE_ONLY)!!
-
-        bypassLanInCoreOnly.isEnabled = bypassLan.isChecked
-        bypassLan.setOnPreferenceChangeListener { _, newValue ->
-            bypassLanInCoreOnly.isEnabled = newValue as Boolean
-            needReload()
-            true
-        }
+        val bypassLanInCore = findPreference<SwitchPreference>(Key.BYPASS_LAN_IN_CORE)!!
 
         val remoteDns = findPreference<EditTextPreference>(Key.REMOTE_DNS)!!
         val directDns = findPreference<EditTextPreference>(Key.DIRECT_DNS)!!
@@ -268,7 +261,8 @@ class SettingsPreferenceFragment : PreferenceFragmentCompat() {
         trafficSniffing.onPreferenceChangeListener = reloadListener
         muxConcurrency.onPreferenceChangeListener = reloadListener
         tcpKeepAliveInterval.onPreferenceChangeListener = reloadListener
-        bypassLanInCoreOnly.onPreferenceChangeListener = reloadListener
+        bypassLan.onPreferenceChangeListener = reloadListener
+        bypassLanInCore.onPreferenceChangeListener = reloadListener
         mtu.onPreferenceChangeListener = reloadListener
 
         remoteDns.onPreferenceChangeListener = reloadListener

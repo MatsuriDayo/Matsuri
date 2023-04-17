@@ -161,8 +161,6 @@
     <string name="group_basic">Базовый</string>
     <string name="trojan_provider">Провайдер Trojan</string>
     <string name="protocol_settings">Настройки протокола</string>
-    <string name="bypass_lan_in_core_only_sum">Если в LineageOS не работает функция \"Разрешить клиентам точки доступа использовать VPN\", попробуйте включить эту настройку.</string>
-    <string name="bypass_lan_in_core_only">Обход LAN только в ядре</string>
     <string name="append_http_proxy_sum">HTTP-прокси будет использоваться напрямую из (браузера / некоторых поддерживаемых приложений), без использования виртуального сетевого интерфейса (Android 10+)</string>
     <string name="append_http_proxy">Добавить HTTP-прокси к VPN</string>
     <string name="connection_test_timeout">Тайм-аут</string>

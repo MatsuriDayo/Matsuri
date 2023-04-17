@@ -279,8 +279,6 @@
     <string name="group_basic">أساسي</string>
     <string name="trojan_provider">Trojan مزود</string>
     <string name="protocol_settings">إعدادات البروتوكول</string>
-    <string name="bypass_lan_in_core_only_sum">إذا لم يعمل Lineage\'s السماح لعملاء نقطة الاتصال باستخدام شبكات VPN، فجرّب ذلك.</string>
-    <string name="bypass_lan_in_core_only">تجاوز LAN في النواة فقط</string>
     <string name="append_http_proxy_sum">سيتم استخدام بروکسی HTTP مباشرة من (المتصفح/ بعض التطبيقات المدعومة)، دون المرور عبر جهاز NIC الافتراضي (Android 10+)</string>
     <string name="append_http_proxy">إلحاق بروکسی HTTP ب VPN</string>
     <string name="connection_test_timeout">نفذ الوقت</string>
