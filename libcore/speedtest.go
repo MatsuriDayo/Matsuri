@@ -3,6 +3,8 @@ package libcore
 import (
 	"context"
 	"fmt"
+	"libcore/device"
+	"log"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -13,6 +15,8 @@ import (
 )
 
 func UrlTestV2ray(instance *V2RayInstance, inbound string, link string, timeout int32) (int32, error) {
+	defer device.DeferPanicToError("UrlTestV2ray", func(err error) { log.Println(err) })
+
 	transport := &http.Transport{
 		TLSHandshakeTimeout: time.Duration(timeout) * time.Millisecond,
 		DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {

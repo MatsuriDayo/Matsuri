@@ -16,15 +16,11 @@ func Unsetenv(key string) error {
 	return os.Unsetenv(key)
 }
 
-func initCoreDefer() {
-	device.AllDefer("InitCore", ForceLog)
-}
-
 func InitCore(internalAssets string, externalAssets string, prefix string, useOfficial BoolFunc, // extractV2RayAssets
 	cachePath string, process string, //InitCore
 	enableLog bool, maxKB int32, //SetEnableLog
 ) {
-	defer initCoreDefer()
+	defer device.DeferPanicToError("InitCore", func(err error) { ForceLog(fmt.Sprintln(err)) })
 
 	isBgProcess := strings.HasSuffix(process, ":bg")
 
@@ -41,12 +37,12 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 		go ForceLog(s)
 	} else {
 		// not fatal
-		ForceLog(fmt.Sprintln("Log not inited:", s, err.Error()))
+		// ForceLog(fmt.Sprintln("Log not inited:", s, err.Error()))
 	}
 
 	// Set up some component
 	go func() {
-		defer initCoreDefer()
+		defer device.DeferPanicToError("InitCore-go", func(err error) { ForceLog(fmt.Sprintln(err)) })
 		device.GoDebug(process)
 
 		externalAssetsPath = externalAssets
