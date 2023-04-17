@@ -130,6 +130,7 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
             R.id.action_new_group -> {
                 startActivity(Intent(context, GroupSettingsActivity::class.java))
             }
+
             R.id.action_update_all -> {
                 MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.confirm)
                     .setMessage(R.string.update_all_subscription)
@@ -149,30 +150,31 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
 
     private lateinit var selectedGroup: ProxyGroup
 
-    private val exportProfiles = registerForActivityResult(ActivityResultContracts.CreateDocument()) { data ->
-        if (data != null) {
-            runOnDefaultDispatcher {
-                val profiles = SagerDatabase.proxyDao.getByGroup(selectedGroup.id)
-                val links = profiles.mapNotNull { it.toLink(compact = true) }.joinToString("\n")
-                try {
-                    (requireActivity() as MainActivity).contentResolver.openOutputStream(
-                        data
-                    )!!.bufferedWriter().use {
-                        it.write(links)
+    private val exportProfiles =
+        registerForActivityResult(ActivityResultContracts.CreateDocument()) { data ->
+            if (data != null) {
+                runOnDefaultDispatcher {
+                    val profiles = SagerDatabase.proxyDao.getByGroup(selectedGroup.id)
+                    val links = profiles.mapNotNull { it.toStdLink() }.joinToString("\n")
+                    try {
+                        (requireActivity() as MainActivity).contentResolver.openOutputStream(
+                            data
+                        )!!.bufferedWriter().use {
+                            it.write(links)
+                        }
+                        onMainDispatcher {
+                            snackbar(getString(R.string.action_export_msg)).show()
+                        }
+                    } catch (e: Exception) {
+                        Logs.w(e)
+                        onMainDispatcher {
+                            snackbar(e.readableMessage).show()
+                        }
                     }
-                    onMainDispatcher {
-                        snackbar(getString(R.string.action_export_msg)).show()
-                    }
-                } catch (e: Exception) {
-                    Logs.w(e)
-                    onMainDispatcher {
-                        snackbar(e.readableMessage).show()
-                    }
-                }
 
+                }
             }
         }
-    }
 
     inner class GroupAdapter : RecyclerView.Adapter<GroupHolder>(),
         GroupManager.Listener,
@@ -329,7 +331,8 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
         undoManager.flush()
     }
 
-    inner class GroupHolder(binding: LayoutGroupItemBinding) : RecyclerView.ViewHolder(binding.root),
+    inner class GroupHolder(binding: LayoutGroupItemBinding) :
+        RecyclerView.ViewHolder(binding.root),
         PopupMenu.OnMenuItemClickListener {
 
         lateinit var proxyGroup: ProxyGroup
@@ -356,13 +359,15 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
                         proxyGroup.toUniversalLink(), proxyGroup.displayName()
                     ).showAllowingStateLoss(parentFragmentManager)
                 }
+
                 R.id.action_universal_clipboard -> {
                     export(proxyGroup.toUniversalLink())
                 }
+
                 R.id.action_export_clipboard -> {
                     runOnDefaultDispatcher {
                         val profiles = SagerDatabase.proxyDao.getByGroup(selectedGroup.id)
-                        val links = profiles.mapNotNull { it.toLink(compact = true) }
+                        val links = profiles.mapNotNull { it.toStdLink() }
                             .joinToString("\n")
                         onMainDispatcher {
                             SagerNet.trySetPrimaryClip(links)
@@ -370,9 +375,11 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
                         }
                     }
                 }
+
                 R.id.action_export_file -> {
                     startFilesForResult(exportProfiles, "profiles_${proxyGroup.displayName()}.txt")
                 }
+
                 R.id.action_clear -> {
                     MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.confirm)
                         .setMessage(R.string.clear_profiles_message)
@@ -524,6 +531,7 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
                                 groupStatus.text = getString(R.string.group_status_proxies, size)
                             }
                         }
+
                         GroupType.SUBSCRIPTION -> {
                             groupStatus.text = if (size == 0L) {
                                 getString(R.string.group_status_empty_subscription)

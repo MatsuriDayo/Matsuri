@@ -481,4 +481,5 @@
     <string name="utls_fingerprint">uTLS 指纹</string>
     <string name="bypass_lan_in_core">在核心中绕过 LAN</string>
     <string name="ads">推广</string>
+    <string name="share_subscription">分享订阅</string>
 </resources>
