@@ -247,12 +247,6 @@
             app:key="acquireWakeLock"
             app:summary="@string/acquire_wake_lock_summary"
             app:title="@string/acquire_wake_lock" />
-        <SwitchPreference
-            app:defaultValue="true"
-            app:icon="@drawable/ic_baseline_security_24"
-            app:key="securityAdvisory"
-            app:summary="@string/insecure_warn_sum"
-            app:title="@string/insecure_warn" />
         <EditTextPreference
             app:defaultValue="15"
             app:icon="@drawable/ic_baseline_flip_camera_android_24"

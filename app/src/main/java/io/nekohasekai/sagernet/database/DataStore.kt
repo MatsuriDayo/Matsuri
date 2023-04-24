@@ -127,7 +127,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var hosts by configurationStore.string(Key.DNS_HOSTS)
     var dnsNetwork by configurationStore.stringSet(Key.DNS_NETWORK)
 
-    var securityAdvisory by configurationStore.boolean(Key.SECURITY_ADVISORY) { true }
+    val securityAdvisory = false
     var rulesProvider by configurationStore.stringToInt(Key.RULES_PROVIDER)
     var enableLog by configurationStore.boolean(Key.ENABLE_LOG)
     var logBufSize by configurationStore.int(Key.LOG_BUF_SIZE) { 0 }
