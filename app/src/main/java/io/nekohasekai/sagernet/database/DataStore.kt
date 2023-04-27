@@ -182,6 +182,7 @@ object DataStore : OnPreferenceDataStoreChangeListener {
     var bypass by configurationStore.boolean(Key.BYPASS_MODE) { true }
     var individual by configurationStore.string(Key.INDIVIDUAL)
     var showDirectSpeed by configurationStore.boolean(Key.SHOW_DIRECT_SPEED) { true }
+    val persistAcrossReboot by configurationStore.boolean(Key.PERSIST_ACROSS_REBOOT) { false }
 
     var requireHttp by configurationStore.boolean(Key.REQUIRE_HTTP) { true }
     var appendHttpProxy by configurationStore.boolean(Key.APPEND_HTTP_PROXY) { true }

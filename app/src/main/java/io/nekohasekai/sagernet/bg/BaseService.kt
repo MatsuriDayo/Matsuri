@@ -29,6 +29,7 @@ import android.net.Network
 import android.os.*
 import android.widget.Toast
 import io.nekohasekai.sagernet.Action
+import io.nekohasekai.sagernet.BootReceiver
 import io.nekohasekai.sagernet.R
 import io.nekohasekai.sagernet.SagerNet
 import io.nekohasekai.sagernet.aidl.AppStatsList
@@ -503,6 +504,7 @@ class BaseService {
 
             val proxy = ProxyInstance(profile, this)
             data.proxy = proxy
+            BootReceiver.enabled = DataStore.persistAcrossReboot
             if (!data.closeReceiverRegistered) {
                 registerReceiver(data.receiver, IntentFilter().apply {
                     addAction(Action.RELOAD)
