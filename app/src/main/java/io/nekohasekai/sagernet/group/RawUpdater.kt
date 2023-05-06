@@ -495,6 +495,7 @@ object RawUpdater : GroupUpdater() {
             address.joinToString("\n") { it.substringBefore("/") }
         }
         bean.privateKey = iface["PrivateKey"]
+        bean.mtu = iface["MTU"]?.toIntOrNull()
         val peers = ini.getAll("Peer")
         if (peers.isNullOrEmpty()) error("Missing 'Peer' selections")
         val beans = mutableListOf<WireGuardBean>()
