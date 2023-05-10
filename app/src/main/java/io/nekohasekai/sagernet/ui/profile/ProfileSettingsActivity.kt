@@ -285,7 +285,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
                         .setLongLabel(ent.displayName())
                         .setIcon(
                             IconCompat.createWithResource(
-                                ctx,
+                                activity,
                                 R.drawable.ic_qu_shadowsocks_launcher
                             )
                         )
@@ -298,7 +298,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
                             }
                         )
                         .build()
-                ShortcutManagerCompat.requestPinShortcut(ctx, shortcut, null)
+                ShortcutManagerCompat.requestPinShortcut(activity, shortcut, null)
             }
 
             R.id.action_move -> {
