@@ -113,6 +113,7 @@ class AboutFragment : ToolbarFragment(R.layout.layout_about) {
                         .setOnClickAction { }
                         .build())
                     .apply {
+                        PackageCache.awaitLoadSync()
                         for ((_, pkg) in PackageCache.installedPluginPackages) {
                             try {
                                 val pluginId = pkg.providers[0].loadString(Plugins.METADATA_KEY_ID)
