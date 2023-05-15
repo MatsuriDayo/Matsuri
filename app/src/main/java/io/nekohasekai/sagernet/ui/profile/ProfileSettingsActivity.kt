@@ -136,9 +136,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
 
                 onMainDispatcher {
                     supportFragmentManager.beginTransaction()
-                        .replace(R.id.settings, MyPreferenceFragmentCompat().apply {
-                            activity = this@ProfileSettingsActivity
-                        })
+                        .replace(R.id.settings, MyPreferenceFragmentCompat())
                         .commit()
                 }
             }
@@ -224,12 +222,12 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
 
     class MyPreferenceFragmentCompat : PreferenceFragmentCompat() {
 
-        lateinit var activity: ProfileSettingsActivity<*>
+        var activity: ProfileSettingsActivity<*>? = null
 
         override fun onCreatePreferencesFix(savedInstanceState: Bundle?, rootKey: String?) {
             preferenceManager.preferenceDataStore = DataStore.profileCacheStore
             try {
-                activity.apply {
+                activity = (requireActivity() as ProfileSettingsActivity<*>).apply {
                     createPreferences(savedInstanceState, rootKey)
                 }
             } catch (e: Exception) {
@@ -247,12 +245,11 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
 
             ViewCompat.setOnApplyWindowInsetsListener(listView, ListListener)
 
-            activity.apply {
+            activity?.apply {
                 viewCreated(view, savedInstanceState)
+                DataStore.dirty = false
+                DataStore.profileCacheStore.registerChangeListener(this)
             }
-
-            DataStore.dirty = false
-            DataStore.profileCacheStore.registerChangeListener(activity)
         }
 
         override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
@@ -274,13 +271,13 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
 
             R.id.action_apply -> {
                 runOnDefaultDispatcher {
-                    activity.saveAndExit()
+                    activity?.saveAndExit()
                 }
                 true
             }
 
             R.id.action_create_shortcut -> {
-                val ctx = requireContext()
+                val activity = requireActivity() as ProfileSettingsActivity<*>
                 val ent = activity.proxyEntity!!
                 val shortcut =
                     ShortcutInfoCompat.Builder(requireContext(), "shortcut-profile-${ent.id}")
@@ -305,6 +302,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
             }
 
             R.id.action_move -> {
+                val activity = requireActivity() as ProfileSettingsActivity<*>
                 val view = LinearLayout(context).apply {
                     val ent = activity.proxyEntity!!
                     orientation = LinearLayout.VERTICAL
@@ -345,7 +343,7 @@ abstract class ProfileSettingsActivity<T : AbstractBean>(
         }
 
         override fun onDisplayPreferenceDialog(preference: Preference) {
-            activity.apply {
+            activity?.apply {
                 if (displayPreferenceDialog(preference)) return
             }
             super.onDisplayPreferenceDialog(preference)
