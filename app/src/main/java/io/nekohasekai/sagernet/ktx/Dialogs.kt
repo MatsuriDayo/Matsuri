@@ -19,6 +19,7 @@
 
 package io.nekohasekai.sagernet.ktx
 
+import android.app.Activity
 import android.content.Context
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -33,3 +34,14 @@ fun Context.alert(text: String): AlertDialog {
 }
 
 fun Fragment.alert(text: String) = requireContext().alert(text)
+
+fun AlertDialog.tryToShow() {
+    try {
+        val activity = context as Activity
+        if (!activity.isFinishing) {
+            show()
+        }
+    } catch (e: Exception) {
+        Logs.e(e)
+    }
+}

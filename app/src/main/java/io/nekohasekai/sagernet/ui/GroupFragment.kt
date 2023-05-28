@@ -461,17 +461,17 @@ class GroupFragment : ToolbarFragment(R.layout.layout_group),
             if (subscription != null && subscription.bytesUsed > 0L) { // SIP008 & Open Online Config
                 groupTraffic.isVisible = true
                 groupTraffic.text = if (subscription.bytesRemaining > 0L) {
-                    getString(
+                    app.getString(
                         R.string.subscription_traffic, Formatter.formatFileSize(
-                            context, subscription.bytesUsed
+                            app, subscription.bytesUsed
                         ), Formatter.formatFileSize(
-                            context, subscription.bytesRemaining
+                            app, subscription.bytesRemaining
                         )
                     )
                 } else {
-                    getString(
+                    app.getString(
                         R.string.subscription_used, Formatter.formatFileSize(
-                            context, subscription.bytesUsed
+                            app, subscription.bytesUsed
                         )
                     )
                 }
