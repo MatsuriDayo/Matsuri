@@ -243,7 +243,12 @@ class GroupSettingsActivity(
                 finish()
                 return
             }
-            entity.subscription?.subscriptionUserinfo = "";
+            val keepUserInfo = (entity.type == GroupType.SUBSCRIPTION &&
+                    DataStore.groupType == GroupType.SUBSCRIPTION &&
+                    entity.subscription?.link == DataStore.subscriptionLink)
+            if (!keepUserInfo) {
+                entity.subscription?.subscriptionUserinfo = "";
+            }
             GroupManager.updateGroup(entity.apply { serialize() })
         }
 

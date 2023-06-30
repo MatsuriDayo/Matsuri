@@ -8,6 +8,5 @@ oneway interface ISagerNetServiceCallback {
   void trafficUpdated(long profileId, in TrafficStats stats, boolean isCurrent);
   void statsUpdated(in AppStatsList statsList);
   void missingPlugin(String profileName, String pluginName);
-  void routeAlert(int type, String routeName);
   void updateWakeLockStatus(boolean acquired);
 }

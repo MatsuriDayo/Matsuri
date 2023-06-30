@@ -21,8 +21,8 @@
 
 package io.nekohasekai.sagernet.ui
 
-import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.RemoteException
@@ -52,8 +52,8 @@ import io.nekohasekai.sagernet.group.GroupUpdater
 import io.nekohasekai.sagernet.ktx.*
 import io.nekohasekai.sagernet.widget.ListHolderListener
 import kotlinx.coroutines.launch
+import moe.matsuri.MoeAd
 import moe.matsuri.nya.utils.Util
-import java.text.SimpleDateFormat
 import java.util.*
 
 class MainActivity : ThemedActivity(),
@@ -66,6 +66,10 @@ class MainActivity : ThemedActivity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        window?.apply {
+            statusBarColor = Color.TRANSPARENT
+        }
 
         binding = LayoutMainBinding.inflate(layoutInflater)
         binding.fab.initProgress(binding.fabProgress)
@@ -103,6 +107,10 @@ class MainActivity : ThemedActivity(),
             onNewIntent(intent)
         }
 
+        if (!BuildConfig.DEBUG && Locale.getDefault().country.lowercase() != "cn") {
+            MoeAd.initialize(this)
+            MoeAd.showBannerAd(binding.coordinator)
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -313,6 +321,7 @@ class MainActivity : ThemedActivity(),
                 displayFragment(ConfigurationFragment())
                 connection.bandwidthTimeout = connection.bandwidthTimeout
             }
+
             R.id.nav_group -> displayFragment(GroupFragment())
             R.id.nav_route -> displayFragment(RouteFragment())
             R.id.nav_settings -> displayFragment(SettingsFragment())
@@ -320,17 +329,20 @@ class MainActivity : ThemedActivity(),
                 displayFragment(TrafficFragment())
                 connection.trafficTimeout = connection.trafficTimeout
             }
+
             R.id.nav_tools -> displayFragment(ToolsFragment())
             R.id.nav_logcat -> displayFragment(LogcatFragment())
             R.id.nav_faq -> {
                 launchCustomTab("https://matsuridayo.github.io/")
                 return false
             }
+
             R.id.nav_about -> displayFragment(AboutFragment())
             R.id.nav_tuiguang -> {
                 launchCustomTab("https://matsuricom.github.io/")
                 return false
             }
+
             else -> return false
         }
         navigation.menu.findItem(id).isChecked = true
@@ -371,6 +383,7 @@ class MainActivity : ThemedActivity(),
                     ProfileManager.postUpdate(DataStore.currentProfile)
                 }
             }
+
             else -> {}
         }
     }
@@ -392,18 +405,6 @@ class MainActivity : ThemedActivity(),
         (supportFragmentManager.findFragmentById(R.id.fragment_holder) as? TrafficFragment)?.emitStats(
             stats
         )
-    }
-
-    override fun routeAlert(type: Int, routeName: String) {
-        when (type) {
-            0 -> {
-                // need vpn
-
-                Toast.makeText(
-                    this, getString(R.string.route_need_vpn, routeName), Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
     }
 
     val connection = SagerConnection(true)
@@ -475,6 +476,7 @@ class MainActivity : ThemedActivity(),
                 binding.drawerLayout.open()
                 navigation.requestFocus()
             }
+
             KeyEvent.KEYCODE_DPAD_RIGHT -> {
                 if (binding.drawerLayout.isOpen) {
                     binding.drawerLayout.close()

@@ -50,7 +50,6 @@ class SagerConnection(private var listenForDeath: Boolean = false) : ServiceConn
         fun statsUpdated(stats: List<AppStats>) {}
 
         fun missingPlugin(profileName: String, pluginName: String) {}
-        fun routeAlert(type: Int, routeName: String) {}
 
         fun onServiceConnected(service: ISagerNetService)
 
@@ -91,13 +90,6 @@ class SagerConnection(private var listenForDeath: Boolean = false) : ServiceConn
         override fun statsUpdated(statsList: AppStatsList) {
             val callback = callback ?: return
             callback.statsUpdated(statsList.data)
-        }
-
-        override fun routeAlert(type: Int, routeName: String) {
-            val callback = callback ?: return
-            runOnMainDispatcher {
-                callback.routeAlert(type, routeName)
-            }
         }
 
         override fun updateWakeLockStatus(acquired: Boolean) {

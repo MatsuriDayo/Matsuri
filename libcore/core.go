@@ -53,6 +53,12 @@ func InitCore(internalAssets string, externalAssets string, prefix string, useOf
 		setupV2rayFileSystem(internalAssets, externalAssets)
 		setupResolvers()
 
+		// certs
+		pem, err := os.ReadFile(externalAssetsPath + "ca.pem")
+		if err == nil {
+			updateRootCACerts(pem)
+		}
+
 		// Extract assets
 		if isBgProcess {
 			extractV2RayAssets(useOfficial)

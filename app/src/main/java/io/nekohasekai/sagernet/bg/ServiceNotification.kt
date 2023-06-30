@@ -123,9 +123,6 @@ class ServiceNotification(
             override fun missingPlugin(profileName: String?, pluginName: String?) {
             }
 
-            override fun routeAlert(type: Int, routeName: String?) {
-            }
-
             override fun updateWakeLockStatus(acquired: Boolean) {
                 updateActions()
                 builder.priority =
