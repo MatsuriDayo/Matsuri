@@ -486,4 +486,6 @@
     <string name="reset_connections">重置连接</string>
     <string name="remove_duplicate">删除重复的服务器</string>
     <string name="test_concurrency">测试并发</string>
+    <string name="auto_select_proxy_apps">自动选择需要代理的应用</string>
+    <string name="auto_select_proxy_apps_message">自动选择需要代理的应用，这将清除您当前的选择。</string>
 </resources>

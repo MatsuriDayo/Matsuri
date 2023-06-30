@@ -526,5 +526,7 @@ Anyone can write advanced plugins, which can control Matsuri. please download an
     <string name="reset_connections">Reset Connections</string>
     <string name="remove_duplicate">Remove duplicate servers</string>
     <string name="test_concurrency">Test concurrency</string>
+    <string name="auto_select_proxy_apps">Auto select proxy apps</string>
+    <string name="auto_select_proxy_apps_message">Auto select proxy apps, this will clear your current selection.</string>
 
 </resources>
